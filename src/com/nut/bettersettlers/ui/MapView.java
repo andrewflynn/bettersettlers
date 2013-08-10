@@ -12,7 +12,9 @@ import java.util.List;
 
 import android.content.Context;
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.Paint;
+import android.graphics.Paint.Style;
 import android.graphics.Path;
 import android.graphics.Point;
 import android.graphics.Rect;
@@ -20,7 +22,10 @@ import android.graphics.RectF;
 import android.graphics.Typeface;
 import android.graphics.drawable.ShapeDrawable;
 import android.util.AttributeSet;
+import android.util.Log;
+import android.util.Pair;
 import android.view.Display;
+import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.ScaleGestureDetector;
 import android.view.View;
@@ -40,8 +45,11 @@ public class MapView extends View {
 	private static final int INVALID_POINTER_ID = -1;
 	
 	private float dXR;
+	private float dXR_2;
 	private float dYR1;
 	private float dYR2;
+	private float dYR2_2;
+	private float dHexR;
 	private float dBorder;
 	private float dFontSize;
 	private float dProbDotR;
@@ -65,9 +73,10 @@ public class MapView extends View {
 	private ArrayList<Integer> mOrderedPlacements;
 
 	private ScaleGestureDetector mScaleDetector;
+	private GestureDetector mTapDetector;
 	private float mScaleFactor;
-	private float mPosX;
-	private float mPosY;
+	private float mDiffX;
+	private float mDiffY;
     private float mLastTouchX;
     private float mLastTouchY;
     // The ‘active pointer’ is the one currently moving our object.
@@ -99,12 +108,16 @@ public class MapView extends View {
 		mOrderedPlacements = new ArrayList<Integer>();
 
 		mScaleDetector = new ScaleGestureDetector(context, new ScaleListener());
+		mTapDetector = new GestureDetector(context, new TapListener());
 	}
 	
 	private void initDimens(Context context) {		
 		dXR = (float) getResources().getDimension(R.dimen.x_r);
+		dXR_2 = (float) getResources().getDimension(R.dimen.x_r_2);
 		dYR1 = (float) getResources().getDimension(R.dimen.y_r1);
 		dYR2 = (float) getResources().getDimension(R.dimen.y_r2);
+		dYR2_2 = (float) getResources().getDimension(R.dimen.y_r2_2);
+		dHexR = (float) getResources().getDimension(R.dimen.hex_r);
 		dBorder = (float) getResources().getDimension(R.dimen.border);
 		dFontSize = (float) getResources().getDimension(R.dimen.font_size);
 		dProbDotR = (float) getResources().getDimension(R.dimen.prob_dot_r);
@@ -133,6 +146,9 @@ public class MapView extends View {
 			mScaleFactor = newScaleByHeight;
 		}
 		
+		mDiffX = 0f;
+		mDiffY = 0f;
+		
 		//Log.i(X, "dMiddleX: " + dMiddleX);
 		//Log.i(X, "dMiddleY: " + dMiddleY);
 		//Log.i(X, "mScaleFactor: " + mScaleFactor);
@@ -156,6 +172,8 @@ public class MapView extends View {
 				
 				if (unknowns != null && unknowns[j][i] != null) {
 					mUPieces[j][i] = new Piece(j, i, unknowns[j][i].getColor());
+				} else {
+					mUPieces[j][i] = null;
 				}
 			}
 		}
@@ -213,11 +231,73 @@ public class MapView extends View {
 			return true;
 		}
 	}
+	
+	private double dist(float x1, float y1, float x2, float y2) {
+		return Math.sqrt(Math.pow(x1 - x2, 2) + Math.pow(y1 - y2, 2));
+	}
+	
+	private Pair<Integer, Integer> getTouchedPiece(Piece[][] pieces, float x, float y) {
+		for (int i = 0; i < pieces.length; i++) {
+			for (int j = 0; j < pieces[i].length; j++) {
+				if (pieces != null && pieces[i][j] != null) {
+					Piece piece = pieces[i][j];
+					Rect rect = getAdjustedRect(piece);
+					
+					if (dist(x, y, rect.exactCenterX(), rect.exactCenterY()) <= dHexR * mScaleFactor) {
+						return new Pair<Integer, Integer>(i, j);
+					}
+				}
+			}
+		}
+		return null;
+	}
+	
+	private class TapListener extends GestureDetector.SimpleOnGestureListener {
+		@Override
+		public boolean onSingleTapUp(MotionEvent ev) {
+			//Toast.makeText(getContext(), String.format("(%f,%f)", ev.getX(), ev.getY()), Toast.LENGTH_SHORT).show();
+			//Toast.makeText(getContext(), String.format("dYR2: %f", dYR2), Toast.LENGTH_SHORT).show();
+			//Toast.makeText(getContext(), String.format("mScaleFactor: %f", mScaleFactor), Toast.LENGTH_SHORT).show();
+			
+			// Check for touching unknowns
+			Pair<Integer, Integer> pair = getTouchedPiece(mUPieces, ev.getX(), ev.getY());
+			if (pair != null) {
+				int i = pair.first;
+				int j = pair.second;
+				
+				if (mUVisibility != null) {
+					mUVisibility[i][j] = !mUVisibility[i][j];
+					invalidate();
+				}
+			}
+			pair = getTouchedPiece(mPieces, ev.getX(), ev.getY());
+			if (pair != null) {
+				int i = pair.first;
+				int j = pair.second;
+				
+				if (Consts.TEST) {
+					Piece piece = mPieces[i][j];
+					if (piece.getColor() == 0xFF00FF00) {
+						mPieces[i][j] = new Piece(piece.getGridX(), piece.getGridY(), 0xFF0000FF);	
+					} else if (piece.getColor() == 0xFF0000FF) {
+						mPieces[i][j] = new Piece(piece.getGridX(), piece.getGridY(), 0xFFCCCCCC);	
+					} else {
+						mPieces[i][j] = new Piece(piece.getGridX(), piece.getGridY(), 0xFF00FF00);
+					}
+					invalidate();
+				}
+			}
+			return true;
+		}
+	}
 
 	@Override
 	public boolean onTouchEvent(MotionEvent ev) {
 		// Let the ScaleGestureDetector inspect all events.
 		mScaleDetector.onTouchEvent(ev);
+		
+		// Let the TapDetector also inspect all events.
+		mTapDetector.onTouchEvent(ev);
 		
 		final int action = ev.getAction();
 		switch (action & MotionEvent.ACTION_MASK) {
@@ -241,8 +321,8 @@ public class MapView extends View {
 				final float dx = x - mLastTouchX;
 				final float dy = y - mLastTouchY;
 
-				mPosX += dx;
-				mPosY += dy;
+				mDiffX += dx;
+				mDiffY += dy;
 				
 				invalidate();
 			}
@@ -255,45 +335,6 @@ public class MapView extends View {
 
 		case MotionEvent.ACTION_UP: {
 			mActivePointerId = INVALID_POINTER_ID;
-			
-			// Check for touching unknowns
-			for (int i = 0; i < mUPieces.length; i++) {
-				for (int j = 0; j < mUPieces[i].length; j++) {
-					if (mUPieces != null && mUPieces[i][j] != null) {
-						Piece piece = mUPieces[i][j];
-						Rect rect = getAdjustedRect(piece);
-
-						if (ev.getX() >= (rect.left + 15) && ev.getX() <= (rect.right - 15)
-								&& ev.getY() >= rect.top && ev.getY() <= rect.bottom) {
-							if (mUVisibility != null) {
-								mUVisibility[i][j] = !mUVisibility[i][j];
-							}
-						}	
-					}
-				}
-			}
-			
-			if (Consts.TEST) {
-				for (int i = 0; i < mPieces.length; i++) {
-					for (int j = 0; j < mPieces[i].length; j++) {
-						if (mPieces != null && mPieces[i][j] != null) {
-							Piece piece = mPieces[i][j];
-							Rect rect = getAdjustedRect(piece);
-
-							if (ev.getX() >= (rect.left + 15) && ev.getX() <= (rect.right - 15)
-									&& ev.getY() >= rect.top && ev.getY() <= rect.bottom) {
-								if (piece.getColor() == 0xFF00FF00) {
-									mPieces[i][j] = new Piece(piece.getGridX(), piece.getGridY(), 0xFF0000FF);	
-								} else if (piece.getColor() == 0xFF0000FF) {
-									mPieces[i][j] = new Piece(piece.getGridX(), piece.getGridY(), 0xFFCCCCCC);	
-								} else {
-									mPieces[i][j] = new Piece(piece.getGridX(), piece.getGridY(), 0xFF00FF00);
-								}
-							}	
-						}
-					}
-				}
-			}
 			break;
 		}
 
@@ -321,13 +362,12 @@ public class MapView extends View {
 	}
 	
 	public void onDrawTest(Canvas canvas) {
-	    canvas.translate(mPosX, mPosY);
-		
 		Paint generalPaint = new Paint();
 		generalPaint.setTextAlign(Paint.Align.CENTER);
 		generalPaint.setTypeface(Typeface.DEFAULT_BOLD);
 		generalPaint.setStrokeWidth(2 * mScaleFactor);
-		generalPaint.setTextSize(dFontSize * mScaleFactor);
+		//generalPaint.setTextSize(dFontSize * mScaleFactor);
+		generalPaint.setTextSize(8 * mScaleFactor);
 		generalPaint.setAntiAlias(true);
 		for (int i = 0; i < mPieces.length; i++) {
 			for (int j = 0; j < mPieces[i].length; j++) {
@@ -351,6 +391,10 @@ public class MapView extends View {
 					
 					canvas.drawText(String.format("(%d,%d)", i, j), rect.centerX(),
 							rect.centerY() - dProbTopBuffer * mScaleFactor, generalPaint);
+					//canvas.drawText("" + rect.top, rect.centerX(), rect.centerY() - dYR1 / 2f * mScaleFactor, generalPaint);
+					//canvas.drawText("" + rect.bottom, rect.centerX(), rect.centerY() + dYR1 / 2f * mScaleFactor, generalPaint);
+					//canvas.drawText("" + rect.left, rect.centerX() - dXR_2 * mScaleFactor, rect.centerY(), generalPaint);
+					//canvas.drawText("" + rect.right, rect.centerX() + dXR_2 * mScaleFactor, rect.centerY(), generalPaint);
 				}
 			}
 		}
@@ -359,15 +403,32 @@ public class MapView extends View {
 	@Override
 	public void onDraw(Canvas canvas) {
 		super.onDraw(canvas);
+		//Log.i(X, "onDraw: " + mScaleFactor);
+		
+		//canvas.save();
+	    //canvas.translate(mPosX, mPosY);
+		
+		/*
+		DRAW RED AROUND BOUNDING RECT
+		for (int i = 0; i < mPieces.length; i++) {
+			for (int j = 0; j < mPieces[i].length; j++) {
+				if (mPieces != null && mPieces[i][j] != null) {
+					Piece piece = mPieces[i][j];
+					Rect rect = getAdjustedRect(piece);
+					
+					Paint redPaint = new Paint();
+					redPaint.setColor(Color.RED);
+					redPaint.setStyle(Style.STROKE);
+					canvas.drawRect(rect, redPaint);
+				}
+			}
+		}
+		*/
 		
 		if (Consts.TEST) {
 			onDrawTest(canvas);
 			return;
 		}
-		//Log.i(X, "onDraw: " + mScaleFactor);
-		
-		//canvas.save();
-	    canvas.translate(mPosX, mPosY);
 		
 		Paint generalPaint = new Paint();
 		generalPaint.setTextAlign(Paint.Align.CENTER);
@@ -414,12 +475,12 @@ public class MapView extends View {
 							} else {
 								generalPaint.setColor(0xFF000000);
 							}
-							canvas.drawText(Integer.toString(oneInt), rect.centerX() - dXR * mScaleFactor,
-									rect.centerY() + dYR2 * mScaleFactor - dProbTopBuffer * mScaleFactor, generalPaint);
-							Rect newRect = new Rect((int) (rect.left - dXR * mScaleFactor),
-									(int) (rect.top + dYR2 * mScaleFactor),
-									(int) (rect.right - dXR * mScaleFactor),
-									(int) (rect.bottom + dYR2 * mScaleFactor));
+							canvas.drawText(Integer.toString(oneInt), rect.centerX() - dXR_2 * mScaleFactor,
+									rect.centerY() + dYR2_2 * mScaleFactor - dProbTopBuffer * mScaleFactor, generalPaint);
+							Rect newRect = new Rect((int) (rect.left - dXR_2 * mScaleFactor),
+									(int) (rect.top + dYR2_2 * mScaleFactor),
+									(int) (rect.right - dXR_2 * mScaleFactor),
+									(int) (rect.bottom + dYR2_2 * mScaleFactor));
 							drawDots(canvas, generalPaint, oneInt, newRect);
 
 							int twoInt = Integer.parseInt(two[1]);
@@ -428,12 +489,12 @@ public class MapView extends View {
 							} else {
 								generalPaint.setColor(0xFF000000);
 							}
-							canvas.drawText(Integer.toString(twoInt), rect.centerX() + dXR * mScaleFactor,
-									rect.centerY() - dYR2 * mScaleFactor - dProbTopBuffer * mScaleFactor, generalPaint);
-							newRect = new Rect((int) (rect.left + dXR * mScaleFactor),
-									(int) (rect.top - dYR2 * mScaleFactor),
-									(int) (rect.right + dXR * mScaleFactor),
-									(int) (rect.bottom - dYR2 * mScaleFactor));
+							canvas.drawText(Integer.toString(twoInt), rect.centerX() + dXR_2 * mScaleFactor,
+									rect.centerY() - dYR2_2 * mScaleFactor - dProbTopBuffer * mScaleFactor, generalPaint);
+							newRect = new Rect((int) (rect.left + dXR_2 * mScaleFactor),
+									(int) (rect.top - dYR2_2 * mScaleFactor),
+									(int) (rect.right + dXR_2 * mScaleFactor),
+									(int) (rect.bottom - dYR2_2 * mScaleFactor));
 							drawDots(canvas, generalPaint, twoInt, newRect);
 						} else {
 							if (prob == 6 || prob == 8) {
@@ -519,12 +580,12 @@ public class MapView extends View {
 	private Rect getAdjustedRect(Piece piece) {
 		int newGridX = BOARD_RANGE_HALF_X - piece.getGridX();
 		int newGridY = BOARD_RANGE_HALF_Y - piece.getGridY();
-		float startX = dMiddleX - (newGridX * (dXR + dBorder) * mScaleFactor);
-		float startY = dMiddleY - (newGridY * (dYR1 + dYR2 + dBorder) * mScaleFactor);
+		float startX = dMiddleX - (newGridX * (dXR + dBorder) * mScaleFactor) + mDiffX;
+		float startY = dMiddleY - (newGridY * (dYR1 + dYR2 + dBorder) * mScaleFactor) + mDiffY;
 
 		return new Rect((int) startX, (int) startY,
 				(int) (startX + (2 * dXR * mScaleFactor)),
-				(int) (startY + (2 * (dYR1 + dYR2) * mScaleFactor)));
+				(int) (startY + (((2 * dYR2) + dYR1) * mScaleFactor)));
 	}
 
 	private void drawDotSuggestions(Canvas canvas, float x, float y) {
@@ -580,7 +641,7 @@ public class MapView extends View {
 
 	private void drawDots(Canvas canvas, Paint paint, int prob, Rect rect) {
 		float x = rect.centerX();
-		float y = rect.centerY();
+		float y = rect.centerY() + dYR1 / 3f * mScaleFactor;
 		paint.setAntiAlias(false);
 		switch (PROBABILITY_MAPPING[prob]) {
 		case 5:
@@ -607,7 +668,7 @@ public class MapView extends View {
 
 	private void drawHarbor(Canvas canvas, Paint paint, Harbor harbor, Rect rect, int i) {
 		float x = rect.centerX();
-		float y = rect.centerY() - (dProbTopBuffer + (2 * dBorder)) * mScaleFactor;
+		float y = rect.centerY() - (dProbTopBuffer + dBorder) * mScaleFactor;
 
 		if (harbor.getResource() == Resource.WATER){
 			return; // Do nothing
@@ -620,14 +681,14 @@ public class MapView extends View {
 			drawHarborLine(canvas, paint, mCurrentMap.getHarborLines()[i][dir], x, y);
 			drawHarborLine(canvas, paint, mCurrentMap.getHarborLines()[i][dir + 1], x, y);
 			paint.setColor(0xFF000000);
-			canvas.drawText("3", x, y + dProbTopBuffer * mScaleFactor, paint);
+			canvas.drawText("3", x, y - 1.5f * dProbTopBuffer * mScaleFactor, paint);
 		} else {
 			paint.setColor(harbor.getResource().getColor());
 			canvas.drawCircle(x, y, dHarborCircle * mScaleFactor, paint);
 			drawHarborLine(canvas, paint, mCurrentMap.getHarborLines()[i][dir], x, y);
 			drawHarborLine(canvas, paint, mCurrentMap.getHarborLines()[i][dir + 1], x, y);
 			paint.setColor(0xFF000000);
-			canvas.drawText("2", x, y + dProbTopBuffer * mScaleFactor, paint);
+			canvas.drawText("2", x, y - 1.5f * dProbTopBuffer * mScaleFactor, paint);
 		}
 	}
 

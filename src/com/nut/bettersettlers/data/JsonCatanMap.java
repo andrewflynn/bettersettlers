@@ -7,10 +7,9 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
+import java.util.Random;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -24,10 +23,14 @@ import com.nut.bettersettlers.data.MapConsts.Resource;
 public class JsonCatanMap extends CatanMap {
 	private static final String LOG_TAG = JsonCatanMap.class.getSimpleName();
 	
+	private static final Random RAND = new Random();
+	
 	private static final String NAME = "name";
 	private static final String LAND = "land";
 	private static final String ORDERED_LAND = "ordered_land";
 	private static final String WATER = "water";
+	private static final String LAND_WATER = "land_water";
+	private static final String RESOURCE = "resource";
 	private static final String RESOURCES = "resources";
 	private static final String PROBABILITY = "probability";
 	private static final String PROBABILITIES = "probabilities";
@@ -45,6 +48,7 @@ public class JsonCatanMap extends CatanMap {
 	private static final String UNKNOWN_LANDWATER = "unknown_landwater";
 	private static final String UNKNOWN_RESOURCES = "unknown_resources";
 	private static final String UNKNOWN_PROBABILITIES = "unknown_probabilities";
+	private static final String PLACEMENT_BLACKLIST = "placement_blacklist";
 	
 	public JsonCatanMap(InputStream is) {
 		try {
@@ -59,7 +63,9 @@ public class JsonCatanMap extends CatanMap {
 			return;
 		}
 		
-		Log.i("XXX", toString());
+		if (getName().equals("heading_for_new_shores")) {
+			System.out.println(toString());
+		}
 		if (getName() == null
 				|| getLowResourceNumber() <= 0
 				|| getHighResourceNumber() <= 0
@@ -98,6 +104,9 @@ public class JsonCatanMap extends CatanMap {
 		setLandWhitelists(json.has(LAND_WHITELIST) ? json.getJSONArray(LAND_WHITELIST) : null);
 		setUnknownGridFromJson(json.has(UNKNOWN_LANDWATER) ? json.getJSONArray(UNKNOWN_LANDWATER) : null);
 		setWaterGridFromJson(json.getJSONArray(WATER));
+		if (json.has(LAND_WATER)) {
+			convertLandToWater(json.getInt(LAND_WATER));
+		}
 		setResourcesFromJson(json.getJSONArray(RESOURCES));
 		setUnknownResourcesFromJson(json.has(UNKNOWN_RESOURCES) ? json.getJSONArray(UNKNOWN_RESOURCES) : null);
 		setAvailableProbabilitiesFromJson(json.getJSONArray(PROBABILITIES));
@@ -214,7 +223,12 @@ public class JsonCatanMap extends CatanMap {
 				int[] duple = new int[2];
 				duple[0] = i;
 				duple[1] = 3;
-				uberIndexes.add(duple);
+				
+				if (contains(getPlacementBlacklists(), duple)) {
+					uberIndexes.add(new int[0]);
+				} else {
+					uberIndexes.add(duple);
+				}
 			}
 			
 			if (landList.contains(getNeighbor(land, 4)) && landList.contains(getNeighbor(land, 3))) {
@@ -227,27 +241,25 @@ public class JsonCatanMap extends CatanMap {
 				int[] duple = new int[2];
 				duple[0] = i;
 				duple[1] = 4;
-				uberIndexes.add(duple);
+
+				if (contains(getPlacementBlacklists(), duple)) {
+					uberIndexes.add(new int[0]);
+				} else {
+					uberIndexes.add(duple);
+				}
 			}
 		}
 		
 		setLandNeighbors(lands);
 		
-		int[][] indexes = new int[uberIndexes.size()][];
-		for (int i = 0; i < uberIndexes.size(); i++) {
-			indexes[i] = uberIndexes.get(i);
-		}
-		setPlacementIndexes(indexes);
-		
-		// TODO(flynn): This probably won't work for custom maps
-		// TODO(flynn): We need to get the rest of the placement indexes.
 		for (int i = 0; i < getWaterGrid().length; i++) {
 			Point water = getWaterGrid()[i];
 			List<Point> landList = Arrays.asList(getLandGrid());
 			
 			List<Integer> smallList = new ArrayList<Integer>();
 			for (int j = 0; j < 6; j++) {
-				if (landList.contains(getNeighbor(water, j))) {
+				Point neighbor = getNeighbor(water, j);
+				if (landList.contains(neighbor)) {
 					smallList.add(landList.indexOf(getNeighbor(water, j)));
 				}
 			}
@@ -255,9 +267,138 @@ public class JsonCatanMap extends CatanMap {
 			for (int j = 0; j < smallList.size(); j++) {
 				tuple[j] = smallList.get(j);
 			}
-			Arrays.sort(tuple);
-			uberNeighborList.add(tuple);
+			
+			List<int[]> tuples = new ArrayList<int[]>();
+			if (tuple.length > 2) {
+				// Split 3+ arrays into small two-somes
+				for (int j = 0; j < tuple.length; j++) {
+					int k = (j + 1) % tuple.length;
+					int[] newTuple = new int[2];
+					newTuple[0] = tuple[j];
+					newTuple[1] = tuple[k];
+					tuples.add(newTuple);
+				}
+			} else if (tuple.length == 2) {
+				// Keep two-somes as is
+				tuples.add(tuple);
+			} // Ignore all others
+			
+			for (int[] realTuple : tuples) {
+				Arrays.sort(realTuple);
+				
+				Point land1 = getLandGrid()[realTuple[0]];
+				Point land2 = getLandGrid()[realTuple[1]];
+				
+				// Only store consecutive coastline
+				if (!(land1.x - 1 == land2.x && land1.y - 1 == land2.y
+						|| land1.x + 1 == land2.x && land1.y - 1 == land2.y
+						|| land1.x + 2 == land2.x && land1.y == land2.y
+						|| land1.x + 1 == land2.x && land1.y + 1 == land2.y
+						|| land1.x - 1 == land2.x && land1.y + 1 == land2.y
+						|| land1.x - 2 == land2.x && land1.y == land2.y)) {
+					continue;
+				}
+				
+				if (!uberNeighborList.contains(realTuple)) {
+					uberNeighborList.add(realTuple);
+				}
+
+				boolean added = false;
+
+				//System.out.println(getName() + " 0000 " + String.format("(%d,%d)", tuple[0], tuple[1]));
+				int[] placement = new int[2];
+				if (land1.y == land2.y) {
+					if (land1.x > land2.x) {
+						if (water.y > land1.y && water.y > land2.y) {
+							//System.out.println(getName() + " 1111aaaa");
+							placement[0] = realTuple[1];
+							placement[1] = 3;
+							added = true;
+						} else if (water.y < land1.y && water.y < land2.y) {
+							//System.out.println(getName() + " 2222aaaa");
+							placement[0] = realTuple[1];
+							placement[1] = 2;
+							added = true;
+						}
+					} else if (land1.x < land2.x){
+						if (water.y > land1.y && water.y > land2.y) {
+							//System.out.println(getName() + " 1111bbbb");
+							placement[0] = realTuple[0];
+							placement[1] = 3;
+							added = true;
+						} else if (water.y < land1.y && water.y < land2.y) {
+							//System.out.println(getName() + " 2222bbbb");
+							placement[0] = realTuple[0];
+							placement[1] = 2;
+							added = true;
+						}
+					}
+				} else if (land1.y < land2.y) {
+					if (water.y == land1.y) {
+						if (water.x < land1.x && water.x < land2.x) {
+							//System.out.println(getName() + " 3333");
+							placement[0] = realTuple[0];
+							placement[1] = 5;
+							added = true;
+						} else if (water.x > land1.x && water.x > land1.x) {
+							//System.out.println(getName() + " 4444");
+							placement[0] = realTuple[0];
+							placement[1] = 3;
+							added = true;
+						}
+					} else if (water.y == land2.y) {
+						if (water.x < land1.x && water.x < land2.x) {
+							//System.out.println(getName() + " 5555");
+							placement[0] = realTuple[0];
+							placement[1] = 4;
+							added = true;
+						} else if (water.x > land1.x && water.x > land1.x) {
+							//System.out.println(getName() + " 6666");
+							placement[0] = realTuple[0];
+							placement[1] = 4;
+							added = true;
+						}
+					}
+				} else if (land1.y > land2.y) {
+					if (water.y == land1.y) {
+						if (water.x < land1.x && water.x < land2.x) {
+							//System.out.println(getName() + " 7777");
+							placement[0] = realTuple[0];
+							placement[1] = 2;
+							added = true;
+						} else if (water.x > land1.x && water.x > land1.x) {
+							//System.out.println(getName() + " 8888");
+							placement[0] = realTuple[0];
+							placement[1] = 0;
+							added = true;
+						}
+					} else if (water.y == land2.y) {
+						if (water.x < land1.x && water.x < land2.x) {
+							//System.out.println(getName() + " 9999");
+							placement[0] = realTuple[0];
+							placement[1] = 1;
+							added = true;
+						} else if (water.x > land1.x && water.x > land1.x) {
+							//System.out.println(getName() + " AAAA");
+							placement[0] = realTuple[0];
+							placement[1] = 1;
+							added = true;
+						}
+					}
+				}
+				if (!added || contains(getPlacementBlacklists(), placement)) {
+					uberIndexes.add(new int[0]);
+				} else {
+					uberIndexes.add(placement);
+				}
+			}
 		}
+		
+		int[][] indexes = new int[uberIndexes.size()][];
+		for (int i = 0; i < uberIndexes.size(); i++) {
+			indexes[i] = uberIndexes.get(i);
+		}
+		setPlacementIndexes(indexes);
 		
 		int[][] inters = new int[uberNeighborList.size()][];
 		for (int i = 0; i < uberNeighborList.size(); i++) {
@@ -283,6 +424,24 @@ public class JsonCatanMap extends CatanMap {
 		default:
 			return refPoint;
 		}
+	}
+	
+	private boolean contains(List<int[]> haystack, int[] needle) {
+		for (int[] hay : haystack) {
+			if (hay.length == needle.length) {
+				boolean allEqual = true;
+				for (int i = 0; i < hay.length; i++) {
+					if (hay[i] != needle[i]) {
+						allEqual = false;
+						break;
+					}
+				}
+				if (allEqual) {
+					return true;
+				}
+			}
+		}
+		return false;
 	}
 	
 	// super ugly, clean up
@@ -388,7 +547,9 @@ public class JsonCatanMap extends CatanMap {
 		Point[] landGrid = new Point[land.length()];
 		String[] whitelistGrid = new String[land.length()];
 		int[] probGrid = new int[land.length()];
+		Resource[] resGrid = new Resource[land.length()];
 		boolean[] harborGrid = new boolean[land.length()];
+		List<int[]> placementBlacklist = new ArrayList<int[]>();
 		
 		for (int i = 0; i < land.length(); i++) {
 			JSONObject landPiece = land.getJSONObject(i);
@@ -409,10 +570,28 @@ public class JsonCatanMap extends CatanMap {
 			} else {
 				probGrid[i] = Integer.MAX_VALUE;
 			}
+			
+			if (landPiece.has(RESOURCE)) {
+				resGrid[i] = Resource.findResourceByJson(landPiece.getString(RESOURCE));
+			} else {
+				resGrid[i] = null;
+			}
+			
+			if (landPiece.has(PLACEMENT_BLACKLIST)) {
+				JSONArray nos = landPiece.getJSONArray(PLACEMENT_BLACKLIST);
+				for (int j = 0; j < nos.length(); j++) {
+					int[] these = new int[2];
+					these[0] = i;
+					these[1] = nos.getInt(j);
+					placementBlacklist.add(these);
+				}
+			}
 		}
 		setLandGrid(landGrid);
 		setLandGridWhitelists(whitelistGrid);
 		setLandGridProbabilities(probGrid);
+		setLandGridResources(resGrid);
+		setPlacementBlacklists(placementBlacklist);
 		
 		return harborGrid;
 	}
@@ -477,6 +656,54 @@ public class JsonCatanMap extends CatanMap {
 			waterGrid[i] = new Point(waterPiece.getInt(X), waterPiece.getInt(Y));
 		}
 		setWaterGrid(waterGrid);
+	}
+	
+	private void convertLandToWater(int num) {
+		Point[] landGrid = getLandGrid();
+		Point[] waterGrid = getWaterGrid();
+		
+		int newWaterLength = waterGrid.length + num;
+		int newLandLength = landGrid.length - num;
+		
+		Point[] newWaterGrid = new Point[newWaterLength];
+		
+		List<Point> landList = new ArrayList<Point>();
+		for (int i = 0; i < landGrid.length; i++) {
+			landList.add(landGrid[i]);
+		}
+		List<Point> waterList = new ArrayList<Point>();
+		for (int i = 0; i < waterGrid.length; i++) {
+			waterList.add(waterGrid[i]);
+		}
+		
+		// Randomly choose either an existing water or steal one from land
+		boolean choice;
+		int counter = 0;
+		while (num > 0 || !waterList.isEmpty()) {
+			choice = RAND.nextBoolean();
+			if (choice) {
+				// Use existing water
+				if (!waterList.isEmpty()) {
+					newWaterGrid[counter] = waterList.remove(0);
+					counter++;
+				}
+			} else {
+				// Steal from land
+				if (num > 0) {
+					newWaterGrid[counter] = landList.remove(RAND.nextInt(landList.size()));
+					num--;
+					counter++;
+				}
+			}
+		}
+
+		Point[] newLandGrid = new Point[newLandLength];
+		for (int i = 0; i < newLandLength; i++) {
+			newLandGrid[i] = landList.remove(0);
+		}
+		
+		setLandGrid(newLandGrid);
+		setWaterGrid(newWaterGrid);
 	}
 	
 	private void setResourcesFromJson(JSONArray resources) throws JSONException {

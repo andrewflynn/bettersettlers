@@ -13,7 +13,9 @@ public abstract class CatanMap {
 	private String name;
 	private int lowResourceNumber;
 	private int highResourceNumber;
+	private int landWaterNumber;
 	private int[] landGridProbabilities;
+	private Resource[] landGridResources;
 	private Point[] landGrid;
 	private String[] landGridWhitelists;
 	private Map<String, List<Resource>> landResourceWhitelists;
@@ -34,6 +36,7 @@ public abstract class CatanMap {
 	private Point[] unknownGrid;
 	private Resource[] availableUnknownResources;
 	private int[] availableUnknownProbabilities;
+	private List<int[]> placementBlacklists;
 	
 	/** The name of this map. */
 	public String getName() {
@@ -58,7 +61,15 @@ public abstract class CatanMap {
 	public void setHighResourceNumber(int highResourceNumber) {
 		this.highResourceNumber = highResourceNumber;
 	}
-
+	
+	/** How many land pieces should actually be ocean. */
+	public int getLandWaterNumber() {
+		return landWaterNumber;
+	}
+	public void setLandWaterNumber(int landWaterNumber) {
+		this.landWaterNumber = landWaterNumber;
+	}
+	
 	/** The (x,y) coordinates of the each land hexagon. */
 	public Point[] getLandGrid() {
 		return landGrid;
@@ -81,6 +92,14 @@ public abstract class CatanMap {
 	}
 	public void setLandGridProbabilities(int[] landGridProbabilities) {
 		this.landGridProbabilities = landGridProbabilities;
+	}
+	
+	/** The assigned resource for each point (if it exists). */
+	public Resource[] getLandGridResources() {
+		return landGridResources;
+	}
+	public void setLandGridResources(Resource[] landGridResources) {
+		this.landGridResources = landGridResources;
 	}
 	
 	/** The whitelist of resources that can be on a certain land grid piece */
@@ -251,6 +270,24 @@ public abstract class CatanMap {
 		this.availableUnknownProbabilities = availableUnknownProbabilities;
 	}
 	
+	/** List of which placement degrees around each piece are disallowed. Null if no blacklist. */
+	public List<int[]> getPlacementBlacklists() {
+		return placementBlacklists;
+	}
+	public void setPlacementBlacklists(List<int[]> placementBlacklists) {
+		this.placementBlacklists = placementBlacklists;
+	}
+	
+	protected String deepToString(List<int[]> array) {
+		StringBuilder sb = new StringBuilder();
+		sb.append("[ ");
+		for (int[] arr : array) {
+			sb.append(Arrays.toString(arr)).append(", ");
+		}
+		sb.append(" ]");
+		return sb.toString();
+	}
+	
 	@Override
 	public String toString() {
 		return new StringBuilder("[Settlers Map: (").append(getName()).append(")").append("\n")
@@ -267,13 +304,16 @@ public abstract class CatanMap {
 			.append("  Land Neighbors: ").append(Arrays.deepToString(getLandNeighbors())).append("\n")
 			.append("  Water Neighbors: ").append(Arrays.deepToString(getWaterNeighbors())).append("\n")
 			.append("  Land Intersections: ").append(Arrays.deepToString(getLandIntersections())).append("\n")
+			.append("  Land Intersections Size: ").append(getLandIntersections().length).append("\n")
 			.append("  Land Intersection Indexes: ").append(Arrays.deepToString(getLandIntersectionIndexes())).append("\n")
 			.append("  Placement Indexes: ").append(Arrays.deepToString(getPlacementIndexes())).append("\n")
+			.append("  Placement Indexes Size: ").append(getPlacementIndexes().length).append("\n")
 			.append("  Available Resources: ").append(Arrays.toString(getAvailableResources())).append("\n")
 			.append("  Available Probabilities: ").append(Arrays.toString(getAvailableProbabilities())).append("\n")
 			.append("  Available Ordered Probabilities: ").append(Arrays.toString(getAvailableOrderedProbabilities())).append("\n")
 			.append("  Available Harbors: ").append(Arrays.toString(getAvailableHarbors())).append("\n")
 			.append("  Ordered Harbors: ").append(Arrays.toString(getOrderedHarbors())).append("\n")
+			.append("  Placement Blacklists: ").append(deepToString(getPlacementBlacklists())).append("\n")
 			.append("]")
 			.toString();
 	}

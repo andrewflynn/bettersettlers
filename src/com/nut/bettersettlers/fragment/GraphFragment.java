@@ -1,6 +1,6 @@
 package com.nut.bettersettlers.fragment;
 
-import java.util.Stack;
+import java.util.ArrayList;
 
 import android.content.Context;
 import android.os.Bundle;
@@ -44,7 +44,7 @@ public class GraphFragment extends Fragment {
 	private int[] mProbs;
 	private int[] mRobberProbs;
 	// Negative numbers will represent robber values in this stack
-	private Stack<Integer> mProbsStack = new Stack<Integer>();
+	private ArrayList<Integer> mProbsList = new ArrayList<Integer>();
 	
 	private int mMapItemId = -1;
 
@@ -79,7 +79,7 @@ public class GraphFragment extends Fragment {
 				mRobberProbs = savedState.getIntArray(STATE_ROBBER_PROBS);
 			}
 			if (savedState.getSerializable(STATE_PROBS_STACK) != null) {
-				mProbsStack = (Stack<Integer>) savedState.getSerializable(STATE_PROBS_STACK);
+				mProbsList = savedState.getIntegerArrayList(STATE_PROBS_STACK);
 			}
 		}
 	}
@@ -124,7 +124,7 @@ public class GraphFragment extends Fragment {
 		super.onSaveInstanceState(outState);
 		outState.putIntArray(STATE_PROBS, mProbs);
 		outState.putIntArray(STATE_ROBBER_PROBS, mRobberProbs);
-		outState.putSerializable(STATE_PROBS_STACK, mProbsStack);
+		outState.putIntegerArrayList(STATE_PROBS_STACK, mProbsList);
 	}
 	
 	private void initDimens(int size) {
@@ -201,17 +201,17 @@ public class GraphFragment extends Fragment {
 	private void incrementGraph(int n, boolean longClick) {
 		if (longClick) {
 			mRobberProbs[n]++;
-			mProbsStack.push(n * -1);
+			mProbsList.add(n * -1);
 		} else {
 			mProbs[n]++;
-			mProbsStack.push(n);
+			mProbsList.add(n);
 		}
 		setAndInvalidate();
 	}
 
 	private void undo() {
-		if (mProbsStack.size() > 0) {
-			int popped = mProbsStack.pop();
+		if (mProbsList.size() > 0) {
+			int popped = mProbsList.remove(mProbsList.size() - 1);
 			if (popped > 0) {
 				if (mProbs[popped] > 0) {
 					mProbs[popped]--;
@@ -241,7 +241,7 @@ public class GraphFragment extends Fragment {
 				mRobberProbs[i] = 0;
 			}
 		}
-		mProbsStack.clear();
+		mProbsList.clear();
 		setAndInvalidate();
 	}
 
