@@ -3,10 +3,11 @@ package com.nut.bettersettlers;
 import static com.nut.bettersettlers.MapSpecs.BOARD_RANGE_X;
 import static com.nut.bettersettlers.MapSpecs.BOARD_RANGE_Y;
 
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Stack;
+import com.nut.bettersettlers.R;
+import com.nut.bettersettlers.MapSpecs.Harbor;
+import com.nut.bettersettlers.MapSpecs.MapSize;
+import com.nut.bettersettlers.MapSpecs.MapType;
+import com.nut.bettersettlers.MapSpecs.Resource;
 
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -23,25 +24,32 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.bettersettlers.R;
-import com.nut.bettersettlers.MapSpecs.Harbor;
-import com.nut.bettersettlers.MapSpecs.MapSize;
-import com.nut.bettersettlers.MapSpecs.MapType;
-import com.nut.bettersettlers.MapSpecs.Resource;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Stack;
 
+/**
+ * Main activity class.
+ * 
+ * @author aflynn@gmail.com (Andrew Flynn)
+ */
 public class BetterSettlers extends Activity {	
 	private static final int DIALOG_SIZE_ID = 0;
 	private static final int DIALOG_TYPE_ID = 1;
 	private static final int DIALOG_WELCOME_ID = 2;
 	private static final int DIALOG_ARE_YOU_SURE_ID = 3;
 	private static final int DIALOG_GRAPH_ID = 4;
+	private static final int DIALOG_SHOW_ALL_ROLLS_ID = 5;
+	private static final int DIALOG_PLACEMENTS_ID = 6;
+	
+	private static final int NUMBER_OF_ROLLS_TO_SHOW = 4;
 	
 	// TODO(flynn): Change the to use strings.xml
 	private static final String[] types = {"Better Settlers", "Traditional", "Random"};
 	private static final String[] sizes = {"Standard (3-4 people)", "Large (5 people)", "X-Large (6 people)"};
   private static int shuffleTypeId = R.drawable.shuffle_map;
 	
-	//private ProgressBar progressBar;
 	private MapView mapView;
 	private GraphView graphView;
 	private TextView lastRollsText;
@@ -59,6 +67,7 @@ public class BetterSettlers extends Activity {
 	private ImageView graphButton12;
 	
 	private boolean shownGraphAlertAlready = false;
+	private boolean shownPlacementSuggestionsAlertAlready = false;
   
   private Handler handler = new Handler() {
   	@Override
@@ -77,7 +86,6 @@ public class BetterSettlers extends Activity {
 	private ArrayList<Harbor> harbors = new ArrayList<Harbor>();
 	private LinkedHashMap<Integer, List<String>> placements = new LinkedHashMap<Integer, List<String>>();
 	private ArrayList<Integer> orderedPlacements = new ArrayList<Integer>();
-	//private int placementIndex = -1;
 	private int placementBookmark = -1;
 
 	private Resource[][] resourceBoard = new Resource[BOARD_RANGE_X + 1][BOARD_RANGE_Y + 1];
@@ -119,12 +127,10 @@ public class BetterSettlers extends Activity {
   @Override
   public void onCreate(Bundle savedState) {
     super.onCreate(savedState);
-    
+
     setContentView(R.layout.main);
   	mapView = (MapView) findViewById(R.id.map_view);
   	graphView = (GraphView) findViewById(R.id.graph_view);
-
-		resetProgressBar();
     
   	// First time around
   	if (savedState == null) {
@@ -176,8 +182,17 @@ public class BetterSettlers extends Activity {
   	} else {
       refreshMap();
   	}
-
-		resetProgressBar();
+  }
+  
+  @Override
+  protected void onPrepareDialog(int id, Dialog dialog) {
+  	switch(id) {
+  	  case DIALOG_SHOW_ALL_ROLLS_ID:
+    		((AlertDialog) dialog).setMessage(getLastRolls(0 /* all */));
+    		break;
+    	default:
+    		break;
+  	}
   }
   
   @Override
@@ -199,6 +214,12 @@ public class BetterSettlers extends Activity {
   	  case DIALOG_GRAPH_ID:
   	  	dialog = createGraphDialog();
   	  	break;
+  	  case DIALOG_SHOW_ALL_ROLLS_ID:
+  	  	dialog = createShowAllRollsDialog();
+  	  	break;
+  	  case DIALOG_PLACEMENTS_ID:
+  	  	dialog = createPlacementsDialog();
+  	  	break;
   	  default:
   			dialog = null;
   	}
@@ -207,9 +228,6 @@ public class BetterSettlers extends Activity {
   
   public boolean onPrepareOptionsMenu(Menu menu) {
   	setContentView(R.layout.menu);
-  	if (graphView != null) {
-  		graphView.releaseSleepLock();
-  	}
   	return true;
   }
   
@@ -370,10 +388,18 @@ public class BetterSettlers extends Activity {
 		});
   }
   
-  private String getLastRolls() {
+  /**
+   * n represents the number of rolls you want where 0 is all of em.
+   * @param n
+   * @return
+   */
+  private String getLastRolls(int n) {
+  	if (n <= 0) {
+  		n = graphStack.size();
+  	}
   	StringBuilder builder = new StringBuilder();
 		Stack<Integer> temp = new Stack<Integer>();
-  	for (int i = 0; i < 4; i++) {
+  	for (int i = 0; i < n; i++) {
   		if (!graphStack.isEmpty()) {
   			int num = graphStack.pop();
   			builder.append(Math.abs(num) + " ");
@@ -386,17 +412,19 @@ public class BetterSettlers extends Activity {
   	return builder.toString();
   }
   
-  private void resetProgressBar() {  	
-  	/*
-  	progressBar = (ProgressBar) findViewById(R.id.progress_bar);
-  	progressBar.setVisibility(View.INVISIBLE);
-  	*/
-  }
-  
   public void placementChoice(View v) {
   	setContentView(R.layout.main);
+		if (!shownPlacementSuggestionsAlertAlready) {
+		  showDialog(DIALOG_PLACEMENTS_ID);
+		  shownPlacementSuggestionsAlertAlready = true;
+		}
+		
+  	graphView = (GraphView) findViewById(R.id.graph_view);
   	mapView = (MapView) findViewById(R.id.map_view);
-		resetProgressBar();
+  	if (mapView != null && graphView != null) {
+  		graphView.releaseSleepLock();
+    	mapView.acquireSleepLock();
+  	}
 
 		shuffleTypeId = R.drawable.prev;
   	ImageView shuffleType = (ImageView) findViewById(R.id.shuffleType);
@@ -413,8 +441,12 @@ public class BetterSettlers extends Activity {
   
   public void resetContentViewNoRefresh(View v) {
   	setContentView(R.layout.main);
+  	graphView = (GraphView) findViewById(R.id.graph_view);
   	mapView = (MapView) findViewById(R.id.map_view);
-		resetProgressBar();
+  	if (mapView != null && graphView != null) {
+  		graphView.releaseSleepLock();
+    	mapView.acquireSleepLock();
+  	}
 
   	ImageView shuffleType = (ImageView) findViewById(R.id.shuffleType);
   	ImageView secondShuffleType = (ImageView) findViewById(R.id.secondShuffleType);
@@ -429,8 +461,12 @@ public class BetterSettlers extends Activity {
   
   public void resetContentView(View v) {
   	setContentView(R.layout.main);
+  	graphView = (GraphView) findViewById(R.id.graph_view);
   	mapView = (MapView) findViewById(R.id.map_view);
-		resetProgressBar();
+  	if (mapView != null && graphView != null) {
+  		graphView.releaseSleepLock();
+    	mapView.acquireSleepLock();
+  	}
     refreshMap();
   }
   
@@ -452,10 +488,14 @@ public class BetterSettlers extends Activity {
   	graphView = (GraphView) findViewById(R.id.graph_view);
   	graphView.setProbs(graphProbs);
   	graphView.setRobberProbs(graphRobberProbs);
-  	graphView.setStack(graphStack);
   	lastRollsText = (TextView) findViewById(R.id.last_rolls_text);
-		lastRollsText.setText(getLastRolls());
+		lastRollsText.setText(getLastRolls(NUMBER_OF_ROLLS_TO_SHOW));
   	graphView.postInvalidate(); // Force refresh
+  }
+  
+  public void showAllRolls(View v) {
+  	
+  	showDialog(DIALOG_SHOW_ALL_ROLLS_ID);
   }
   
   public void areYouSure(View v) {
@@ -469,13 +509,16 @@ public class BetterSettlers extends Activity {
   public void showGraphView() {
 		setContentView(R.layout.graph);
 		addGraphButtons();
-		graphView = (GraphView) findViewById(R.id.graph_view);
+  	mapView = (MapView) findViewById(R.id.map_view);
+  	graphView = (GraphView) findViewById(R.id.graph_view);
+  	if (mapView != null && graphView != null) {
+  		mapView.releaseSleepLock();
+    	graphView.acquireSleepLock();
+  	}
   	graphView.setProbs(graphProbs);
   	graphView.setRobberProbs(graphRobberProbs);
-  	graphView.setStack(graphStack);
   	lastRollsText = (TextView) findViewById(R.id.last_rolls_text);
-		lastRollsText.setText(getLastRolls());
-		graphView.aquireSleepLock();
+		lastRollsText.setText(getLastRolls(NUMBER_OF_ROLLS_TO_SHOW));
   	graphView.postInvalidate(); // Force refresh
   }
   
@@ -495,9 +538,8 @@ public class BetterSettlers extends Activity {
   	graphView = (GraphView) findViewById(R.id.graph_view);
   	graphView.setProbs(graphProbs);
   	graphView.setRobberProbs(graphRobberProbs);
-  	graphView.setStack(graphStack);
   	lastRollsText = (TextView) findViewById(R.id.last_rolls_text);
-		lastRollsText.setText(getLastRolls());
+		lastRollsText.setText(getLastRolls(NUMBER_OF_ROLLS_TO_SHOW));
   	graphView.postInvalidate(); // Force refresh
   }
   
@@ -513,9 +555,8 @@ public class BetterSettlers extends Activity {
   	graphView = (GraphView) findViewById(R.id.graph_view);
   	graphView.setProbs(graphProbs);
   	graphView.setRobberProbs(graphRobberProbs);
-  	graphView.setStack(graphStack);
   	lastRollsText = (TextView) findViewById(R.id.last_rolls_text);
-		lastRollsText.setText(getLastRolls());
+		lastRollsText.setText(getLastRolls(NUMBER_OF_ROLLS_TO_SHOW));
   	graphView.postInvalidate(); // Force refresh
   }
   
@@ -593,9 +634,35 @@ public class BetterSettlers extends Activity {
   private Dialog createGraphDialog() {
   	AlertDialog.Builder builder = new AlertDialog.Builder(this);
   	builder.setIcon(R.drawable.icon);
-  	builder.setTitle("Better Settlers\nRoll Tracker");
+  	builder.setTitle("Roll Tracker");
   	builder.setMessage("Keep track of dice rolls during the game and see the "
   			+ "probability distribution for each game.\n\nLong press for robbered rolls.");
+  	builder.setPositiveButton("Dismiss", new OnClickListener() {
+  		public void onClick(DialogInterface dialog, int id) {
+  			dialog.cancel();
+  		}
+  	});
+  	return builder.create();
+  }
+  
+  private Dialog createPlacementsDialog() {
+  	AlertDialog.Builder builder = new AlertDialog.Builder(this);
+  	builder.setIcon(R.drawable.icon);
+  	builder.setTitle("Placement Suggestions");
+  	builder.setMessage("View suggestions on where the best placements are on the board.");
+  	builder.setPositiveButton("Dismiss", new OnClickListener() {
+  		public void onClick(DialogInterface dialog, int id) {
+  			dialog.cancel();
+  		}
+  	});
+  	return builder.create();
+  }
+  
+  private Dialog createShowAllRollsDialog() {
+  	AlertDialog.Builder builder = new AlertDialog.Builder(this);
+  	builder.setIcon(R.drawable.icon);
+  	builder.setTitle("Roll History");
+  	builder.setMessage(""); // Start as empty
   	builder.setPositiveButton("Dismiss", new OnClickListener() {
   		public void onClick(DialogInterface dialog, int id) {
   			dialog.cancel();
@@ -692,21 +759,14 @@ public class BetterSettlers extends Activity {
   }
   
   public void pickSize(View v) {
-  	ImageView shuffleType = (ImageView) findViewById(R.id.shuffleType);
-  	if (shuffleType != null) {
-  		shuffleTypeId = R.drawable.shuffle_map;
-	  	shuffleType.setImageResource(R.drawable.shuffle_map);
-  	}
+		shuffleTypeId = R.drawable.shuffle_map;
+
 		placementBookmark = -1;
   	showDialog(DIALOG_SIZE_ID);
   }
   
   public void pickType(View v) {
-  	ImageView shuffleType = (ImageView) findViewById(R.id.shuffleType);
-  	if (shuffleType != null) {
-  		shuffleTypeId = R.drawable.shuffle_map;
-	  	shuffleType.setImageResource(R.drawable.shuffle_map);
-  	}
+		shuffleTypeId = R.drawable.shuffle_map;
 		placementBookmark = -1;
   	showDialog(DIALOG_TYPE_ID);
   }
@@ -716,14 +776,16 @@ public class BetterSettlers extends Activity {
   }
   
   private void startThinking() {
+  	Log.i("TypeId: ", Integer.toString(shuffleTypeId));
   	if (mapView != null) {
     	ImageView progressImage = (ImageView) findViewById(R.id.progress_image);
-  		progressImage.setImageResource(R.drawable.loading);
-    	progressImage.setVisibility(View.VISIBLE);
+    	if (progressImage != null) {
+    		progressImage.setImageResource(R.drawable.loading);
+      	progressImage.setVisibility(View.VISIBLE);
+    	}
 
     	mapView.setVisibility(View.INVISIBLE);
   	}
-  	//progressBar.setVisibility(View.VISIBLE);
   }
   
   private void stopThinking() {
@@ -731,10 +793,11 @@ public class BetterSettlers extends Activity {
     	mapView.setVisibility(View.VISIBLE);
 
     	ImageView progressImage = (ImageView) findViewById(R.id.progress_image);
-  		progressImage.setImageResource(0);
-    	progressImage.setVisibility(View.INVISIBLE);
+    	if (progressImage != null) {
+    		progressImage.setImageResource(0);
+      	progressImage.setVisibility(View.INVISIBLE);
+    	}
   	}
-  	//progressBar.setVisibility(View.INVISIBLE);
   }
   
   private void refreshMap() {
@@ -804,9 +867,6 @@ public class BetterSettlers extends Activity {
     mapView.setHarbors(harbors);
     mapView.setPlacementBookmark(placementBookmark);
     mapView.setPlacements(placements);
-    Log.i("OP", orderedPlacements.toString());
-    Log.i("BK", Integer.toString(placementBookmark));
-    Log.i("3", placements.toString());
     mapView.setOrderedPlacements(orderedPlacements);
 		mapView.postInvalidate();  // Force refresh
   }

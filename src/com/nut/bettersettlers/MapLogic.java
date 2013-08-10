@@ -1,15 +1,15 @@
 package com.nut.bettersettlers;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Random;
-
 import com.nut.bettersettlers.MapSpecs.Harbor;
 import com.nut.bettersettlers.MapSpecs.MapSize;
 import com.nut.bettersettlers.MapSpecs.MapType;
 import com.nut.bettersettlers.MapSpecs.NumberOfResource;
 import com.nut.bettersettlers.MapSpecs.Resource;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Random;
 
 public class MapLogic {
 	
