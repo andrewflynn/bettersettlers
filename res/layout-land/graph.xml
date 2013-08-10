@@ -1,20 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-	android:orientation="vertical"
+	android:orientation="horizontal"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
     android:background="#FFFFFFFF" >
     <TableLayout android:id="@+id/roll_buttons"
-    	android:layout_width="fill_parent"
-    	android:layout_height="wrap_content"
+    	android:layout_width="wrap_content"
+    	android:layout_height="fill_parent"
     	android:paddingLeft="@dimen/graph_button_padding"
-    	android:paddingRight="@dimen/graph_button_padding"
+    	android:paddingTop="@dimen/graph_button_padding"
     	android:paddingBottom="@dimen/graph_button_padding"
-		android:layout_alignParentBottom="true"
+		android:layout_alignParentLeft="true"
 		android:gravity="center" >
     </TableLayout>
     <com.nut.bettersettlers.ui.GraphView android:id="@+id/graph_view"
     	android:layout_width="fill_parent"
     	android:layout_height="fill_parent"
-		android:layout_above="@id/roll_buttons" />
+		android:layout_toRightOf="@id/roll_buttons" />
 </RelativeLayout>

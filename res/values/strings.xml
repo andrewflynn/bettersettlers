@@ -1,37 +1,24 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">Better Settlers</string>
-    <string name="shuffle_title">Shuffle</string>
-    <string name="extras">Extras :</string>
-    <string name="refresh_map">Map</string>
-    <string name="map_size">Size</string>
-    <string name="standard">Standard</string>
-    <string name="standard_verbose">Standard (3-4 ppl)</string>
-    <string name="large">Large</string>
-    <string name="large_verbose">Large (5 ppl)</string>
-    <string name="xlarge">X-Large</string>
-    <string name="xlarge_verbose">X-Large (6 ppl)</string>
-    <string name="shuffle_probs">Probabilities</string>
-    <string name="shuffle_harbors">Harbors</string>
-    <string name="map_type">Type</string>
+	<string name="better_settlers">Better Settlers</string>
+	<string name="roll_tracker">Roll Tracker</string>
+    <string name="shuffle_map">Shuffle Map</string>
+    <string name="shuffle_probabilities">Shuffle Probabilities</string>
+    <string name="shuffle_harbors">Shuffle Harbors</string>
+    <string name="traditional">Traditional</string>
+    <string name="random">Random</string>
+    <string name="standard">Standard (3-4 people)</string>
+    <string name="large">Large (5 people)</string>
+    <string name="xlarge">X-Large (6 people)</string>
+    <string name="map_size">Map Size</string>
+    <string name="map_type">Map Type</string>
+    <string name="placements_off">Placements: Off</string>
+    <string name="placements_on">Placements: On</string>
+    <string name="prev">Prev</string>
+    <string name="next">Next</string>
+    <string name="return_to_map">Return to Map</string>
+    <string name="help">Help</string>
     <string name="about">About</string>
-    <string name="size_title"><b>3 different sizes</b></string>
-    <string name="size_standard">* <i>Standard</i> - 3-4 people</string>
-    <string name="size_large">* <i>Large</i> - 5 people</string>
-    <string name="size_xlarge">* <i>X-Large</i> - 6 people</string>
-    <string name="type_title"><b>3 different types</b></string>
-    <string name="type_fair">* <i>Better Settlers</i> - A more variable way to play that involves precise
-        placement of resources and probabilities in order to maximize fairness.</string>
-    <string name="type_random">* <i>Random</i> - Completely.  No rules.</string>
-    <string name="type_traditional">* <i>Traditional</i> - The way the instructions specify to play 
-        with random resources and probabilities ordered by letter spiraling inward.</string>
-    <string name="button_title"><b>3 different ways to generate</b></string>
-    <string name="button_generate">* <i>Refresh Map</i> - Refreshes the entire map.</string>
-    <string name="button_shuffle_harbors">* <i>Shuffle Harbors</i> - Shuffles only the harbors.</string>
-    <string name="button_shuffle_probabilities">* <i>Shuffle Probabilities</i> - Shuffles only probabilities.
-        Try this one for quicker setup on a second game.</string>
-    <string name="start_generating">Start Generating Maps</string>
-    <string name="follow_along">Roll Tracker</string>
-    <string name="author">Author: Andrew Flynn</string>
-    <string name="copyright">Copyright 2010 Better Settlers</string>
+    <string name="map">Map</string>
+    <string name="legal">Legal</string>
 </resources>

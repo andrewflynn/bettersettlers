@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+  <dimen name="starting_x">10dp</dimen>
+  <dimen name="starting_y">10dp</dimen>
+  <dimen name="map_padding">10dp</dimen>
+  <dimen name="x_r">17dp</dimen>
+  <dimen name="y_r1">18dp</dimen>
+  <dimen name="y_r2">11dp</dimen>
+  <dimen name="border">2dp</dimen>
+  <dimen name="font_size">12sp</dimen>
+  <dimen name="prob_dot_r">1.5dp</dimen>
+  <dimen name="placement_dot_r">5dp</dimen>
+  <dimen name="placement_triangle_height">25dp</dimen>
+  <dimen name="placement_reason_box_width">225dp</dimen>
+  <dimen name="prob_top_buffer">5dp</dimen>
+  <dimen name="harbor_circle">10dp</dimen>
+</resources>
