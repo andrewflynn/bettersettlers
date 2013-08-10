@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+  <dimen name="starting_x">30dp</dimen>
+  <dimen name="starting_y">10dp</dimen>
+  <dimen name="screen_height">320dp</dimen>
+  <dimen name="xd">18dp</dimen>
+  <dimen name="xdt">36dp</dimen>
+  <dimen name="yd1">12dp</dimen>
+  <dimen name="yd2">19dp</dimen>
+  <dimen name="ydt">31dp</dimen>
+  <dimen name="hex_size">100dp</dimen>
+  <dimen name="harbor_circle">10dp</dimen>
+  <dimen name="probability_top_buffer">5dp</dimen>
+  <dimen name="probability_dot">1.5dp</dimen>
+  <dimen name="placement_dot">5dp</dimen>
+  <dimen name="font_size">12sp</dimen>
+  <dimen name="border_width">2dp</dimen>
+  
+  <dimen name="graph_width">300dp</dimen>
+  <dimen name="graph_height">285dp</dimen>
+  <dimen name="graph_expected_unit">40dp</dimen>
+  <dimen name="graph_starting_x">23dp</dimen>
+  <dimen name="graph_starting_y">275dp</dimen>
+  <dimen name="graph_bar_starting_x">15dp</dimen>
+  <dimen name="graph_bar_starting_y">260dp</dimen>
+  <dimen name="graph_bar_width">13dp</dimen>
+  <dimen name="graph_expected_bar_width">19dp</dimen>
+  <dimen name="graph_increment_x">26dp</dimen>
+  <dimen name="graph_button_width">52dp</dimen>
+  <dimen name="graph_button_height">40dp</dimen>
+  <dimen name="graph_button_text_size">18sp</dimen>
+  <dimen name="graph_text_size">12sp</dimen>
+  
+  <dimen name="menu_padding">12dp</dimen>
+</resources>
