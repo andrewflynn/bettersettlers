@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <item type="id" name="actionbar_compat_container" />
+    <item type="id" name="actionbar_compat_text" />
+    <item type="id" name="menu_map" />
+    <item type="id" name="menu_placements" />
+    <item type="id" name="menu_rolls" />
+    <item type="id" name="menu_refresh" />
+    <item type="id" name="menu_refresh_progress" />
+</resources>

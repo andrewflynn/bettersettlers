@@ -2,14 +2,18 @@ package com.nut.bettersettlers.fragment.dialog;
 
 import android.app.AlertDialog;
 import android.app.Dialog;
-import android.app.DialogFragment;
 import android.content.DialogInterface;
 import android.os.Bundle;
+import android.support.v4.app.DialogFragment;
 
 import com.nut.bettersettlers.R;
 import com.nut.bettersettlers.fragment.GraphFragment;
 
 public class ResetDialogFragment extends DialogFragment {
+	public static ResetDialogFragment newInstance() {
+		return new ResetDialogFragment();
+	}
+	
 	@Override
 	public Dialog onCreateDialog(Bundle savedInstanceState) {
 		return new AlertDialog.Builder(getActivity())

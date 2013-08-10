@@ -82,13 +82,13 @@ public class MapSpecs {
 	}
 
 	public static enum Resource {
-		DESERT(0xFFE6C426, NumberOfResource.DESERT),
-		WHEAT(0xFFFFFC00, NumberOfResource.HIGH),
-		CLAY(0xFF8E1414, NumberOfResource.LOW),
-		ROCK(0xFF9A9A9A, NumberOfResource.LOW),
-		SHEEP(0xFF00FF1F, NumberOfResource.HIGH),
-		WOOD(0xFF085D12, NumberOfResource.HIGH),
-		WATER(0xFF0000FF, NumberOfResource.WATER);
+		DESERT(0xFFf0dc82, NumberOfResource.DESERT),
+		WHEAT(0xFFfad111, NumberOfResource.HIGH),
+		CLAY(0xFFb22222, NumberOfResource.LOW),
+		ROCK(0xFF9e9e9e, NumberOfResource.LOW),
+		SHEEP(0xFF66ce5f, NumberOfResource.HIGH),
+		WOOD(0xFF0c9302, NumberOfResource.HIGH),
+		WATER(0xFF00aeef, NumberOfResource.WATER);
 		
 		private final int color;
 		private final NumberOfResource num;

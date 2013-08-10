@@ -2,11 +2,10 @@ package com.nut.bettersettlers.fragment;
 
 import java.util.Stack;
 
-import android.app.DialogFragment;
-import android.app.Fragment;
 import android.content.Context;
-import android.os.Build;
 import android.os.Bundle;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentTransaction;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -23,8 +22,8 @@ import android.widget.TableRow;
 
 import com.nut.bettersettlers.R;
 import com.nut.bettersettlers.fragment.dialog.HelpDialogFragment;
-import com.nut.bettersettlers.fragment.dialog.LegalDialogFragment;
 import com.nut.bettersettlers.fragment.dialog.ResetDialogFragment;
+import com.nut.bettersettlers.misc.Consts;
 import com.nut.bettersettlers.ui.GraphView;
 
 public class GraphFragment extends Fragment {
@@ -38,15 +37,13 @@ public class GraphFragment extends Fragment {
 	private int dRollButtonPadding;
 
 	private GraphView mGraphView;
-	private DialogFragment mResetFragment;
-	private DialogFragment mHelpFragment;
 
 	private int[] mProbs;
 	private int[] mRobberProbs;
 	// Negative numbers will represent robber values in this stack
 	private Stack<Integer> mProbsStack = new Stack<Integer>();
 	
-	public GraphFragment() {}
+	private int mMapItemId = -1;
 
 	///////////////////////////////
 	// Fragment method overrides //
@@ -57,9 +54,6 @@ public class GraphFragment extends Fragment {
 		super.onCreate(savedState);
 		
 		setHasOptionsMenu(true);
-		
-		mResetFragment = new ResetDialogFragment();
-		mHelpFragment = new HelpDialogFragment();
 
 		mProbs = new int[13];
 		mRobberProbs = new int[13];
@@ -178,7 +172,7 @@ public class GraphFragment extends Fragment {
 			if (counter == 13) {
 				// Also add a backspace button
 				Button button = (Button) getActivity().getLayoutInflater().inflate(R.layout.graph_button, null);
-				button.setText("X");
+				button.setText("DEL");
 				button.setWidth(dRollButtonSize);
 				button.setHeight(dRollButtonSize);
 				button.setPadding(dRollButtonPadding, dRollButtonPadding, dRollButtonPadding, dRollButtonPadding);
@@ -230,7 +224,7 @@ public class GraphFragment extends Fragment {
 	}
 	
 	private void areYouSureReset() {
-		mResetFragment.show(getFragmentManager(), "ResetFragmentDialog");
+		ResetDialogFragment.newInstance().show(getFragmentManager(), "ResetFragmentDialog");
 	}
 
 	public void reset() {
@@ -260,7 +254,7 @@ public class GraphFragment extends Fragment {
 	@Override
 	public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
 		inflater.inflate(R.menu.graph, menu);
-		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
+		if (Consts.AT_LEAST_HONEYCOMB) {
 			// Set up action items for Action Bar
 			menu.findItem(R.id.help_item).setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM);
 		}
@@ -269,12 +263,18 @@ public class GraphFragment extends Fragment {
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 		item.setChecked(true);
+		
+		if (item.getItemId() == mMapItemId) {
+			FragmentTransaction ft = getFragmentManager().beginTransaction();
+			ft.hide(getFragmentManager().findFragmentById(R.id.graph_fragment));
+			ft.show(getFragmentManager().findFragmentById(R.id.map_fragment));
+			ft.commit();
+			return true;
+		}
+		
 		switch (item.getItemId()) {
 		case R.id.help_item:
-			mHelpFragment.show(getFragmentManager(), "HelpDialogFragment");
-		case R.id.legal_item:
-			(new LegalDialogFragment()).show(getFragmentManager(), "LegalDialogFragment");
-			return true;
+			HelpDialogFragment.newInstance().show(getFragmentManager(), "HelpDialogFragment");
 		default:
 			return false;
 		}
