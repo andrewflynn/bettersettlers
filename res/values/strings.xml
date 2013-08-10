@@ -10,8 +10,10 @@
     <string name="standard">Standard (3-4 people)</string>
     <string name="large">Large (5 people)</string>
     <string name="xlarge">X-Large (6 people)</string>
+    <string name="europe">Europe (custom)</string>
     <string name="map_size">Map Size</string>
     <string name="map_type">Map Type</string>
+    <string name="placements">Placements</string>
     <string name="placements_off">Placements: Off</string>
     <string name="placements_on">Placements: On</string>
     <string name="prev">Prev</string>
@@ -20,5 +22,8 @@
     <string name="help">Help</string>
     <string name="about">About</string>
     <string name="map">Map</string>
+    <string name="rolls">Rolls</string>
     <string name="legal">Legal</string>
+    <string name="more">More</string>
+    <string name="refresh">Refresh</string>
 </resources>

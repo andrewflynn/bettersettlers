@@ -144,7 +144,7 @@ public class MapView extends View {
 				if (land != null && land[j][i] != null) {
 					mPieces[j][i] = new Piece(j, i, land[j][i].getColor());
 				} else if (water != null && water[j][i] != null) {
-					mPieces[j][i] = new Piece(j, i, 0xFF0000FF);
+					mPieces[j][i] = new Piece(j, i, 0xFF1959DF);
 				} else {
 					mPieces[j][i] = new Piece(j, i, 0xFFFFFFFF);
 				}
@@ -250,8 +250,7 @@ public class MapView extends View {
 		}
 
 		case MotionEvent.ACTION_POINTER_UP: {
-			final int pointerIndex = (ev.getAction() & MotionEvent.ACTION_POINTER_INDEX_MASK) 
-			>> MotionEvent.ACTION_POINTER_INDEX_SHIFT;
+			final int pointerIndex = (ev.getAction() & MotionEvent.ACTION_POINTER_INDEX_MASK) >> MotionEvent.ACTION_POINTER_INDEX_SHIFT;
 			final int pointerId = ev.getPointerId(pointerIndex);
 			if (pointerId == mActivePointerId) {
 				// This was our active pointer going up. Choose a new
@@ -298,7 +297,7 @@ public class MapView extends View {
 					
 					if (mProbs != null && mProbs[i][j] != 0) {
 						if (mProbs[i][j] == 6 || mProbs[i][j] == 8) {
-							generalPaint.setColor(0xFFD20000);
+							generalPaint.setColor(0xFFFF0000);
 						} else {
 							generalPaint.setColor(0xFF000000);
 						}

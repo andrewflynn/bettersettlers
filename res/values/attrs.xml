@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="AppTheme">
+        <attr name="actionbarCompatButtonStyle" format="reference" />
+        <attr name="actionbarCompatButtonStyleNoOrange" format="reference" />
+        <attr name="actionbarCompatProgressIndicatorStyle" format="reference" />
+        <attr name="actionbarCompatSeparatorStyle" format="reference" />
+        <attr name="actionbarCompatTextStyle" format="reference" />
+    </declare-styleable>
+</resources>
