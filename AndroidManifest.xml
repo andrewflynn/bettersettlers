@@ -1,12 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
       package="com.nut.bettersettlers"
-      android:versionCode="12"
-      android:versionName="2.0.7">
-    <application android:icon="@drawable/icon" android:label="@string/app_name">
-        <activity android:name=".BetterSettlers"
-                  android:label="@string/app_name"
-                  android:screenOrientation="portrait" >
+      android:versionCode="13"
+      android:versionName="3.0">
+    <application android:icon="@drawable/icon"
+    	android:label="@string/better_settlers"
+    	android:theme="@style/BetterSettlersThemeSelector">
+        <activity android:name="com.nut.bettersettlers.activity.MainActivity"
+                  android:label="@string/better_settlers">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
@@ -14,12 +15,14 @@
         </activity>
 
     </application>
-    <uses-sdk android:minSdkVersion="4" />
+    <uses-sdk android:minSdkVersion="4" android:targetSdkVersion="11" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
+    <uses-permission android:name="android.permission.INTERNET" />
+	<uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <supports-screens
+    	android:xlargeScreens="true"
         android:largeScreens="true"
         android:normalScreens="true"
         android:smallScreens="true"
         android:anyDensity="true" />
-
-</manifest> 
+</manifest>
