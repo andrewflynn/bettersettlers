@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 	<string name="better_settlers">Better Settlers</string>
-	<string name="roll_tracker">Roll Tracker</string>
     <string name="shuffle_map">Shuffle Map</string>
     <string name="shuffle_probabilities">Shuffle Probabilities</string>
     <string name="shuffle_harbors">Shuffle Harbors</string>
@@ -26,4 +25,6 @@
     <string name="legal">Legal</string>
     <string name="more">More</string>
     <string name="refresh">Refresh</string>
+    <string name="rate_this_app">Rate this app</string>
+    <string name="rules">How it works</string>
 </resources>

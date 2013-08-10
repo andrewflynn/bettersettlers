@@ -21,8 +21,11 @@ import android.widget.TableLayout;
 import android.widget.TableRow;
 
 import com.nut.bettersettlers.R;
+import com.nut.bettersettlers.fragment.dialog.AboutDialogFragment;
 import com.nut.bettersettlers.fragment.dialog.HelpDialogFragment;
+import com.nut.bettersettlers.fragment.dialog.RateDialogFragment;
 import com.nut.bettersettlers.fragment.dialog.ResetDialogFragment;
+import com.nut.bettersettlers.fragment.dialog.RulesDialogFragment;
 import com.nut.bettersettlers.misc.Consts;
 import com.nut.bettersettlers.ui.GraphView;
 
@@ -253,7 +256,7 @@ public class GraphFragment extends Fragment {
 	////////////////////
 	@Override
 	public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-		inflater.inflate(R.menu.graph, menu);
+		inflater.inflate(R.menu.graph_hc, menu);
 		if (Consts.AT_LEAST_HONEYCOMB) {
 			// Set up action items for Action Bar
 			menu.findItem(R.id.help_item).setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM);
@@ -275,6 +278,16 @@ public class GraphFragment extends Fragment {
 		switch (item.getItemId()) {
 		case R.id.help_item:
 			HelpDialogFragment.newInstance().show(getFragmentManager(), "HelpDialogFragment");
+			return true;
+		case R.id.rules_item:
+			RulesDialogFragment.newInstance().show(getFragmentManager(), "RulesDialogFragment");
+			return true;
+		case R.id.about_item:
+			AboutDialogFragment.newInstance().show(getFragmentManager(), "AboutDialogFragment");
+			return true;
+		case R.id.rate_item:
+			RateDialogFragment.newInstance().show(getFragmentManager(), "RateDialogFragment");
+			return true;
 		default:
 			return false;
 		}

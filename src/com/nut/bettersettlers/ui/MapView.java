@@ -113,7 +113,7 @@ public class MapView extends View {
 		Display display = ((WindowManager) context.getSystemService(Context.WINDOW_SERVICE)).getDefaultDisplay();
 		float midWidth = display.getWidth() / 2f;
 		float midHeight = display.getHeight() / 2f;
-		dMiddleX = midWidth;
+		dMiddleX = midWidth + 1.5f * getResources().getDimension(R.dimen.x_r); // hack to get it to the middle of the screen
 		dMiddleY = midHeight;
 		float oldWidth = (dXR + dBorder) * BOARD_RANGE_X / 2f;
 		float newScaleByWidth = midWidth / oldWidth;
@@ -473,7 +473,7 @@ public class MapView extends View {
 			canvas.drawLine(x, y, x - dXR * mScaleFactor, y + (dYR1 / 2) * mScaleFactor, paint);
 			break;
 		default:
-			Log.i(X, "WARNING: Cannot draw this line: "  +  dir);
+			//Log.i(X, "WARNING: Cannot draw this line: "  +  dir);
 			break;
 		}
 	}

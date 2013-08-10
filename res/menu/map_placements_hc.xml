@@ -2,12 +2,14 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
 	<item android:id="@+id/prev_item"
 		android:title="@string/prev"
-		android:icon="@drawable/menu_prev"
+		android:icon="@drawable/placements_left_hc"
 		android:showAsAction="ifRoom" />
 	<item android:id="@+id/next_item"
 		android:title="@string/next"
-		android:icon="@drawable/menu_next"
+		android:icon="@drawable/placements_right_hc"
 		android:showAsAction="ifRoom" />
+	<item android:id="@+id/rate_item"
+		android:title="@string/rate_this_app" />
 	<item android:id="@+id/about_item"
 		android:title="@string/about" />
 </menu>

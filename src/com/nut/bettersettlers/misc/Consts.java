@@ -3,7 +3,9 @@ package com.nut.bettersettlers.misc;
 import android.os.Build;
 
 public class Consts {
-	public static final String ANALYTICS_KEY = "UA-22984277-1";
+	//public static final String ANALYTICS_KEY = "UA-22984277-1"; // PROD
+	public static final String ANALYTICS_KEY = "UA-24622139-1"; // TEST
+	public static final int ANALYTICS_INTERVAL = 10;
 	public static final String ANALYTICS_SHUFFLE = "/shuffle";
 	public static final String ANALYTICS_SHUFFLE_MAP = ANALYTICS_SHUFFLE + "/map";
 	public static final String ANALYTICS_SHUFFLE_PROBABILITIES = ANALYTICS_SHUFFLE + "/probabilities";

@@ -14,7 +14,6 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -30,6 +29,8 @@ import com.nut.bettersettlers.data.MapSpecs.MapSize;
 import com.nut.bettersettlers.data.MapSpecs.MapType;
 import com.nut.bettersettlers.data.MapSpecs.Resource;
 import com.nut.bettersettlers.fragment.dialog.AboutDialogFragment;
+import com.nut.bettersettlers.fragment.dialog.RateDialogFragment;
+import com.nut.bettersettlers.fragment.dialog.RulesDialogFragment;
 import com.nut.bettersettlers.fragment.dialog.WelcomeDialogFragment;
 import com.nut.bettersettlers.logic.MapLogic;
 import com.nut.bettersettlers.logic.PlacementLogic;
@@ -50,7 +51,7 @@ public class MapFragment extends Fragment {
 	private static final String STATE_ZOOM_LEVEL = "ZOOM_LEVEL";
 
 	private static final String SHARED_PREFS_NAME = "MapActivity";
-	private static final String SHARED_PREFS_SHOWN_WHATS_NEW = "ShownWhatsNewVersion3.0";
+	private static final String SHARED_PREFS_SHOWN_WHATS_NEW = "ShownWhatsNewVersion13";
 	
 	private MapView mMapView;
 
@@ -223,10 +224,15 @@ public class MapFragment extends Fragment {
 		refreshView(null);
 	}
 	public void refreshView(Float scale) {
+		if (mResourceList.isEmpty() || mProbabilityList.isEmpty() || mHarborList.isEmpty()) {
+			return;
+		}
+		
 		if (scale != null && scale != 0f) {
 			mMapView.setScale(scale);
 		}
 		mMapView.setMapSize(mMapSize);
+		
 		fillResourceProbabilityAndHarbors();
 
 		mMapView.setLandAndWaterResources(mResourceBoard, mHarborBoard);
@@ -303,7 +309,7 @@ public class MapFragment extends Fragment {
 
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
-		GoogleAnalyticsTracker analytics = GoogleAnalyticsTracker.getInstance();
+		GoogleAnalyticsTracker analytics = ((MainActivity) getActivity()).getAnalytics();
 		item.setChecked(true);
 		
 		if (item.getItemId() == mRollTrackerItemId) {
@@ -319,6 +325,12 @@ public class MapFragment extends Fragment {
 		case R.id.refresh_item:
 			asyncMapShuffle();
 			analytics.trackPageView(Consts.ANALYTICS_SHUFFLE_MAP);
+			return true;
+		case R.id.prev_item:
+			prevPlacement();
+			return true;
+		case R.id.next_item:
+			nextPlacement();
 			return true;
 		// MAP TYPE
 		case R.id.better_settlers_item:
@@ -341,12 +353,21 @@ public class MapFragment extends Fragment {
 			xlargeChoice();
 			return true;
 		case R.id.shuffle_probs_item:
-			asyncProbsShuffle();
-			analytics.trackPageView(Consts.ANALYTICS_SHUFFLE_PROBABILITIES);
+			// We don't want to shuffle for traditional maps since it doesn't make sense
+			if (getMapType() != MapType.TRADITIONAL) {
+				asyncProbsShuffle();
+				analytics.trackPageView(Consts.ANALYTICS_SHUFFLE_PROBABILITIES);
+			}
 			return true;
 		case R.id.shuffle_harbors_item:
 			asyncHarborsShuffle();
 			analytics.trackPageView(Consts.ANALYTICS_SHUFFLE_HARBORS);
+			return true;
+		case R.id.rules_item:
+			RulesDialogFragment.newInstance().show(getFragmentManager(), "RulesDialogFragment");
+			return true;
+		case R.id.rate_item:
+			RateDialogFragment.newInstance().show(getFragmentManager(), "RateDialogFragment");
 			return true;
 		case R.id.about_item:
 			AboutDialogFragment.newInstance().show(getFragmentManager(), "AboutDialogFragment");
@@ -360,7 +381,7 @@ public class MapFragment extends Fragment {
 		if (mMapType != type) {
 			mMapType = type;
 			asyncMapShuffle();
-			GoogleAnalyticsTracker.getInstance().trackPageView(String.format(analyticsKey, mMapType));
+			((MainActivity) getActivity()).getAnalytics().trackPageView(String.format(analyticsKey, mMapType));
 		}
 	}
 	
@@ -380,7 +401,7 @@ public class MapFragment extends Fragment {
 		if (mMapSize != size) {
 			mMapSize = size;
 			asyncMapShuffle();
-			GoogleAnalyticsTracker.getInstance().trackPageView(String.format(analyticsKey, mMapSize));
+			((MainActivity) getActivity()).getAnalytics().trackPageView(String.format(analyticsKey, mMapSize));
 		}
 	}
 	
@@ -402,7 +423,9 @@ public class MapFragment extends Fragment {
 	
 	public void togglePlacements(boolean on) {
 		if (on) {
-			GoogleAnalyticsTracker.getInstance().trackPageView(Consts.ANALYTICS_USE_PLACEMENTS);
+			((MainActivity) getActivity()).getAnalytics().trackPageView(Consts.ANALYTICS_USE_PLACEMENTS);
+			System.out.println("XXX");
+			System.out.println("   XXX");
 			if (mPlacementBookmark < 0) {
 				mPlacementBookmark = 0;
 			}

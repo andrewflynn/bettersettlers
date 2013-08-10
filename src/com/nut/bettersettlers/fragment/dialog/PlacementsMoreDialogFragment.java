@@ -9,7 +9,7 @@ import android.support.v4.app.DialogFragment;
 import com.nut.bettersettlers.R;
 
 public class PlacementsMoreDialogFragment extends DialogFragment {
-	private static final String[] CHOICES = { "About" };
+	private static final String[] CHOICES = { "Rate this app", "About" };
 	
 	public static PlacementsMoreDialogFragment newInstance() {
 		return new PlacementsMoreDialogFragment();
@@ -31,6 +31,9 @@ public class PlacementsMoreDialogFragment extends DialogFragment {
 			
 			switch (which) {
 			case 0:
+				RateDialogFragment.newInstance().show(getFragmentManager(), "RateDialogFragment");
+				break;
+			case 1:
 				AboutDialogFragment.newInstance().show(getFragmentManager(), "AboutDialogFragment");
 				break;
 			default:
