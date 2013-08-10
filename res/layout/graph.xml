@@ -9,7 +9,7 @@
 	    <ImageView android:id="@+id/reset" android:layout_width="wrap_content" android:layout_height="wrap_content" android:src="@drawable/reset" android:padding="5dp" android:clickable="true" android:onClick="areYouSure" />
 	    <ImageView android:id="@+id/undo" android:layout_width="wrap_content" android:layout_height="wrap_content" android:src="@drawable/undo" android:padding="5dp" android:clickable="true" android:onClick="undoGraph" />
 	    
-        <TextView android:id="@+id/last_rolls_text" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textColor="#000" />
+        <TextView android:id="@+id/last_rolls_text" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textColor="#000" android:clickable="true" android:onClick="showAllRolls" />
     </LinearLayout><LinearLayout xmlns:android="http://schemas.android.com/apk/res/android" android:orientation="horizontal" android:layout_width="wrap_content" android:layout_height="wrap_content">
             <com.nut.bettersettlers.GraphView android:id="@+id/graph_view" android:layout_width="@dimen/graph_width" android:layout_height="@dimen/graph_height" />
 	        
