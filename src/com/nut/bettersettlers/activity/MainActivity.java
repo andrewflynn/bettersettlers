@@ -1,27 +1,25 @@
 package com.nut.bettersettlers.activity;
 
 import android.app.ActionBar;
-import android.app.Dialog;
-import android.app.ProgressDialog;
 import android.app.ActionBar.Tab;
 import android.app.ActionBar.TabListener;
+import android.app.Dialog;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.os.Bundle;
 import android.os.PowerManager;
 import android.os.PowerManager.WakeLock;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentTransaction;
-import android.view.Gravity;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.ProgressBar;
-import android.widget.TextView;
 
 import com.google.android.apps.analytics.GoogleAnalyticsTracker;
+
 import com.nut.bettersettlers.R;
 import com.nut.bettersettlers.data.MapSpecs.MapSize;
 import com.nut.bettersettlers.data.MapSpecs.MapType;
@@ -46,6 +44,7 @@ public class MainActivity extends FragmentActivity {
 	private GraphFragment mGraphFragment;
 	
 	private WakeLock mWakeLock;
+	private GoogleAnalyticsTracker mAnalytics;
 
 	///////////////////////////////
 	// Activity method overrides //
@@ -87,7 +86,8 @@ public class MainActivity extends FragmentActivity {
 		mMapFragment = (MapFragment) getSupportFragmentManager().findFragmentById(R.id.map_fragment);
 		mGraphFragment = (GraphFragment) getSupportFragmentManager().findFragmentById(R.id.graph_fragment);
 		
-		GoogleAnalyticsTracker.getInstance().start(Consts.ANALYTICS_KEY, this);
+		mAnalytics = GoogleAnalyticsTracker.getInstance();
+		mAnalytics.start(Consts.ANALYTICS_KEY, Consts.ANALYTICS_INTERVAL, this);
 		
 		mWakeLock = ((PowerManager) getSystemService(Context.POWER_SERVICE))
 				.newWakeLock(PowerManager.SCREEN_BRIGHT_WAKE_LOCK, "MapActivityWakeLock");
@@ -114,15 +114,15 @@ public class MainActivity extends FragmentActivity {
 					.setText(R.string.placements)
 					.setTabListener(tabListener), showPlacements);
 			actionBar.addTab(actionBar.newTab()
-					.setText(R.string.roll_tracker)
+					.setText(R.string.rolls)
 					.setTabListener(tabListener), showGraph);
 		} else {
 			if (showGraph) {
-				setupActionBarCompat(R.drawable.hdpi_menu_rolls, R.id.menu_rolls, new TitleClickListener());
+				setupActionBarCompat(R.drawable.title_rolls, R.id.menu_rolls, new TitleClickListener());
 			} else if (showPlacements) {
-				setupActionBarCompat(R.drawable.hdpi_menu_placements, R.id.menu_placements, new TitleClickListener());
+				setupActionBarCompat(R.drawable.title_placements, R.id.menu_placements, new TitleClickListener());
 			} else {
-				setupActionBarCompat(R.drawable.hdpi_menu_map, R.id.menu_map, new TitleClickListener());
+				setupActionBarCompat(R.drawable.title_map, R.id.menu_map, new TitleClickListener());
 			}
 		}
 
@@ -130,6 +130,9 @@ public class MainActivity extends FragmentActivity {
 			showGraphFragment();
 		} else {
 			showMapFragment();
+			if (showPlacements) {
+				showPlacements();
+			}
 		}
 	}
 	
@@ -145,6 +148,12 @@ public class MainActivity extends FragmentActivity {
 		mWakeLock.release();
 	}
 	
+	@Override
+	public void onDestroy() {
+		super.onDestroy();
+		mAnalytics.stop();
+	}
+	
 	public class MapActivityTabListener implements TabListener {
 		@Override
 		public void onTabSelected(Tab tab, android.app.FragmentTransaction unused) {
@@ -156,7 +165,7 @@ public class MainActivity extends FragmentActivity {
 				ft.show(mMapFragment);
 				getMapFragment().togglePlacements(true);
 			}
-			if (tab.getText().equals(getString(R.string.roll_tracker))) {
+			if (tab.getText().equals(getString(R.string.rolls))) {
 				ft.show(mGraphFragment);
 			}
 			ft.commit();
@@ -172,7 +181,7 @@ public class MainActivity extends FragmentActivity {
 				ft.hide(mMapFragment);
 				getMapFragment().togglePlacements(false);
 			}
-			if (tab.getText().equals(getString(R.string.roll_tracker))) {
+			if (tab.getText().equals(getString(R.string.rolls))) {
 				ft.hide(mGraphFragment);
 			}
 			ft.commit();
@@ -187,6 +196,10 @@ public class MainActivity extends FragmentActivity {
      */
     public ViewGroup getActionBarCompat() {
         return (ViewGroup) findViewById(R.id.actionbar_compat);
+    }
+    
+    public GoogleAnalyticsTracker getAnalytics() {
+    	return mAnalytics;
     }
     
     public void setupActionBarCompat(int iconResId, int viewId, View.OnClickListener clickListener) {
@@ -306,17 +319,17 @@ public class MainActivity extends FragmentActivity {
 			
 			if (iv.getId() == R.id.menu_map) {
 				iv.setId(R.id.menu_placements);
-				iv.setImageResource(R.drawable.hdpi_menu_placements);
+				iv.setImageResource(R.drawable.title_placements);
 				getMapFragment().togglePlacements(true);
 				showPlacements();
 			} else if (iv.getId() == R.id.menu_placements) {
 				iv.setId(R.id.menu_rolls);
-				iv.setImageResource(R.drawable.hdpi_menu_rolls);
+				iv.setImageResource(R.drawable.title_rolls);
 				getMapFragment().togglePlacements(false);
 				showGraphFragment();
 			} else if (iv.getId() == R.id.menu_rolls) {
 				iv.setId(R.id.menu_map);
-				iv.setImageResource(R.drawable.hdpi_menu_map);
+				iv.setImageResource(R.drawable.title_map);
 				showMapFragment();
 			}
 		}
@@ -326,7 +339,7 @@ public class MainActivity extends FragmentActivity {
 		@Override
 		public void onClick(View v) {
 			getMapFragment().asyncMapShuffle();
-			GoogleAnalyticsTracker.getInstance().trackPageView(Consts.ANALYTICS_SHUFFLE_MAP);
+			mAnalytics.trackPageView(Consts.ANALYTICS_SHUFFLE_MAP);
 		}
     }
     
@@ -421,20 +434,20 @@ public class MainActivity extends FragmentActivity {
 		ft.commit();
 		
 		if (!Consts.AT_LEAST_HONEYCOMB) {
-			clearActionButtonCompats(R.drawable.hdpi_menu_map, R.id.menu_map);
-			addActionButtonCompat(R.drawable.hdpi_refresh, R.string.shuffle_map, new RefreshClickListener(), false /* separaterAfter */);
-			addActionButtonCompat(R.drawable.hdpi_map_size, R.string.map_size, new MapSizeClickListener(), false /* separaterAfter */);
-			addActionButtonCompat(R.drawable.hdpi_map_type, R.string.map_type, new MapTypeClickListener(), false /* separaterAfter */);
-			addActionButtonCompat(R.drawable.hdpi_menu, R.string.more, new MapMoreClickListener(), false /* separaterAfter */);
+			clearActionButtonCompats(R.drawable.title_map, R.id.menu_map);
+			addActionButtonCompat(R.drawable.map_refresh, R.string.shuffle_map, new RefreshClickListener(), false /* separaterAfter */);
+			addActionButtonCompat(R.drawable.map_size, R.string.map_size, new MapSizeClickListener(), false /* separaterAfter */);
+			addActionButtonCompat(R.drawable.map_type, R.string.map_type, new MapTypeClickListener(), false /* separaterAfter */);
+			addActionButtonCompat(R.drawable.menu, R.string.more, new MapMoreClickListener(), false /* separaterAfter */);
 		}
     }
     
     private void showPlacements() {
 		if (!Consts.AT_LEAST_HONEYCOMB) {
-			clearActionButtonCompats(R.drawable.hdpi_menu_placements, R.id.menu_placements);
-			addActionButtonCompat(R.drawable.hdpi_arrow_left, R.string.prev, new PrevClickListener(), false /* separaterAfter */);
-			addActionButtonCompat(R.drawable.hdpi_arrow_right, R.string.next, new NextClickListener(), false /* separaterAfter */);
-			addActionButtonCompat(R.drawable.hdpi_menu, R.string.more, new PlacementsMoreClickListener(), false /* separaterAfter */);
+			clearActionButtonCompats(R.drawable.title_placements, R.id.menu_placements);
+			addActionButtonCompat(R.drawable.placements_left, R.string.prev, new PrevClickListener(), false /* separaterAfter */);
+			addActionButtonCompat(R.drawable.placements_right, R.string.next, new NextClickListener(), false /* separaterAfter */);
+			addActionButtonCompat(R.drawable.menu, R.string.more, new PlacementsMoreClickListener(), false /* separaterAfter */);
 		}
     }
     
@@ -445,9 +458,9 @@ public class MainActivity extends FragmentActivity {
 		ft.commit();
 
 		if (!Consts.AT_LEAST_HONEYCOMB) {
-			clearActionButtonCompats(R.drawable.hdpi_menu_rolls, R.id.menu_rolls);
-			addActionButtonCompat(R.drawable.hdpi_help, R.string.help, new HelpClickListener(), false /* separaterAfter */);
-			addActionButtonCompat(R.drawable.hdpi_menu, R.string.more, new GraphMoreClickListener(), false /* separaterAfter */);
+			clearActionButtonCompats(R.drawable.title_rolls, R.id.menu_rolls);
+			addActionButtonCompat(R.drawable.graph_help, R.string.help, new HelpClickListener(), false /* separaterAfter */);
+			addActionButtonCompat(R.drawable.menu, R.string.more, new GraphMoreClickListener(), false /* separaterAfter */);
 		}
     }
 }

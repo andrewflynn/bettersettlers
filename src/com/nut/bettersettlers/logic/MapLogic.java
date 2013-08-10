@@ -47,7 +47,7 @@ public class MapLogic {
 	public static ArrayList<Integer> getProbabilities(MapSize currentMap, MapType currentType, ArrayList<Resource> resources) {
 		switch(currentType) {
 			case TRADITIONAL:
-        return null; // Doesn't make any sense
+				return null; // Doesn't make any sense
 			case FAIR:
 				return getOrderedProbabilities(currentMap, resources);
 			case RANDOM:
