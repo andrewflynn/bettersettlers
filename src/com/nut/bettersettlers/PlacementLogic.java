@@ -112,10 +112,12 @@ public class PlacementLogic {
 			addValueToMap(sums, entry.getKey(), 5 * entry.getValue());
 		}
 
-		// 4 pts 50-75%, 8 pts 75+%
+		// 2 pts 25-50%, 4 pts 50-75%, 8 pts 75+%
 		Map<Integer, Integer> rareResources = PlacementLogic.getRareResources(currentMap, 50, probs, resources);
 		for (Map.Entry<Integer, Integer> entry : rareResources.entrySet()) {
-			if (entry.getValue() < 75) {
+			if (entry.getValue() > 25 && entry.getValue() < 50) {
+				addValueToMap(sums, entry.getKey(), 2);
+			} else if (entry.getValue() > 50 && entry.getValue() < 75) {
 				addValueToMap(sums, entry.getKey(), 4);
 			} else {
 				addValueToMap(sums, entry.getKey(), 8);
@@ -158,10 +160,10 @@ public class PlacementLogic {
 			addValueToMap(sums, entry.getKey(), 3);
 		}
 		
-		// 3 pts for variety
-		ArrayList<Integer> varieties = PlacementLogic.getVarietyIndexes(currentMap, resources);
-		for (int num : varieties) {
-			addValueToMap(sums, num, 3);
+		// 2x the lowest probability of the variety
+		Map<Integer, Integer> varieties = PlacementLogic.getVarietyIndexes(currentMap, resources, probs);
+		for (Map.Entry<Integer, Integer> entry : varieties.entrySet()) {
+			addValueToMap(sums, entry.getKey(), 2 * entry.getValue());
 		}
 		
 		// Add reasons
@@ -176,7 +178,7 @@ public class PlacementLogic {
   		if (cities.containsKey(key)) { reasons.get(key).add(Trait.CITY_BUILDER.getDescription()); }
   		if (devCards.containsKey(key)) { reasons.get(key).add(Trait.DEV_CARD_BUILDER.getDescription()); }
   		if (ninjas.containsKey(key)) { reasons.get(key).add(Trait.NINJA.getDescription()); }
-  		if (varieties.contains(key)) { reasons.get(key).add(Trait.VARIETY.getDescription()); }
+  		if (varieties.containsKey(key)) { reasons.get(key).add(Trait.VARIETY.getDescription()); }
     }
     
   	Log.i("BS", "   RICH    : " + highProbs);
@@ -206,14 +208,16 @@ public class PlacementLogic {
 	
 	/**
 	 * Takes in a list of resources and returns which intersections have 3 different
-	 * resources (no two of the same resource at an intersection.
+	 * resources (no two of the same resource at an intersection).
 	 * 
 	 * @param currentMap Size of the map
 	 * @param resources The list of ordered resources.
-	 * @return A list of indexes
+	 * @param probs The list of ordered probabilities
+	 * @return A list of indexes mapped to the resource with the least probability
 	 */
-	private static ArrayList<Integer> getVarietyIndexes(MapSize currentMap, ArrayList<Resource> resources) {
-    ArrayList<Integer> set = new ArrayList<Integer>();
+	private static Map<Integer, Integer> getVarietyIndexes(MapSize currentMap,
+			ArrayList<Resource> resources,	ArrayList<Integer> probs) {
+    Map<Integer, Integer> set = new HashMap<Integer, Integer>();
 		
 		for (int i = 0; i < currentMap.getLandIntersections().length; i++) {
 			int[] triplet = currentMap.getLandIntersections()[i];
@@ -224,8 +228,10 @@ public class PlacementLogic {
 			
 			Set<Resource> seen = new HashSet<Resource>();
 			boolean containsDuplicates = false;
+			int lowestProb = Integer.MAX_VALUE;
 			for (int trip : triplet) {
 				Resource res = resources.get(trip);
+				int prob = probs.get(trip);
 				
 				// Deserts should not be considered for variety
 				if (res == Resource.DESERT) {
@@ -237,12 +243,15 @@ public class PlacementLogic {
 					containsDuplicates = true;
 					break;
 				} else {
+					if (MapSpecs.PROBABILITY_MAPPING[prob] < lowestProb) {
+						lowestProb = MapSpecs.PROBABILITY_MAPPING[prob];
+					}
   				seen.add(resources.get(trip));
 				}
 			}
 			
 			if (!containsDuplicates) {
-				set.add(i);
+				set.put(i, lowestProb);
 			}
 		}
 		

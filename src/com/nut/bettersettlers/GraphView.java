@@ -1,6 +1,6 @@
 package com.nut.bettersettlers;
 
-import java.util.Stack;
+import com.nut.bettersettlers.R;
 
 import android.content.Context;
 import android.graphics.Canvas;
@@ -10,8 +10,6 @@ import android.graphics.Typeface;
 import android.os.PowerManager;
 import android.util.AttributeSet;
 import android.view.View;
-
-import com.bettersettlers.R;
 
 public class GraphView extends View {
 	
@@ -26,7 +24,6 @@ public class GraphView extends View {
 	private int textSize;
 	private int buffer;
 	
-	private Stack<Integer> stack;
 	private int[] expected;	
 	private int[] probs;
 	private int[] robberProbs;
@@ -45,22 +42,7 @@ public class GraphView extends View {
   	initialize(context);
   }
   
-  public void aquireSleepLock() {
-  	dontSleep.acquire();
-  }
-  
-  public void releaseSleepLock() {
-  	if (dontSleep.isHeld()) {
-    	dontSleep.release();
-  	}
-  }
-  
-  private void initialize(Context context) {
-  	PowerManager pm = (PowerManager) context.getSystemService(Context.POWER_SERVICE);
-  	dontSleep = pm.newWakeLock(PowerManager.SCREEN_DIM_WAKE_LOCK, "graph tag");
-  	
-  	stack = new Stack<Integer>();
-
+  private void initialize(Context context) {  	
   	expectedUnit = (int) context.getResources().getDimension(R.dimen.graph_expected_unit);
   	startingX = (int) context.getResources().getDimension(R.dimen.graph_starting_x);
   	startingY = (int) context.getResources().getDimension(R.dimen.graph_starting_y);
@@ -116,6 +98,21 @@ public class GraphView extends View {
         0  /* 10 */,
         0  /* 11 */,
         0  /* 12 */};
+  	
+  	PowerManager pm = (PowerManager) getContext().getSystemService(Context.POWER_SERVICE);
+  	dontSleep = pm.newWakeLock(PowerManager.SCREEN_DIM_WAKE_LOCK, "GraphView tag");
+  }
+  
+  public void acquireSleepLock() {
+  	if (!dontSleep.isHeld()) {
+    	dontSleep.acquire();
+  	}
+  }
+  
+  public void releaseSleepLock() {
+  	if (dontSleep.isHeld()) {
+    	dontSleep.release();
+  	}
   }
   
   public void setProbs(int[] probs) {
@@ -124,10 +121,6 @@ public class GraphView extends View {
   
   public void setRobberProbs(int[] robberProbs) {
   	this.robberProbs = robberProbs;
-  }
-  
-  public void setStack(Stack<Integer> stack) {
-  	this.stack = stack;
   }
   
 	@Override

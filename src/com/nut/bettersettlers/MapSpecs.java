@@ -2,7 +2,6 @@ package com.nut.bettersettlers;
 
 import java.io.Serializable;
 
-import android.content.res.Resources;
 import android.graphics.Point;
 
 /**

@@ -3,9 +3,10 @@ package com.nut.bettersettlers;
 import static com.nut.bettersettlers.MapSpecs.BOARD_RANGE_X;
 import static com.nut.bettersettlers.MapSpecs.BOARD_RANGE_Y;
 
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
+import com.nut.bettersettlers.R;
+import com.nut.bettersettlers.MapSpecs.Harbor;
+import com.nut.bettersettlers.MapSpecs.MapSize;
+import com.nut.bettersettlers.MapSpecs.Resource;
 
 import android.content.Context;
 import android.graphics.Canvas;
@@ -16,13 +17,13 @@ import android.graphics.RectF;
 import android.graphics.Typeface;
 import android.graphics.drawable.ShapeDrawable;
 import android.graphics.drawable.shapes.PathShape;
+import android.os.PowerManager;
 import android.util.AttributeSet;
 import android.view.View;
 
-import com.bettersettlers.R;
-import com.nut.bettersettlers.MapSpecs.Harbor;
-import com.nut.bettersettlers.MapSpecs.MapSize;
-import com.nut.bettersettlers.MapSpecs.Resource;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
 
 public class MapView extends View {
 	private int starting_x;
@@ -48,9 +49,10 @@ public class MapView extends View {
 	private MapSize currentMap;
 	
 	private int placementBookmark;
-	//private int placementIndex;
 	private LinkedHashMap<Integer, List<String>> placements;
 	private ArrayList<Integer> orderedPlacements;
+	
+	private PowerManager.WakeLock dontSleep;
   
   public MapView(Context context) {
   	super(context);
@@ -88,9 +90,23 @@ public class MapView extends View {
   	
   	currentMap = MapSize.STANDARD; // Default to standard
   	placementBookmark = -1; // Don't show placements initially
-  	//placementIndex = -1; // Don't show placements initially
   	placements = new LinkedHashMap<Integer, List<String>>();
   	orderedPlacements = new ArrayList<Integer>();
+  	
+  	PowerManager pm = (PowerManager) getContext().getSystemService(Context.POWER_SERVICE);
+  	dontSleep = pm.newWakeLock(PowerManager.SCREEN_DIM_WAKE_LOCK, "MapView tag");
+  }
+  
+  public void acquireSleepLock() {
+  	if (!dontSleep.isHeld()) {
+    	dontSleep.acquire();
+  	}
+  }
+  
+  public void releaseSleepLock() {
+  	if (dontSleep.isHeld()) {
+    	dontSleep.release();
+  	}
   }
   
   public void setMapType(MapSize currentMap) {
@@ -136,12 +152,6 @@ public class MapView extends View {
   public void setHarbors(List<Harbor> harbors) {
   	this.harbors = harbors;
   }
-  
-  /*
-  public void setPlacementIndex(int placementIndex) {
-  	this.placementIndex = placementIndex;
-  }
-  */
   
   public void setPlacementBookmark(int placementBookmark) {
   	this.placementBookmark = placementBookmark;
@@ -353,7 +363,7 @@ public class MapView extends View {
   		}
   	}
 
-  	if (placementBookmark != -1) {
+  	if (placementBookmark >= 0) {
   		int placementIndex = orderedPlacements.get(placementBookmark);
 
   		// Ignore any places that aren't allowed settlements on the coast

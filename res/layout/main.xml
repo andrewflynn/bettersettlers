@@ -43,10 +43,6 @@
                    android:src="@drawable/close_bracket"
                    android:layout_gravity="center"
                    android:onClick="updateShuffle" />
-        <!--
-        <ProgressBar android:id="@+id/progress_bar"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content" />
         -->
     </LinearLayout>
 </LinearLayout>
