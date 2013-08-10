@@ -19,6 +19,8 @@
 					android:title="@string/large" />
 				<item android:id="@+id/xlarge_item"
 					android:title="@string/xlarge" />
+				<item android:id="@+id/heading_for_new_shores_item"
+					android:title="@string/heading_for_new_shores" />
 			</group>
 		</menu>
 	</item>

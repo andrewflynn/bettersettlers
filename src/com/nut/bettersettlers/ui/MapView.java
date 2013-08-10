@@ -1,9 +1,10 @@
 package com.nut.bettersettlers.ui;
 
-import static com.nut.bettersettlers.data.MapSpecs.BOARD_RANGE_HALF_X;
-import static com.nut.bettersettlers.data.MapSpecs.BOARD_RANGE_HALF_Y;
-import static com.nut.bettersettlers.data.MapSpecs.BOARD_RANGE_X;
-import static com.nut.bettersettlers.data.MapSpecs.BOARD_RANGE_Y;
+import static com.nut.bettersettlers.data.MapConsts.BOARD_RANGE_HALF_X;
+import static com.nut.bettersettlers.data.MapConsts.BOARD_RANGE_HALF_Y;
+import static com.nut.bettersettlers.data.MapConsts.BOARD_RANGE_X;
+import static com.nut.bettersettlers.data.MapConsts.BOARD_RANGE_Y;
+import static com.nut.bettersettlers.data.MapConsts.PROBABILITY_MAPPING;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -19,7 +20,6 @@ import android.graphics.RectF;
 import android.graphics.Typeface;
 import android.graphics.drawable.ShapeDrawable;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.Display;
 import android.view.MotionEvent;
 import android.view.ScaleGestureDetector;
@@ -27,12 +27,12 @@ import android.view.View;
 import android.view.WindowManager;
 
 import com.nut.bettersettlers.R;
-import com.nut.bettersettlers.data.MapSpecs;
-import com.nut.bettersettlers.data.MapSpecs.Harbor;
-import com.nut.bettersettlers.data.MapSpecs.MapSize;
-import com.nut.bettersettlers.data.MapSpecs.Piece;
-import com.nut.bettersettlers.data.MapSpecs.Resource;
+import com.nut.bettersettlers.data.CatanMap;
+import com.nut.bettersettlers.data.MapConsts.Harbor;
+import com.nut.bettersettlers.data.MapConsts.Piece;
+import com.nut.bettersettlers.data.MapConsts.Resource;
 import com.nut.bettersettlers.logic.MapLogic;
+import com.nut.bettersettlers.misc.Consts;
 
 public class MapView extends View {
 	private static final String X = MapView.class.getSimpleName();
@@ -54,9 +54,12 @@ public class MapView extends View {
 	private float dMiddleY;
 	
 	private Piece[][] mPieces;
+	private Piece[][] mUPieces;
+	private boolean[][] mUVisibility;
 	private int[][] mProbs;
+	private int[][] mUProbs;
 	private List<Harbor> mHarbors;
-	private MapSize mCurrentMap;
+	private CatanMap mCurrentMap;
 	private int mPlacementBookmark;
 	private LinkedHashMap<Integer, List<String>> mPlacements;
 	private ArrayList<Integer> mOrderedPlacements;
@@ -85,9 +88,11 @@ public class MapView extends View {
 	private void init(Context context) {
 		initDimens(context);
 		
-		mCurrentMap = MapSize.STANDARD; // Default to standard
+		// XXX mCurrentMap = MapSize.STANDARD; // Default to standard
 		mPieces = new Piece[BOARD_RANGE_X + 1][BOARD_RANGE_Y + 1];
+		mUPieces = new Piece[BOARD_RANGE_X + 1][BOARD_RANGE_Y + 1];
 		mProbs = new int[BOARD_RANGE_X + 1][BOARD_RANGE_Y + 1];
+		mUProbs = new int[BOARD_RANGE_X + 1][BOARD_RANGE_Y + 1];
 		mHarbors = new ArrayList<Harbor>();
 		mPlacementBookmark = -1; // No placements initially
 		mPlacements = new LinkedHashMap<Integer, List<String>>();
@@ -133,27 +138,36 @@ public class MapView extends View {
 		//Log.i(X, "mScaleFactor: " + mScaleFactor);
 	}
 
-	public void setMapSize(MapSize currentMap) {
+	public void setMapSize(CatanMap currentMap) {
 		mCurrentMap = currentMap;
 	}
 
-	public void setLandAndWaterResources(Resource[][] land, Harbor[][] water) {
+	public void setLandAndWaterResources(Resource[][] land, Harbor[][] water, Resource[][] unknowns) {
 		for (int i = 0; i < BOARD_RANGE_Y; i++) {
 			for (int j = (i % 2); j < BOARD_RANGE_X; j += 2) {
-				mPieces[j][i] = null;
 				if (land != null && land[j][i] != null) {
 					mPieces[j][i] = new Piece(j, i, land[j][i].getColor());
 				} else if (water != null && water[j][i] != null) {
 					mPieces[j][i] = new Piece(j, i, 0xFF1959DF);
 				} else {
 					mPieces[j][i] = new Piece(j, i, 0xFFFFFFFF);
+					//mPieces[j][i] = new Piece(j, i, 0xFFCCCCCC);
+				}
+				
+				if (unknowns != null && unknowns[j][i] != null) {
+					mUPieces[j][i] = new Piece(j, i, unknowns[j][i].getColor());
 				}
 			}
 		}
 	}
 
-	public void setProbabilities(int[][] probs) {
+	public void setProbabilities(int[][] probs, int[][] unknownProbs) {
 		mProbs = probs;
+		mUProbs = unknownProbs;
+	}
+	
+	public void setVisibility(boolean[][] visibles) {
+		mUVisibility = visibles;
 	}
 
 	public void setHarbors(List<Harbor> harbors) {
@@ -241,6 +255,45 @@ public class MapView extends View {
 
 		case MotionEvent.ACTION_UP: {
 			mActivePointerId = INVALID_POINTER_ID;
+			
+			// Check for touching unknowns
+			for (int i = 0; i < mUPieces.length; i++) {
+				for (int j = 0; j < mUPieces[i].length; j++) {
+					if (mUPieces != null && mUPieces[i][j] != null) {
+						Piece piece = mUPieces[i][j];
+						Rect rect = getAdjustedRect(piece);
+
+						if (ev.getX() >= (rect.left + 15) && ev.getX() <= (rect.right - 15)
+								&& ev.getY() >= rect.top && ev.getY() <= rect.bottom) {
+							if (mUVisibility != null) {
+								mUVisibility[i][j] = !mUVisibility[i][j];
+							}
+						}	
+					}
+				}
+			}
+			
+			if (Consts.TEST) {
+				for (int i = 0; i < mPieces.length; i++) {
+					for (int j = 0; j < mPieces[i].length; j++) {
+						if (mPieces != null && mPieces[i][j] != null) {
+							Piece piece = mPieces[i][j];
+							Rect rect = getAdjustedRect(piece);
+
+							if (ev.getX() >= (rect.left + 15) && ev.getX() <= (rect.right - 15)
+									&& ev.getY() >= rect.top && ev.getY() <= rect.bottom) {
+								if (piece.getColor() == 0xFF00FF00) {
+									mPieces[i][j] = new Piece(piece.getGridX(), piece.getGridY(), 0xFF0000FF);	
+								} else if (piece.getColor() == 0xFF0000FF) {
+									mPieces[i][j] = new Piece(piece.getGridX(), piece.getGridY(), 0xFFCCCCCC);	
+								} else {
+									mPieces[i][j] = new Piece(piece.getGridX(), piece.getGridY(), 0xFF00FF00);
+								}
+							}	
+						}
+					}
+				}
+			}
 			break;
 		}
 
@@ -266,13 +319,8 @@ public class MapView extends View {
 		
 		return true;
 	}
-
-	@Override
-	public void onDraw(Canvas canvas) {
-		super.onDraw(canvas);
-		//Log.i(X, "onDraw: " + mScaleFactor);
-		
-		//canvas.save();
+	
+	public void onDrawTest(Canvas canvas) {
 	    canvas.translate(mPosX, mPosY);
 		
 		Paint generalPaint = new Paint();
@@ -292,22 +340,151 @@ public class MapView extends View {
 							dYR1 * mScaleFactor,
 							dYR2 * mScaleFactor));
 					shape.setBounds(rect);
-					shape.getPaint().setColor(piece.getColor());
+					if (piece.getColor() == 0xFF0000FF) {
+						shape.getPaint().setColor(0xFF0000FF);
+					} else if (piece.getColor() == 0xFF00FF00) {
+						shape.getPaint().setColor(0xFF00FF00);
+					} else {
+						shape.getPaint().setColor(0xFFCCCCCC);
+					}
 					shape.draw(canvas);
 					
-					if (mProbs != null && mProbs[i][j] != 0) {
-						if (mProbs[i][j] == 6 || mProbs[i][j] == 8) {
-							generalPaint.setColor(0xFFFF0000);
-						} else {
-							generalPaint.setColor(0xFF000000);
+					canvas.drawText(String.format("(%d,%d)", i, j), rect.centerX(),
+							rect.centerY() - dProbTopBuffer * mScaleFactor, generalPaint);
+				}
+			}
+		}
+	}
+
+	@Override
+	public void onDraw(Canvas canvas) {
+		super.onDraw(canvas);
+		
+		if (Consts.TEST) {
+			onDrawTest(canvas);
+			return;
+		}
+		//Log.i(X, "onDraw: " + mScaleFactor);
+		
+		//canvas.save();
+	    canvas.translate(mPosX, mPosY);
+		
+		Paint generalPaint = new Paint();
+		generalPaint.setTextAlign(Paint.Align.CENTER);
+		generalPaint.setTypeface(Typeface.DEFAULT_BOLD);
+		generalPaint.setStrokeWidth(2 * mScaleFactor);
+		generalPaint.setTextSize(dFontSize * mScaleFactor);
+		generalPaint.setAntiAlias(true);
+		
+		// First draw the real ones
+		for (int i = 0; i < mPieces.length; i++) {
+			for (int j = 0; j < mPieces[i].length; j++) {
+				if (mPieces != null && mPieces[i][j] != null) {
+					Piece piece = mPieces[i][j];
+					Rect rect = getAdjustedRect(piece);
+					
+					ShapeDrawable shape = new ShapeDrawable(new HexShape(
+							dXR * mScaleFactor,
+							dYR1 * mScaleFactor,
+							dYR2 * mScaleFactor));
+					shape.setBounds(rect);
+					shape.getPaint().setColor(piece.getColor());
+					shape.draw(canvas);
+				}
+			}
+		}
+		for (int i = 0; i < mPieces.length; i++) {
+			for (int j = 0; j < mPieces[i].length; j++) {
+				if (mPieces != null && mPieces[i][j] != null) {
+					Piece piece = mPieces[i][j];
+					Rect rect = getAdjustedRect(piece);
+					
+					if (mProbs != null && mProbs[i][j] != 0 && mProbs[i][j] != -1) {
+						int prob = mProbs[i][j];
+						if (mProbs[i][j] < 0) {
+							prob *= -1;
 						}
-						canvas.drawText(Integer.toString(mProbs[i][j]), rect.centerX(),
-								rect.centerY() - dProbTopBuffer * mScaleFactor, generalPaint);
-						drawDots(canvas, generalPaint, mProbs[i][j], rect);
+						
+						if (prob > 12) {
+							// Split into two
+							String[] two = Integer.toString(prob).split("7");
+							int oneInt = Integer.parseInt(two[0]);
+							if (oneInt == 6 || oneInt == 8) {
+								generalPaint.setColor(0xFFFF0000);
+							} else {
+								generalPaint.setColor(0xFF000000);
+							}
+							canvas.drawText(Integer.toString(oneInt), rect.centerX() - dXR * mScaleFactor,
+									rect.centerY() + dYR2 * mScaleFactor - dProbTopBuffer * mScaleFactor, generalPaint);
+							Rect newRect = new Rect((int) (rect.left - dXR * mScaleFactor),
+									(int) (rect.top + dYR2 * mScaleFactor),
+									(int) (rect.right - dXR * mScaleFactor),
+									(int) (rect.bottom + dYR2 * mScaleFactor));
+							drawDots(canvas, generalPaint, oneInt, newRect);
+
+							int twoInt = Integer.parseInt(two[1]);
+							if (twoInt == 6 || twoInt == 8) {
+								generalPaint.setColor(0xFFFF0000);
+							} else {
+								generalPaint.setColor(0xFF000000);
+							}
+							canvas.drawText(Integer.toString(twoInt), rect.centerX() + dXR * mScaleFactor,
+									rect.centerY() - dYR2 * mScaleFactor - dProbTopBuffer * mScaleFactor, generalPaint);
+							newRect = new Rect((int) (rect.left + dXR * mScaleFactor),
+									(int) (rect.top - dYR2 * mScaleFactor),
+									(int) (rect.right + dXR * mScaleFactor),
+									(int) (rect.bottom - dYR2 * mScaleFactor));
+							drawDots(canvas, generalPaint, twoInt, newRect);
+						} else {
+							if (prob == 6 || prob == 8) {
+								generalPaint.setColor(0xFFFF0000);
+							} else {
+								generalPaint.setColor(0xFF000000);
+							}
+							canvas.drawText(Integer.toString(prob), rect.centerX(),
+									rect.centerY() - dProbTopBuffer * mScaleFactor, generalPaint);
+							drawDots(canvas, generalPaint, prob, rect);
+						}
 					}
 				}
 			}
 		}
+		
+		// Next draw unknowns
+		for (int i = 0; i < mUPieces.length; i++) {
+			for (int j = 0; j < mUPieces[i].length; j++) {
+				if (mUPieces != null && mUPieces[i][j] != null) {
+					Piece piece = mUPieces[i][j];
+					Rect rect = getAdjustedRect(piece);
+					
+					ShapeDrawable shape = new ShapeDrawable(new HexShape(
+							dXR * mScaleFactor,
+							dYR1 * mScaleFactor,
+							dYR2 * mScaleFactor));
+					shape.setBounds(rect);
+					if (mUVisibility != null && !mUVisibility[i][j]) {
+						shape.getPaint().setColor(0xFFCCCCCC);
+					} else {
+						shape.getPaint().setColor(piece.getColor());
+					}
+					shape.draw(canvas);
+
+					if (mUVisibility == null || mUVisibility[i][j]) {
+						if (mUProbs != null && mUProbs[i][j] > 0) {
+							if (mUProbs[i][j] == 6 || mUProbs[i][j] == 8) {
+								generalPaint.setColor(0xFFFF0000);
+							} else {
+								generalPaint.setColor(0xFF000000);
+							}
+							canvas.drawText(Integer.toString(mUProbs[i][j]), rect.centerX(),
+									rect.centerY() - dProbTopBuffer * mScaleFactor, generalPaint);
+							drawDots(canvas, generalPaint, mUProbs[i][j], rect);
+						}
+					}
+				}
+			}
+		}
+		
 		for (int i = 0; i < mHarbors.size(); i++) {
 			if (mHarbors.get(i) != null) {
 				Point point = mCurrentMap.getWaterGrid()[i];
@@ -405,7 +582,7 @@ public class MapView extends View {
 		float x = rect.centerX();
 		float y = rect.centerY();
 		paint.setAntiAlias(false);
-		switch (MapSpecs.PROBABILITY_MAPPING[prob]) {
+		switch (PROBABILITY_MAPPING[prob]) {
 		case 5:
 			canvas.drawCircle(x - (dXR / 2 * mScaleFactor), y, dProbDotR * mScaleFactor, paint);
 			canvas.drawCircle(x + (dXR / 2 * mScaleFactor), y, dProbDotR * mScaleFactor, paint);
@@ -431,11 +608,13 @@ public class MapView extends View {
 	private void drawHarbor(Canvas canvas, Paint paint, Harbor harbor, Rect rect, int i) {
 		float x = rect.centerX();
 		float y = rect.centerY() - (dProbTopBuffer + (2 * dBorder)) * mScaleFactor;
+
+		if (harbor.getResource() == Resource.WATER){
+			return; // Do nothing
+		}
 		
 		int dir = MapLogic.whichWayHarborFaces(mCurrentMap, harbor);
-		if (harbor.getResource() == Resource.WATER) {
-			// Do nothing
-		} else if (harbor.getResource() == Resource.DESERT) {
+		if (harbor.getResource() == Resource.DESERT) {
 			paint.setColor(0xFFFFFFFF);
 			canvas.drawCircle(x, y, dHarborCircle * mScaleFactor, paint);
 			drawHarborLine(canvas, paint, mCurrentMap.getHarborLines()[i][dir], x, y);
