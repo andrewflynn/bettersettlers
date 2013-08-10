@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+	android:layout_width="fill_parent"
+	android:layout_height="fill_parent"
+	android:background="#FFFFFFFF" >
+	<com.nut.bettersettlers.ui.MapView
+		android:id="@+id/map_view"
+		android:layout_width="fill_parent"
+		android:layout_height="fill_parent" />
+	<ImageView
+		android:id="@+id/refresh_icon"
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		android:layout_alignParentTop="true"
+		android:layout_alignParentRight="true"
+		android:layout_marginRight="10dip"
+		android:layout_marginTop="10dip"
+		android:src="@drawable/refresh"
+		android:clickable="true" />
+	<ImageView
+		android:id="@+id/right_arrow"
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		android:layout_below="@id/refresh_icon"
+		android:layout_alignRight="@id/refresh_icon"
+		android:layout_marginTop="10dip"
+		android:src="@drawable/right_arrow"
+		android:clickable="true"
+		android:visibility="gone" />
+	<ImageView
+		android:id="@+id/left_arrow"
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		android:layout_below="@id/refresh_icon"
+		android:layout_alignLeft="@id/refresh_icon"
+		android:layout_marginTop="10dip"
+		android:src="@drawable/left_arrow"
+		android:clickable="true"
+		android:visibility="gone" />
+</RelativeLayout>

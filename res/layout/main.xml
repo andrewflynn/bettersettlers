@@ -1,48 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-              android:layout_width="fill_parent" 
-              android:layout_height="fill_parent" 
-              android:orientation="vertical"
-              android:background="#FFFFFFFF" >
-    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-                  android:layout_width="fill_parent" 
-                  android:layout_height="wrap_content" 
-                  android:gravity="center"
-                  android:orientation="horizontal" >
-        <ImageView android:id="@+id/progress_image"
-                   android:layout_width="wrap_content"
-                   android:gravity="center"
-                   android:layout_height="wrap_content" />
-        <com.nut.bettersettlers.MapView android:id="@+id/map_view"
-                                    android:layout_width="wrap_content"
-                                    android:layout_height="@dimen/screen_height" />
-    </LinearLayout>
-    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-                  android:layout_width="fill_parent" 
-                  android:layout_height="wrap_content" 
-                  android:gravity="center"
-                  android:orientation="horizontal" >
-        <ImageView android:id="@+id/openBracket"
-                   android:layout_width="wrap_content"
-                   android:layout_height="wrap_content"
-                   android:src="@drawable/open_bracket"
-                   android:layout_gravity="center"
-                   android:onClick="updateReverseShuffle" />
-        <ImageView android:id="@+id/shuffleType"
-                   android:layout_width="wrap_content"
-                   android:layout_height="wrap_content"
-                   android:src="@drawable/shuffle_map"
-                   android:onClick="shuffle" />
-        <ImageView android:id="@+id/secondShuffleType"
-                   android:layout_width="wrap_content"
-                   android:layout_height="wrap_content"
-                   android:onClick="shuffle2" />
-        <ImageView android:id="@+id/closeBracket"
-                   android:layout_width="wrap_content"
-                   android:layout_height="wrap_content"
-                   android:src="@drawable/close_bracket"
-                   android:layout_gravity="center"
-                   android:onClick="updateShuffle" />
-        -->
-    </LinearLayout>
-</LinearLayout>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+	android:id="@+id/main_fragment_container"
+	android:layout_width="match_parent"
+	android:layout_height="match_parent">
+	<fragment android:id="@+id/map_fragment"
+		android:name="com.nut.bettersettlers.fragment.MapFragment"
+		android:layout_width="match_parent"
+		android:layout_height="match_parent" />
+	<fragment android:id="@+id/graph_fragment"
+		android:name="com.nut.bettersettlers.fragment.GraphFragment"
+		android:layout_width="match_parent"
+		android:layout_height="match_parent" />
+</FrameLayout>
