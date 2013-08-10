@@ -1,7 +1,7 @@
 package com.nut.bettersettlers.fragment;
 
-import static com.nut.bettersettlers.data.MapSpecs.BOARD_RANGE_X;
-import static com.nut.bettersettlers.data.MapSpecs.BOARD_RANGE_Y;
+import static com.nut.bettersettlers.data.MapConsts.BOARD_RANGE_X;
+import static com.nut.bettersettlers.data.MapConsts.BOARD_RANGE_Y;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -14,6 +14,7 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -24,10 +25,12 @@ import android.view.ViewGroup;
 import com.google.android.apps.analytics.GoogleAnalyticsTracker;
 import com.nut.bettersettlers.R;
 import com.nut.bettersettlers.activity.MainActivity;
-import com.nut.bettersettlers.data.MapSpecs.Harbor;
-import com.nut.bettersettlers.data.MapSpecs.MapSize;
-import com.nut.bettersettlers.data.MapSpecs.MapType;
-import com.nut.bettersettlers.data.MapSpecs.Resource;
+import com.nut.bettersettlers.data.CatanMap;
+import com.nut.bettersettlers.data.MapConsts.Harbor;
+import com.nut.bettersettlers.data.MapConsts.MapType;
+import com.nut.bettersettlers.data.MapConsts.Resource;
+import com.nut.bettersettlers.data.MapProvider;
+import com.nut.bettersettlers.data.MapProvider.MapSize;
 import com.nut.bettersettlers.fragment.dialog.AboutDialogFragment;
 import com.nut.bettersettlers.fragment.dialog.RateDialogFragment;
 import com.nut.bettersettlers.fragment.dialog.RulesDialogFragment;
@@ -43,7 +46,9 @@ public class MapFragment extends Fragment {
 	private static final String STATE_MAP_SIZE = "MAP_SIZE";
 	private static final String STATE_MAP_TYPE = "MAP_TYPE";
 	private static final String STATE_RESOURCES = "MAP_RESOURCES";
+	private static final String STATE_UNKNOWNS = "UNKNOWNS";
 	private static final String STATE_PROBABILITIES = "PROBABILITIES";
+	private static final String STATE_UNKNOWN_PROBABILITIES = "UNKNOWN_PROBABILITIES";
 	private static final String STATE_HARBORS = "HARBORS";
 	private static final String STATE_PLACEMENTS = "PLACEMENTS";
 	private static final String STATE_ORDERED_PLACEMENTS = "ORDERED_PLACEMENTS";
@@ -55,14 +60,19 @@ public class MapFragment extends Fragment {
 	
 	private MapView mMapView;
 
-	private MapSize mMapSize = MapSize.STANDARD;
+	private CatanMap mMapSize;
 	private MapType mMapType = MapType.FAIR;
 	private Resource[][] mResourceBoard = new Resource[BOARD_RANGE_X + 1][BOARD_RANGE_Y + 1];
+	private Resource[][] mUResourceBoard = new Resource[BOARD_RANGE_X + 1][BOARD_RANGE_Y + 1];
+	private boolean[][] mUVisibleBoard = new boolean[BOARD_RANGE_X + 1][BOARD_RANGE_Y + 1];
 	private Harbor[][] mHarborBoard = new Harbor[BOARD_RANGE_X + 1][BOARD_RANGE_Y + 1];
 	private int[][] mProbabilityBoard = new int[BOARD_RANGE_X + 1][BOARD_RANGE_Y + 1];
+	private int[][] mUProbabilityBoard = new int[BOARD_RANGE_X + 1][BOARD_RANGE_Y + 1];
 	private ArrayList<Harbor> mHarborList = new ArrayList<Harbor>();
 	private ArrayList<Resource> mResourceList = new ArrayList<Resource>();
 	private ArrayList<Integer> mProbabilityList = new ArrayList<Integer>();
+	private ArrayList<Resource> mUnknownsList = new ArrayList<Resource>();
+	private ArrayList<Integer> mUnknownProbabilitiesList = new ArrayList<Integer>();
 	private LinkedHashMap<Integer, List<String>> mPlacementList = new LinkedHashMap<Integer, List<String>>();
 	private ArrayList<Integer> mOrderedPlacementList = new ArrayList<Integer>();
 	private int mPlacementBookmark = -1;
@@ -85,10 +95,12 @@ public class MapFragment extends Fragment {
 	@Override
 	public void onSaveInstanceState(Bundle outState) {
 		super.onSaveInstanceState(outState);
-		outState.putString(STATE_MAP_SIZE, mMapSize.name());
+		outState.putString(STATE_MAP_SIZE, mMapSize.getName());
 		outState.putString(STATE_MAP_TYPE, mMapType.name());
 		outState.putSerializable(STATE_RESOURCES, mResourceList);
+		outState.putSerializable(STATE_UNKNOWNS, mUnknownsList);
 		outState.putSerializable(STATE_PROBABILITIES, mProbabilityList);
+		outState.putSerializable(STATE_UNKNOWN_PROBABILITIES, mUnknownProbabilitiesList);
 		outState.putSerializable(STATE_HARBORS, mHarborList);
 		outState.putSerializable(STATE_PLACEMENTS, mPlacementList);
 		outState.putSerializable(STATE_ORDERED_PLACEMENTS, mOrderedPlacementList);
@@ -120,9 +132,9 @@ public class MapFragment extends Fragment {
 		
 		if (savedInstanceState != null) {
 			if (savedInstanceState.getString(STATE_MAP_SIZE) != null) {
-				mMapSize = MapSize.valueOf(savedInstanceState.getString(STATE_MAP_SIZE));
+				mMapSize = getMapProvider().getMap(savedInstanceState.getString(STATE_MAP_SIZE));
 			} else {
-				mMapSize = MapSize.STANDARD;
+				mMapSize = getMapProvider().getMap(MapSize.STANDARD);
 			}
 
 			if (savedInstanceState.getString(STATE_MAP_TYPE) != null) {
@@ -132,10 +144,14 @@ public class MapFragment extends Fragment {
 			}
 
 			if (savedInstanceState.getSerializable(STATE_RESOURCES) != null
+					&& savedInstanceState.getSerializable(STATE_UNKNOWNS) != null
 					&& savedInstanceState.getSerializable(STATE_PROBABILITIES) != null
+					&& savedInstanceState.getSerializable(STATE_UNKNOWN_PROBABILITIES) != null
 					&& savedInstanceState.getSerializable(STATE_HARBORS) != null) {
 				mResourceList = (ArrayList<Resource>) savedInstanceState.getSerializable(STATE_RESOURCES);
+				mUnknownsList = (ArrayList<Resource>) savedInstanceState.getSerializable(STATE_UNKNOWNS);
 				mProbabilityList = (ArrayList<Integer>) savedInstanceState.getSerializable(STATE_PROBABILITIES);
+				mUnknownProbabilitiesList = (ArrayList<Integer>) savedInstanceState.getSerializable(STATE_UNKNOWN_PROBABILITIES);
 				mHarborList = (ArrayList<Harbor>) savedInstanceState.getSerializable(STATE_HARBORS);
 				if (savedInstanceState.getSerializable(STATE_PLACEMENTS) != null
 						&& savedInstanceState.getSerializable(STATE_ORDERED_PLACEMENTS) != null
@@ -151,6 +167,7 @@ public class MapFragment extends Fragment {
 				}
 			}
 		} else {
+			mMapSize = getMapProvider().getMap(MapSize.STANDARD);
 			asyncMapShuffle();
 		}
 	}
@@ -168,7 +185,9 @@ public class MapFragment extends Fragment {
 		@Override
 		protected Void doInBackground(Void... params) {
 			mProbabilityList = MapLogic.getProbabilities(mMapSize, mMapType);
+			mUnknownProbabilitiesList = MapLogic.getUnknownProbabilities(mMapSize);
 			mResourceList = MapLogic.getResources(mMapSize, mMapType, mProbabilityList);
+			mUnknownsList = MapLogic.getUnknowns(mMapSize, mUnknownProbabilitiesList);
 			mHarborList = MapLogic.getHarbors(mMapSize, mMapType, mResourceList, mProbabilityList);
 			fillPlacements();
 			return null;
@@ -189,6 +208,8 @@ public class MapFragment extends Fragment {
 		@Override
 		protected Void doInBackground(Void... params) {
 			mProbabilityList = MapLogic.getProbabilities(mMapSize, mMapType, mResourceList);
+			mUnknownProbabilitiesList = MapLogic.getUnknownProbabilities(mMapSize);
+			mUnknownsList = MapLogic.getUnknowns(mMapSize, mUnknownProbabilitiesList);
 			fillPlacements();
 			return null;
 		}
@@ -235,8 +256,9 @@ public class MapFragment extends Fragment {
 		
 		fillResourceProbabilityAndHarbors();
 
-		mMapView.setLandAndWaterResources(mResourceBoard, mHarborBoard);
-		mMapView.setProbabilities(mProbabilityBoard);
+		mMapView.setLandAndWaterResources(mResourceBoard, mHarborBoard, mUResourceBoard);
+		mMapView.setProbabilities(mProbabilityBoard, mUProbabilityBoard);
+		mMapView.setVisibility(mUVisibleBoard);
 		mMapView.setHarbors(mHarborList);
 		mMapView.setPlacementBookmark(mPlacementBookmark);
 		mMapView.setPlacements(mPlacementList);
@@ -250,7 +272,10 @@ public class MapFragment extends Fragment {
 
 	private void fillResourceProbabilityAndHarbors() {
 		mResourceBoard = new Resource[BOARD_RANGE_X + 1][BOARD_RANGE_Y + 1];
+		mUResourceBoard = new Resource[BOARD_RANGE_X + 1][BOARD_RANGE_Y + 1];
+		mUVisibleBoard = new boolean[BOARD_RANGE_X + 1][BOARD_RANGE_Y + 1];
 		mProbabilityBoard = new int[BOARD_RANGE_X + 1][BOARD_RANGE_Y + 1];
+		mUProbabilityBoard = new int[BOARD_RANGE_X + 1][BOARD_RANGE_Y + 1];
 		mHarborBoard = new Harbor[BOARD_RANGE_X + 1][BOARD_RANGE_Y + 1];
 		for (int i = 0; i < mMapSize.getLandGrid().length; i++) {
 			Point point = mMapSize.getLandGrid()[i];
@@ -260,6 +285,11 @@ public class MapFragment extends Fragment {
 		for (int i = 0; i < mMapSize.getWaterGrid().length; i++) {
 			Point point = mMapSize.getWaterGrid()[i];
 			mHarborBoard[point.x][point.y] = mHarborList.get(i);
+		}
+		for (int i = 0; i < mMapSize.getUnknownGrid().length; i++) {
+			Point point = mMapSize.getUnknownGrid()[i];
+			mUResourceBoard[point.x][point.y] = mUnknownsList.get(i);
+			mUProbabilityBoard[point.x][point.y] = mUnknownProbabilitiesList.get(i);
 		}
 	}
 
@@ -286,7 +316,7 @@ public class MapFragment extends Fragment {
 		refreshView();
 	}
 	
-	public MapSize getMapSize() {
+	public CatanMap getMapSize() {
 		return mMapSize;
 	}
 	public MapType getMapType() {
@@ -298,6 +328,8 @@ public class MapFragment extends Fragment {
 	////////////////////
 	@Override
 	public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+		super.onCreateOptionsMenu(menu, inflater);
+		
 		if (Consts.AT_LEAST_HONEYCOMB) {
 			if (showingPlacements()) {
 				inflater.inflate(R.menu.map_placements_hc, menu);
@@ -337,7 +369,12 @@ public class MapFragment extends Fragment {
 			betterSettlersChoice();
 			return true;
 		case R.id.traditional_item:
-			traditionalChoice();
+			// Traditional only makes sense for normal maps
+			if (getMapSize().getName().equals(MapProvider.MapSize.STANDARD.name)
+					|| getMapSize().getName().equals(MapProvider.MapSize.LARGE.name)
+					|| getMapSize().getName().equals(MapProvider.MapSize.XLARGE.name)) {
+				traditionalChoice();
+			}
 			return true;
 		case R.id.random_item:
 			randomChoice();
@@ -351,6 +388,9 @@ public class MapFragment extends Fragment {
 			return true;
 		case R.id.xlarge_item:
 			xlargeChoice();
+			return true;
+		case R.id.heading_for_new_shores_item:
+			headingForNewShoresChoice();
 			return true;
 		case R.id.shuffle_probs_item:
 			// We don't want to shuffle for traditional maps since it doesn't make sense
@@ -397,35 +437,33 @@ public class MapFragment extends Fragment {
 		typeChoice(MapType.RANDOM, Consts.ANALYTICS_CHANGE_MAP_TYPE_FORMAT);
 	}
 	
-	private void sizeChoice(MapSize size, String analyticsKey) {
+	private void sizeChoice(CatanMap size, String analyticsKey) {
 		if (mMapSize != size) {
 			mMapSize = size;
 			asyncMapShuffle();
-			((MainActivity) getActivity()).getAnalytics().trackPageView(String.format(analyticsKey, mMapSize));
+			((MainActivity) getActivity()).getAnalytics().trackPageView(String.format(analyticsKey, mMapSize.getName()));
 		}
 	}
 	
 	public void standardChoice() {
-		sizeChoice(MapSize.STANDARD, Consts.ANALYTICS_CHANGE_MAP_SIZE_FORMAT);
+		sizeChoice(getMapProvider().getMap(MapSize.STANDARD), Consts.ANALYTICS_CHANGE_MAP_SIZE_FORMAT);
 	}
 	
 	public void largeChoice() {
-		sizeChoice(MapSize.LARGE, Consts.ANALYTICS_CHANGE_MAP_SIZE_FORMAT);
+		sizeChoice(getMapProvider().getMap(MapSize.LARGE), Consts.ANALYTICS_CHANGE_MAP_SIZE_FORMAT);
 	}
 	
 	public void xlargeChoice() {
-		sizeChoice(MapSize.XLARGE, Consts.ANALYTICS_CHANGE_MAP_SIZE_FORMAT);
+		sizeChoice(getMapProvider().getMap(MapSize.XLARGE), Consts.ANALYTICS_CHANGE_MAP_SIZE_FORMAT);
 	}
 	
-	public void europeChoice() {
-		sizeChoice(MapSize.EUROPE, Consts.ANALYTICS_CHANGE_MAP_SIZE_FORMAT);
+	public void headingForNewShoresChoice() {
+		sizeChoice(getMapProvider().getMap(MapSize.HEADING_FOR_NEW_SHORES), Consts.ANALYTICS_CHANGE_MAP_SIZE_FORMAT);
 	}
 	
 	public void togglePlacements(boolean on) {
 		if (on) {
 			((MainActivity) getActivity()).getAnalytics().trackPageView(Consts.ANALYTICS_USE_PLACEMENTS);
-			System.out.println("XXX");
-			System.out.println("   XXX");
 			if (mPlacementBookmark < 0) {
 				mPlacementBookmark = 0;
 			}
@@ -433,5 +471,9 @@ public class MapFragment extends Fragment {
 			mPlacementBookmark = -1;
 		}
 		refreshView();
+	}
+	
+	private MapProvider getMapProvider() {
+		return ((MainActivity) getActivity()).getMapProvider();
 	}
 }

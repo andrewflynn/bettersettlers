@@ -10,7 +10,8 @@ import com.nut.bettersettlers.R;
 import com.nut.bettersettlers.fragment.MapFragment;
 
 public class MapSizeDialogFragment extends DialogFragment {
-	private static final String[] SIZES = {"Standard (3-4 people)", "Large (5 people)", "X-Large (6 people)"};
+	private static final String[] SIZES = {"Standard (3-4 people)", "Large (5 people)", "X-Large (6 people)",
+		"Heading for New Shores" };
 	private static final String SELECTED_KEY = "selected";
 	
 	public static MapSizeDialogFragment newInstance(int selected) {
@@ -51,7 +52,7 @@ public class MapSizeDialogFragment extends DialogFragment {
 				mapFragment.xlargeChoice();
 				break;
 			case 3:
-				mapFragment.europeChoice();
+				mapFragment.headingForNewShoresChoice();
 				break;
 			default:
 				break;

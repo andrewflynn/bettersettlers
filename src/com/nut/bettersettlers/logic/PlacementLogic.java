@@ -1,5 +1,7 @@
 package com.nut.bettersettlers.logic;
 
+import static com.nut.bettersettlers.data.MapConsts.PROBABILITY_MAPPING;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -8,12 +10,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import android.util.Log;
+import com.nut.bettersettlers.data.CatanMap;
+import com.nut.bettersettlers.data.MapConsts.Harbor;
+import com.nut.bettersettlers.data.MapConsts.Resource;
 
-import com.nut.bettersettlers.data.MapSpecs;
-import com.nut.bettersettlers.data.MapSpecs.Harbor;
-import com.nut.bettersettlers.data.MapSpecs.MapSize;
-import com.nut.bettersettlers.data.MapSpecs.Resource;
 
 /**
  * [][][] Single placement
@@ -87,7 +87,7 @@ public class PlacementLogic {
 	 * @param harbors The list of ordered harbors.
 	 * @return A list of best intersections
 	 */	
-	public static LinkedHashMap<Integer, List<String>> getBestPlacements(MapSize currentMap, int n,
+	public static LinkedHashMap<Integer, List<String>> getBestPlacements(CatanMap currentMap, int n,
 			ArrayList<Resource> resources, ArrayList<Integer> probs, ArrayList<Harbor> harbors) {
 		LinkedHashMap<Integer, List<String>> initial =
 			getAllBestPlacements(currentMap, resources, probs, harbors);
@@ -104,7 +104,7 @@ public class PlacementLogic {
 		return set;
 	}
 
-	private static LinkedHashMap<Integer, List<String>> getAllBestPlacements(MapSize currentMap,
+	private static LinkedHashMap<Integer, List<String>> getAllBestPlacements(CatanMap currentMap,
 			ArrayList<Resource> resources, ArrayList<Integer> probs, ArrayList<Harbor> harbors) {
 		LinkedHashMap<Integer, List<String>> set = new LinkedHashMap<Integer, List<String>>();
 		Map<Integer, Integer> sums = new HashMap<Integer, Integer>();
@@ -218,7 +218,7 @@ public class PlacementLogic {
 	 * @param probs The list of ordered probabilities
 	 * @return A list of indexes mapped to the resource with the least probability
 	 */
-	private static Map<Integer, Integer> getVarietyIndexes(MapSize currentMap,
+	private static Map<Integer, Integer> getVarietyIndexes(CatanMap currentMap,
 			ArrayList<Resource> resources,	ArrayList<Integer> probs) {
 		Map<Integer, Integer> set = new HashMap<Integer, Integer>();
 
@@ -246,8 +246,8 @@ public class PlacementLogic {
 					containsDuplicates = true;
 					break;
 				} else {
-					if (MapSpecs.PROBABILITY_MAPPING[prob] < lowestProb) {
-						lowestProb = MapSpecs.PROBABILITY_MAPPING[prob];
+					if (prob >= 0 && PROBABILITY_MAPPING[prob] < lowestProb) {
+						lowestProb = PROBABILITY_MAPPING[prob];
 					}
 					seen.add(resources.get(trip));
 				}
@@ -261,7 +261,7 @@ public class PlacementLogic {
 		return set;
 	}
 
-	private static Map<Integer, Integer> getRoadBuilder(MapSize currentMap, int n,
+	private static Map<Integer, Integer> getRoadBuilder(CatanMap currentMap, int n,
 			ArrayList<Integer> probs, ArrayList<Resource> resources) {
 		ArrayList<Resource> goal = new ArrayList<Resource>();
 		goal.add(Resource.WOOD);
@@ -270,7 +270,7 @@ public class PlacementLogic {
 		return getGoodCombinationProbabilities(currentMap, n, probs, resources, goal);
 	}
 
-	private static Map<Integer, Integer> getCityBuilder(MapSize currentMap, int n,
+	private static Map<Integer, Integer> getCityBuilder(CatanMap currentMap, int n,
 			ArrayList<Integer> probs, ArrayList<Resource> resources) {
 		ArrayList<Resource> goal = new ArrayList<Resource>();
 		goal.add(Resource.ROCK);
@@ -279,7 +279,7 @@ public class PlacementLogic {
 		return getGoodCombinationProbabilities(currentMap, n, probs, resources, goal);
 	}
 
-	private static Map<Integer, Integer> getDevCardBuilder(MapSize currentMap, int n,
+	private static Map<Integer, Integer> getDevCardBuilder(CatanMap currentMap, int n,
 			ArrayList<Integer> probs, ArrayList<Resource> resources) {
 		ArrayList<Resource> goal = new ArrayList<Resource>();
 		goal.add(Resource.ROCK);
@@ -301,7 +301,7 @@ public class PlacementLogic {
 	 * @param goal The resources needed for this good combination.
 	 * @return A list of indexes to the sum of those resources
 	 */
-	private static Map<Integer, Integer> getGoodCombinationProbabilities(MapSize currentMap, int n,
+	private static Map<Integer, Integer> getGoodCombinationProbabilities(CatanMap currentMap, int n,
 			ArrayList<Integer> probs, ArrayList<Resource> resources, ArrayList<Resource> goal) {
 		Map<Integer, Integer> set = new HashMap<Integer, Integer>();
 
@@ -318,10 +318,11 @@ public class PlacementLogic {
 				Resource neighborResource = resources.get(trip);
 				int neighborProb = probs.get(trip);
 
-				if (resourceSums.containsKey(resources.get(trip))) {
+				if (resourceSums.containsKey(resources.get(trip)) && neighborProb >= 0) {
+					// Skip no prob resources
 					resourceSums.put(neighborResource,
-							resourceSums.get(neighborResource) + MapSpecs.PROBABILITY_MAPPING[neighborProb]);
-					totalSum += MapSpecs.PROBABILITY_MAPPING[neighborProb];
+							resourceSums.get(neighborResource) + PROBABILITY_MAPPING[neighborProb]);
+					totalSum += PROBABILITY_MAPPING[neighborProb];
 				}
 			}
 
@@ -352,7 +353,7 @@ public class PlacementLogic {
 	 * @param ninja Option as to whether to ignore intersections with 6/8s.
 	 * @return A map of indexes to their sum of dots
 	 */
-	private static Map<Integer, Integer> getHighProbabilities(MapSize currentMap, int n,
+	private static Map<Integer, Integer> getHighProbabilities(CatanMap currentMap, int n,
 			ArrayList<Integer> probs, boolean ninja) {
 		Map<Integer, Integer> set = new HashMap<Integer, Integer>();
 
@@ -362,7 +363,7 @@ public class PlacementLogic {
 				boolean validTarget = true;
 				for (int trip : triplet) {
 					// Ignore 6/8s
-					if (MapSpecs.PROBABILITY_MAPPING[probs.get(trip)] == 5) {
+					if (probs.get(trip) >= 0 && PROBABILITY_MAPPING[probs.get(trip)] == 5) {
 						validTarget = false;
 						break;
 					}
@@ -374,7 +375,10 @@ public class PlacementLogic {
 
 			int sum = 0;
 			for (int trip : triplet) {
-				sum += MapSpecs.PROBABILITY_MAPPING[probs.get(trip)];
+				// Skip no prob resources
+				if (probs.get(trip) >= 0) {
+					sum += PROBABILITY_MAPPING[probs.get(trip)];
+				}
 			}
 
 			if (sum >= n) {
@@ -396,7 +400,7 @@ public class PlacementLogic {
 	 * @param harbors The list of ordered harbors
 	 * @return A map of indexes to their number of dots
 	 */
-	private static Map<Integer, Integer> getTraderPlacements(MapSize currentMap, int n,
+	private static Map<Integer, Integer> getTraderPlacements(CatanMap currentMap, int n,
 			ArrayList<Integer> probs, ArrayList<Resource> resources, ArrayList<Harbor> harbors) {
 		Map<Integer, Integer> set = new HashMap<Integer, Integer>();
 
@@ -419,7 +423,11 @@ public class PlacementLogic {
 			//	continue; // We only want harbors with two resources
 			//}
 			for (int landIndex : landIndexes) {
-				landSum += MapSpecs.PROBABILITY_MAPPING[probs.get(landIndex)];
+				// Skip no prob resources
+				if (probs.get(landIndex) < 0) {
+					continue;
+				}
+				landSum += PROBABILITY_MAPPING[probs.get(landIndex)];
 			}
 			if (landSum >= n) {
 				set.put(i, landSum);
@@ -440,7 +448,7 @@ public class PlacementLogic {
 	 * @param harbors The list of ordered harbors
 	 * @return A map of indexes to their number of dots
 	 */
-	private static Map<Integer, Integer> getFactoryPlacements(MapSize currentMap, int n,
+	private static Map<Integer, Integer> getFactoryPlacements(CatanMap currentMap, int n,
 			ArrayList<Integer> probs, ArrayList<Resource> resources, ArrayList<Harbor> harbors) {
 		Map<Integer, Integer> set = new HashMap<Integer, Integer>();
 
@@ -463,8 +471,12 @@ public class PlacementLogic {
 			//	continue; // We only want harbors with two resources
 			//}
 			for (int landIndex : landIndexes) {
+				// Skip no prob resources
+				if (probs.get(landIndex) < 0) {
+					continue;
+				}
 				Resource landResource = resources.get(landIndex);
-				int landProb = MapSpecs.PROBABILITY_MAPPING[probs.get(landIndex)];
+				int landProb = PROBABILITY_MAPPING[probs.get(landIndex)];
 
 				if (landResource == harborResource) {
 					landSum += landProb;
@@ -489,13 +501,17 @@ public class PlacementLogic {
 	 * @param resources The list of ordered resources
 	 * @return A map of indexes to their percentage
 	 */
-	private static Map<Integer, Integer> getRareResources(MapSize currentMap, int n,
+	private static Map<Integer, Integer> getRareResources(CatanMap currentMap, int n,
 			ArrayList<Integer> probs, ArrayList<Resource> resources) {
 		Map<Integer, Integer> set = new HashMap<Integer, Integer>();
 
 		Map<Resource, Integer> sums = new HashMap<Resource, Integer>();
 		for (int i = 0; i < probs.size(); i++) {
-			int prob = MapSpecs.PROBABILITY_MAPPING[probs.get(i)];
+			// Skip no prob resources
+			if (probs.get(i) < 0) {
+				continue;
+			}
+			int prob = PROBABILITY_MAPPING[probs.get(i)];
 			Resource res = resources.get(i);
 
 			if (sums.get(res) == null) {
@@ -505,7 +521,11 @@ public class PlacementLogic {
 		}
 
 		for (int i = 0; i < probs.size(); i++) {
-			int prob = MapSpecs.PROBABILITY_MAPPING[probs.get(i)];
+			// Skip no prob resources
+			if (probs.get(i) < 0) {
+				continue;
+			}
+			int prob = PROBABILITY_MAPPING[probs.get(i)];
 			Resource res = resources.get(i);
 
 			if (res == Resource.DESERT) {
