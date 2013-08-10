@@ -4,6 +4,7 @@ import static com.nut.bettersettlers.data.MapConsts.BOARD_RANGE_X;
 import static com.nut.bettersettlers.data.MapConsts.BOARD_RANGE_Y;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
 
@@ -295,7 +296,7 @@ public class MapFragment extends Fragment {
 
 	private void fillPlacements() {
 		mPlacementList = PlacementLogic.getBestPlacements(mMapSize, 0 /* all */, mResourceList, mProbabilityList, mHarborList);
-		//Log.i(X, "mPlacementList: " + mPlacementList);
+		Log.i(X, "mPlacementList: " + mPlacementList);
 		mOrderedPlacementList.clear();
 		for (int key : mPlacementList.keySet()) {
 			mOrderedPlacementList.add(key);

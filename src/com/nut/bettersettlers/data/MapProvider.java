@@ -8,13 +8,14 @@ import android.content.Context;
 import com.nut.bettersettlers.R;
 
 public class MapProvider {
+	private final Context mContext;
 	private final Map<MapSize, CatanMap> maps;
 	
 	public enum MapSize {
 		STANDARD(R.raw.standard, "standard"),
 		LARGE(R.raw.large, "large"),
 		XLARGE(R.raw.xlarge, "xlarge"),
-		HEADING_FOR_NEW_SHORES(R.raw.heading_for_new_shores, "heading_for_new_shores");
+		HEADING_FOR_NEW_SHORES(R.raw.heading_for_new_shores, "heading_for_new_shores"),;
 		
 		public final int rawResId;
 		public final String name;
@@ -26,9 +27,11 @@ public class MapProvider {
 	}
 	
 	public MapProvider(Context context) {
+		mContext = context;
+		
 		maps = new HashMap<MapSize, CatanMap>();
 		for (MapSize size : MapSize.values()) {
-			maps.put(size, new JsonCatanMap(context.getResources().openRawResource(size.rawResId)));
+			maps.put(size, new JsonCatanMap(mContext.getResources().openRawResource(size.rawResId)));
 		}
 	}
 	
@@ -43,5 +46,9 @@ public class MapProvider {
 			}
 		}
 		return null;
+	}
+	
+	public void refreshMap(MapSize size) {
+		maps.put(size, new JsonCatanMap(mContext.getResources().openRawResource(size.rawResId)));
 	}
 }
