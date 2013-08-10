@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:layout_width="fill_parent"
+              android:layout_height="fill_parent"
+              android:orientation="vertical"
+              android:background="#FFFFFFFF" >
+              <!--  android:background="@drawable/icon" -->
+    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:layout_width="fill_parent" 
+              android:layout_height="wrap_content" 
+              android:gravity="center"
+              android:orientation="vertical"
+              >
+        <ImageView android:id="@+id/image"
+                   android:layout_width="wrap_content"
+                   android:layout_height="wrap_content"
+                   android:src="@drawable/icon"
+                   />
+        <ImageView android:id="@+id/generateImage"
+                   android:layout_width="wrap_content"
+                   android:layout_height="wrap_content"
+                   android:src="@drawable/generate"
+                   android:onClick="resetContentViewNoRefresh" />
+        <ImageView android:id="@+id/mapSize"
+                   android:layout_width="wrap_content"
+                   android:layout_height="wrap_content"
+                   android:src="@drawable/map_size"
+                   android:onClick="pickSize" />
+        <ImageView android:id="@+id/mapType"
+                   android:layout_width="wrap_content"
+                   android:layout_height="wrap_content"
+                   android:src="@drawable/map_type"
+                   android:onClick="pickType" />
+        <ImageView android:id="@+id/roll_tracker"
+                   android:layout_width="wrap_content"
+                   android:layout_height="wrap_content"
+                   android:src="@drawable/roll_tracker"
+                   android:onClick="rollTrack" />
+        <ImageView android:id="@+id/placements"
+                   android:layout_width="wrap_content"
+                   android:layout_height="wrap_content"
+                   android:src="@drawable/placements"
+                   android:onClick="placementChoice" />
+        <ImageView android:id="@+id/about"
+                   android:layout_width="wrap_content"
+                   android:layout_height="wrap_content"
+                   android:src="@drawable/about"
+                   android:onClick="about" />
+   </LinearLayout>
+</LinearLayout>

@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:orientation="vertical"
+              android:layout_width="fill_parent"
+              android:layout_height="fill_parent"
+              android:background="#FFFFFFFF"
+              >
+    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android" android:gravity="center" android:orientation="horizontal" android:layout_width="wrap_content" android:layout_height="wrap_content">
+	    <ImageView android:id="@+id/reset" android:layout_width="wrap_content" android:layout_height="wrap_content" android:src="@drawable/reset" android:padding="5dp" android:clickable="true" android:onClick="areYouSure" />
+	    <ImageView android:id="@+id/undo" android:layout_width="wrap_content" android:layout_height="wrap_content" android:src="@drawable/undo" android:padding="5dp" android:clickable="true" android:onClick="undoGraph" />
+	    
+        <TextView android:id="@+id/last_rolls_text" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textColor="#000" />
+    </LinearLayout><LinearLayout xmlns:android="http://schemas.android.com/apk/res/android" android:orientation="horizontal" android:layout_width="wrap_content" android:layout_height="wrap_content">
+            <com.nut.bettersettlers.GraphView android:id="@+id/graph_view" android:layout_width="@dimen/graph_width" android:layout_height="@dimen/graph_height" />
+	        
+        </LinearLayout>
+    <LinearLayout android:id="@+id/LinearLayout02" android:layout_width="wrap_content" android:layout_height="wrap_content" android:orientation="horizontal"><LinearLayout android:id="@+id/LinearLayout03" android:layout_width="wrap_content" android:layout_height="wrap_content" android:orientation="vertical"><LinearLayout xmlns:android="http://schemas.android.com/apk/res/android" android:orientation="horizontal" android:layout_width="wrap_content" android:layout_height="wrap_content">
+	        <ImageView android:id="@+id/graph_button_2" android:layout_width="fill_parent" android:layout_height="fill_parent" android:onClick="incrementGraph" android:longClickable="true" android:src="@drawable/two" />
+	        <ImageView android:id="@+id/graph_button_3" android:layout_width="fill_parent" android:layout_height="fill_parent" android:onClick="incrementGraph" android:longClickable="true" android:src="@drawable/three" />
+	        <ImageView android:id="@+id/graph_button_4" android:layout_width="fill_parent" android:layout_height="fill_parent" android:onClick="incrementGraph" android:longClickable="true" android:src="@drawable/four" />
+	        <ImageView android:id="@+id/graph_button_5" android:layout_width="fill_parent" android:layout_height="fill_parent" android:onClick="incrementGraph" android:longClickable="true" android:src="@drawable/five" />
+	        <ImageView android:id="@+id/graph_button_6" android:layout_width="fill_parent" android:layout_height="fill_parent" android:onClick="incrementGraph" android:longClickable="true" android:src="@drawable/six" />
+	        
+        </LinearLayout>
+    <LinearLayout android:id="@+id/LinearLayout01" android:layout_width="wrap_content" android:layout_height="wrap_content" android:orientation="horizontal">
+            <ImageView android:id="@+id/graph_button_12" android:layout_width="fill_parent" android:paddingTop="8dp" android:layout_height="fill_parent" android:onClick="incrementGraph" android:longClickable="true" android:src="@drawable/twelve" />
+            <ImageView android:id="@+id/graph_button_11" android:layout_width="fill_parent" android:paddingTop="8dp" android:layout_height="fill_parent" android:onClick="incrementGraph" android:longClickable="true" android:src="@drawable/eleven" />
+            <ImageView android:id="@+id/graph_button_10" android:layout_width="fill_parent" android:paddingTop="8dp" android:layout_height="fill_parent" android:onClick="incrementGraph" android:longClickable="true" android:src="@drawable/ten" />
+            <ImageView android:id="@+id/graph_button_9" android:layout_width="fill_parent" android:paddingTop="8dp" android:layout_height="fill_parent" android:onClick="incrementGraph" android:longClickable="true" android:src="@drawable/nine" />
+            <ImageView android:id="@+id/graph_button_8" android:layout_width="fill_parent" android:paddingTop="8dp" android:layout_height="fill_parent" android:onClick="incrementGraph" android:longClickable="true" android:src="@drawable/eight" />
+
+        </LinearLayout>
+    </LinearLayout>
+            <ImageView android:id="@+id/graph_button_7" android:layout_width="fill_parent" android:onClick="incrementGraph" android:longClickable="true" android:layout_height="fill_parent" android:src="@drawable/seven" />
+</LinearLayout>
+</LinearLayout>
