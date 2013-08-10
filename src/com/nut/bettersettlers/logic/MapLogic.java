@@ -9,6 +9,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 
+import android.graphics.Point;
+import android.util.Log;
+
 import com.nut.bettersettlers.data.CatanMap;
 import com.nut.bettersettlers.data.MapConsts.Harbor;
 import com.nut.bettersettlers.data.MapConsts.MapType;
@@ -502,6 +505,14 @@ public class MapLogic {
 					set.add(Resource.DESERT);
 					placedRecently = true;
 					continue;
+				} else if (currentMap.getLandGridResources()[nextIndex] != null) {
+					nextResource = currentMap.getLandGridResources()[nextIndex];
+					// If we have an assigned resource, use it
+					set.add(nextResource);
+					resourceMap.get(nextResource).add(nextProb);
+					avail.remove(nextResource);
+					placedRecently = true;
+					continue;
 				} else {
 					nextResource = avail.remove(RAND.nextInt(avail.size()));
 				}
@@ -526,22 +537,24 @@ public class MapLogic {
 				}
 				
 				// Check neighbors for same resource.
-				for (int neighbor : currentMap.getLandNeighbors()[nextIndex]) {
-					//Log.i("XXX XXX XXX", "    " + neighbor);
-					if (neighbor >= set.size()) {
-						// Do nothing, it is not yet occupied
-					} else {
-						if (set.get(neighbor) == nextResource) {
-							canPlaceHere = false;
-							break;
+				if (!currentMap.getName().equals("the_pirate_islands")) {
+					for (int neighbor : currentMap.getLandNeighbors()[nextIndex]) {
+						//Log.i("XXX XXX XXX", "    " + neighbor);
+						if (neighbor >= set.size()) {
+							// Do nothing, it is not yet occupied
 						} else {
-							// Do nothing, at least this neighbor isn't the same
+							if (set.get(neighbor) == nextResource) {
+								canPlaceHere = false;
+								break;
+							} else {
+								// Do nothing, at least this neighbor isn't the same
+							}
 						}
 					}
 				}
 				
 				// If this number is already used by the same resource
-				if (resourceMap.get(nextResource).contains(nextProb)) {
+				if (resourceMap.get(nextResource).contains(nextProb) && !currentMap.getName().equals("the_pirate_islands")) {
 					canPlaceHere = false;
 				}
 				
@@ -685,12 +698,17 @@ public class MapLogic {
 				
 				int nextResourceIndex = RAND.nextInt(resources.size());
 				if (coinFlip) {
-					if (currentMap.getWaterNeighbors()[pos].length > 1) {
-						harbors.add(new Harbor(pos, resources.remove(nextResourceIndex),
-								currentMap.getWaterNeighbors()[pos][RAND.nextInt(2)]));
+					// no land around it
+					if (currentMap.getWaterNeighbors()[pos] == null) {
+						harbors.add(new Harbor(pos, Resource.WATER, -1));
 					} else {
-						harbors.add(new Harbor(pos, resources.remove(nextResourceIndex),
-								currentMap.getWaterNeighbors()[pos][0]));
+						if (currentMap.getWaterNeighbors()[pos].length > 1) {
+							harbors.add(new Harbor(pos, resources.remove(nextResourceIndex),
+									currentMap.getWaterNeighbors()[pos][RAND.nextInt(2)]));
+						} else {
+							harbors.add(new Harbor(pos, resources.remove(nextResourceIndex),
+									currentMap.getWaterNeighbors()[pos][0]));
+						}
 					}
 					pos++;
 
@@ -698,22 +716,37 @@ public class MapLogic {
 						break;
 					}
 
-					harbors.add(new Harbor(pos, Resource.WATER, currentMap.getWaterNeighbors()[pos][0]));
+					// no land around it
+					if (currentMap.getWaterNeighbors()[pos] == null) {
+						harbors.add(new Harbor(pos, Resource.WATER, -1));
+					} else {
+						harbors.add(new Harbor(pos, Resource.WATER, currentMap.getWaterNeighbors()[pos][0]));
+					}
 					pos++;
 				} else {
-					harbors.add(new Harbor(pos, Resource.WATER, currentMap.getWaterNeighbors()[pos][0]));
+					// no land around it
+					if (currentMap.getWaterNeighbors()[pos] == null) {
+						harbors.add(new Harbor(pos, Resource.WATER, -1));
+					} else {
+						harbors.add(new Harbor(pos, Resource.WATER, currentMap.getWaterNeighbors()[pos][0]));
+					}
 					pos++;
 
 					if (harbors.size() >= currentMap.getWaterGrid().length) {
 						break;
 					}
 
-					if (currentMap.getWaterNeighbors()[pos].length > 1) {
-						harbors.add(new Harbor(pos, resources.remove(nextResourceIndex),
-								currentMap.getWaterNeighbors()[pos][RAND.nextInt(2)]));
+					// no land around it
+					if (currentMap.getWaterNeighbors()[pos] == null) {
+						harbors.add(new Harbor(pos, Resource.WATER, -1));
 					} else {
-						harbors.add(new Harbor(pos, resources.remove(nextResourceIndex),
-								currentMap.getWaterNeighbors()[pos][0]));
+						if (currentMap.getWaterNeighbors()[pos].length > 1) {
+							harbors.add(new Harbor(pos, resources.remove(nextResourceIndex),
+									currentMap.getWaterNeighbors()[pos][RAND.nextInt(2)]));
+						} else {
+							harbors.add(new Harbor(pos, resources.remove(nextResourceIndex),
+									currentMap.getWaterNeighbors()[pos][0]));
+						}
 					}
 					pos++;
 				}
@@ -857,7 +890,9 @@ public class MapLogic {
 	private static boolean noDuplicates(CatanMap currentMap, ArrayList<Integer> numbers) {
 		for (int i = 0; i < numbers.size(); i++) {
 			int num = numbers.remove(i);
-			if (numbers.contains(num) && !(currentMap.getName().equals("through_the_desert") && num == 0)) {
+			if (numbers.contains(num)
+					&& !(currentMap.getName().equals("through_the_desert") && num == 0)
+					&& !(currentMap.getName().equals("the_wonders_of_catan") && num == 0)) {
 				// Be sure to put back at the proper place in the array so
 				// that we actually go through all elements
 				numbers.add(i, num);

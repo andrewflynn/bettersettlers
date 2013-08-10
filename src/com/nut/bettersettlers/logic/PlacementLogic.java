@@ -223,6 +223,10 @@ public class PlacementLogic {
 		Map<Integer, Integer> set = new HashMap<Integer, Integer>();
 
 		for (int i = 0; i < currentMap.getLandIntersections().length; i++) {
+			if (currentMap.getPlacementIndexes()[i] == null || currentMap.getPlacementIndexes()[i].length == 0) {
+				continue;
+			}
+			
 			int[] triplet = currentMap.getLandIntersections()[i];
 			// Don't count shoreline
 			if (triplet.length < 3) {
@@ -306,6 +310,10 @@ public class PlacementLogic {
 		Map<Integer, Integer> set = new HashMap<Integer, Integer>();
 
 		for (int i = 0; i < currentMap.getLandIntersections().length; i++) {
+			if (currentMap.getPlacementIndexes()[i] == null || currentMap.getPlacementIndexes()[i].length == 0) {
+				continue;
+			}
+			
 			int totalSum = 0;
 			int[] triplet = currentMap.getLandIntersections()[i];
 
@@ -358,6 +366,10 @@ public class PlacementLogic {
 		Map<Integer, Integer> set = new HashMap<Integer, Integer>();
 
 		for (int i = 0; i < currentMap.getLandIntersections().length; i++) {
+			if (currentMap.getPlacementIndexes()[i] == null || currentMap.getPlacementIndexes()[i].length == 0) {
+				continue;
+			}
+			
 			int[] triplet = currentMap.getLandIntersections()[i];
 			if (ninja) {
 				boolean validTarget = true;
@@ -407,6 +419,10 @@ public class PlacementLogic {
 		// Find out how many land only intersections first
 		int landOnly = 0;		
 		for (int i = 0; i < currentMap.getLandIntersections().length; i++) {
+			if (currentMap.getPlacementIndexes()[i] == null || currentMap.getPlacementIndexes()[i].length == 0) {
+				continue;
+			}
+			
 			int[] landIntersections = currentMap.getLandIntersections()[i];
 			if (landIntersections.length == 3) {
 				landOnly = i + 1; // 0 indexing
@@ -455,6 +471,10 @@ public class PlacementLogic {
 		// Find out how many land only intersections first
 		int landOnly = 0;		
 		for (int i = 0; i < currentMap.getLandIntersections().length; i++) {
+			if (currentMap.getPlacementIndexes()[i] == null || currentMap.getPlacementIndexes()[i].length == 0) {
+				continue;
+			}
+			
 			int[] landIntersections = currentMap.getLandIntersections()[i];
 			if (landIntersections.length == 3) {
 				landOnly = i + 1; // 0 indexing
@@ -535,7 +555,9 @@ public class PlacementLogic {
 			int percent = prob * 100 / sums.get(res);
 			if (percent >= n) {
 				for (int tripletIndex : currentMap.getLandIntersectionIndexes()[i]) {
-					set.put(tripletIndex, percent);
+					if (currentMap.getPlacementIndexes()[tripletIndex] != null && currentMap.getPlacementIndexes()[tripletIndex].length != 0) {
+						set.put(tripletIndex, percent);
+					}
 				}
 			}			
 		}
