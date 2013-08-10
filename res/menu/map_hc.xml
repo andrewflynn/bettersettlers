@@ -1,7 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
+	<item android:id="@+id/refresh_item"
+		android:title="@string/refresh"
+		android:icon="@drawable/menu_refresh"
+		android:showAsAction="ifRoom" />
 	<item android:id="@+id/map_size_item"
-		android:title="@string/map_size" >
+		android:title="@string/map_size"
+		android:icon="@drawable/menu_map_size"
+		android:showAsAction="ifRoom" >
 		<menu android:id="@+id/map_size_submenu"
 			android:title="@string/map_size"
 			android:icon="@drawable/icon" >
@@ -17,7 +23,9 @@
 		</menu>
 	</item>
 	<item android:id="@+id/map_type_item"
-		android:title="@string/map_type" >
+		android:title="@string/map_type"
+		android:icon="@drawable/menu_map_type"
+		android:showAsAction="ifRoom" >
 		<menu android:id="@+id/map_type_submenu"
 			android:title="@string/map_type"
 			android:icon="@drawable/icon" >
@@ -32,14 +40,10 @@
 			</group>
 		</menu>
 	</item>
-	<item android:id="@+id/placements_item"
-		android:title="@string/placements_off" />
-	<item android:id="@+id/shuffle_probs_item"
-		android:title="@string/shuffle_probabilities" />
 	<item android:id="@+id/shuffle_harbors_item"
 		android:title="@string/shuffle_harbors" />
+	<item android:id="@+id/shuffle_probs_item"
+		android:title="@string/shuffle_probabilities" />
 	<item android:id="@+id/about_item"
 		android:title="@string/about" />
-	<item android:id="@+id/legal_item"
-		android:title="@string/legal" />
 </menu>

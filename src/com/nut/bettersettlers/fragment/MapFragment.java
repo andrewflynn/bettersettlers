@@ -4,23 +4,16 @@ import static com.nut.bettersettlers.data.MapSpecs.BOARD_RANGE_X;
 import static com.nut.bettersettlers.data.MapSpecs.BOARD_RANGE_Y;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 
-import android.app.AlertDialog;
-import android.app.Dialog;
-import android.app.DialogFragment;
-import android.app.Fragment;
 import android.content.Context;
-import android.content.DialogInterface;
-import android.content.DialogInterface.OnClickListener;
 import android.content.SharedPreferences;
 import android.graphics.Point;
 import android.os.AsyncTask;
-import android.os.Build;
 import android.os.Bundle;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentTransaction;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -28,16 +21,15 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
 
 import com.google.android.apps.analytics.GoogleAnalyticsTracker;
 import com.nut.bettersettlers.R;
+import com.nut.bettersettlers.activity.MainActivity;
 import com.nut.bettersettlers.data.MapSpecs.Harbor;
 import com.nut.bettersettlers.data.MapSpecs.MapSize;
 import com.nut.bettersettlers.data.MapSpecs.MapType;
 import com.nut.bettersettlers.data.MapSpecs.Resource;
 import com.nut.bettersettlers.fragment.dialog.AboutDialogFragment;
-import com.nut.bettersettlers.fragment.dialog.LegalDialogFragment;
 import com.nut.bettersettlers.fragment.dialog.WelcomeDialogFragment;
 import com.nut.bettersettlers.logic.MapLogic;
 import com.nut.bettersettlers.logic.PlacementLogic;
@@ -61,11 +53,6 @@ public class MapFragment extends Fragment {
 	private static final String SHARED_PREFS_SHOWN_WHATS_NEW = "ShownWhatsNewVersion3.0";
 	
 	private MapView mMapView;
-	private ImageView mRefreshIcon;
-	private ImageView mLeftArrowIcon;
-	private ImageView mRightArrowIcon;
-	private DialogFragment mWelcomeDialog;
-	private DialogFragment mAboutDialog;
 
 	private MapSize mMapSize = MapSize.STANDARD;
 	private MapType mMapType = MapType.FAIR;
@@ -78,6 +65,8 @@ public class MapFragment extends Fragment {
 	private LinkedHashMap<Integer, List<String>> mPlacementList = new LinkedHashMap<Integer, List<String>>();
 	private ArrayList<Integer> mOrderedPlacementList = new ArrayList<Integer>();
 	private int mPlacementBookmark = -1;
+	
+	private int mRollTrackerItemId = -1;
 
 	///////////////////////////////
 	// Fragment method overrides //
@@ -87,33 +76,6 @@ public class MapFragment extends Fragment {
 		super.onCreateView(inflater, container, savedInstanceState);
 		View view = inflater.inflate(R.layout.map, container, false);
 		mMapView = (MapView) view.findViewById(R.id.map_view);
-		mRefreshIcon = (ImageView) view.findViewById(R.id.refresh_icon);
-		mRefreshIcon.setOnClickListener(new View.OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				asyncMapShuffle();
-				GoogleAnalyticsTracker.getInstance().trackPageView(Consts.ANALYTICS_SHUFFLE_MAP);
-			}
-		});
-		mLeftArrowIcon = (ImageView) view.findViewById(R.id.left_arrow);;
-		mLeftArrowIcon.setOnClickListener(new View.OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				mPlacementBookmark = mPlacementBookmark == 0 ? 0 : mPlacementBookmark - 1;
-				refreshView();
-			}
-		});
-		mRightArrowIcon = (ImageView) view.findViewById(R.id.right_arrow);;
-		mRightArrowIcon.setOnClickListener(new View.OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				mPlacementBookmark = mPlacementBookmark == mPlacementList.size() - 1 ? mPlacementBookmark : mPlacementBookmark + 1;
-				refreshView();
-			}
-		});
-		
-		mWelcomeDialog = new WelcomeDialogFragment();
-		mAboutDialog = new AboutDialogFragment();
 		
 		return view;
 	}
@@ -148,8 +110,8 @@ public class MapFragment extends Fragment {
 		
 		SharedPreferences prefs = getActivity().getSharedPreferences(SHARED_PREFS_NAME, Context.MODE_PRIVATE);
 		boolean shownWhatsNew = prefs.getBoolean(SHARED_PREFS_SHOWN_WHATS_NEW, false);
-		if (true) {//savedInstanceState == null && !shownWhatsNew) {
-			mWelcomeDialog.show(getFragmentManager(), "WelcomeDialog");
+		if (savedInstanceState == null && !shownWhatsNew) {
+			WelcomeDialogFragment.newInstance().show(getFragmentManager(), "WelcomeDialog");
 			SharedPreferences.Editor prefsEditor = prefs.edit();
 			prefsEditor.putBoolean(SHARED_PREFS_SHOWN_WHATS_NEW, true);
 			prefsEditor.commit();
@@ -196,6 +158,9 @@ public class MapFragment extends Fragment {
 	// Async generate tasks //
 	//////////////////////////
 	public void asyncMapShuffle() {
+		if (getActivity() != null) {
+			((MainActivity) getActivity()).showProgressBar();
+		}
 		new ShuffleMapAsyncTask().execute();
 	}
 	private class ShuffleMapAsyncTask extends AsyncTask<Void, Void, Void> {
@@ -214,6 +179,9 @@ public class MapFragment extends Fragment {
 	}
 
 	public void asyncProbsShuffle() {
+		if (getActivity() != null) {
+			((MainActivity) getActivity()).showProgressBar();
+		}
 		new ShuffleProbabilitiesAsyncTask().execute();
 	}
 	private class ShuffleProbabilitiesAsyncTask extends AsyncTask<Void, Void, Void> {
@@ -230,6 +198,9 @@ public class MapFragment extends Fragment {
 	}
 
 	public void asyncHarborsShuffle() {
+		if (getActivity() != null) {
+			((MainActivity) getActivity()).showProgressBar();
+		}
 		new ShuffleHarborsAsyncTask().execute();
 	}
 	private class ShuffleHarborsAsyncTask extends AsyncTask<Void, Void, Void> {
@@ -265,6 +236,10 @@ public class MapFragment extends Fragment {
 		mMapView.setPlacements(mPlacementList);
 		mMapView.setOrderedPlacements(mOrderedPlacementList);
 		mMapView.invalidate();  // Force refresh
+		
+		if (getActivity() != null) {
+			((MainActivity) getActivity()).killProgressBar();
+		}
 	}
 
 	private void fillResourceProbabilityAndHarbors() {
@@ -290,30 +265,39 @@ public class MapFragment extends Fragment {
 			mOrderedPlacementList.add(key);
 		}
 	}
+	
+	public boolean showingPlacements() {
+		return mPlacementBookmark >= 0;
+	}
+	
+	public void nextPlacement() {
+		mPlacementBookmark = mPlacementBookmark == mPlacementList.size() - 1 ? mPlacementBookmark : mPlacementBookmark + 1;
+		refreshView();
+	}
+	
+	public void prevPlacement() {
+		mPlacementBookmark = mPlacementBookmark == 0 ? 0 : mPlacementBookmark - 1;
+		refreshView();
+	}
+	
+	public MapSize getMapSize() {
+		return mMapSize;
+	}
+	public MapType getMapType() {
+		return mMapType;
+	}
 
 	////////////////////
 	// Menu functions //
 	////////////////////
 	@Override
 	public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-		inflater.inflate(R.menu.map, menu);
-		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
-			// Set up action items for Action Bar
-			menu.findItem(R.id.map_size_item).setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM);
-			menu.findItem(R.id.map_type_item).setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM);
-			menu.findItem(R.id.placements_item).setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM);
-		}
-	}
-	
-	@Override
-	public void onPrepareOptionsMenu(Menu menu) {
-		super.onPrepareOptionsMenu(menu);
-		
-		MenuItem item = menu.findItem(R.id.placements_item);
-		if (mPlacementBookmark < 0) {
-			item.setTitle(getString(R.string.placements_off));
-		} else {
-			item.setTitle(getString(R.string.placements_on));
+		if (Consts.AT_LEAST_HONEYCOMB) {
+			if (showingPlacements()) {
+				inflater.inflate(R.menu.map_placements_hc, menu);
+			} else {
+				inflater.inflate(R.menu.map_hc, menu);
+			}
 		}
 	}
 
@@ -321,66 +305,40 @@ public class MapFragment extends Fragment {
 	public boolean onOptionsItemSelected(MenuItem item) {
 		GoogleAnalyticsTracker analytics = GoogleAnalyticsTracker.getInstance();
 		item.setChecked(true);
+		
+		if (item.getItemId() == mRollTrackerItemId) {
+			FragmentTransaction ft = getFragmentManager().beginTransaction();
+			ft.hide(getFragmentManager().findFragmentById(R.id.map_fragment));
+			ft.show(getFragmentManager().findFragmentById(R.id.graph_fragment));
+			ft.addToBackStack("MapToGraph");
+			ft.commit();
+			return true;
+		}
+		
 		switch (item.getItemId()) {
+		case R.id.refresh_item:
+			asyncMapShuffle();
+			analytics.trackPageView(Consts.ANALYTICS_SHUFFLE_MAP);
+			return true;
 		// MAP TYPE
 		case R.id.better_settlers_item:
-			if (mMapType != MapType.FAIR) {
-				mMapType = MapType.FAIR;
-				asyncMapShuffle();
-				analytics.trackPageView(String.format(Consts.ANALYTICS_CHANGE_MAP_TYPE_FORMAT, mMapType));
-			}
+			betterSettlersChoice();
 			return true;
 		case R.id.traditional_item:
-			if (mMapType != MapType.TRADITIONAL) {
-				mMapType = MapType.TRADITIONAL;
-				asyncMapShuffle();
-				analytics.trackPageView(String.format(Consts.ANALYTICS_CHANGE_MAP_TYPE_FORMAT, mMapType));
-			}
+			traditionalChoice();
 			return true;
 		case R.id.random_item:
-			if (mMapType != MapType.RANDOM) {
-				mMapType = MapType.RANDOM;
-				asyncMapShuffle();
-				analytics.trackPageView(String.format(Consts.ANALYTICS_CHANGE_MAP_TYPE_FORMAT, mMapType));
-			}
+			randomChoice();
 			return true;
 		// MAP SIZE
 		case R.id.standard_item:
-			if (mMapSize != MapSize.STANDARD) {
-				mMapSize = MapSize.STANDARD;
-				asyncMapShuffle();
-				analytics.trackPageView(String.format(Consts.ANALYTICS_CHANGE_MAP_SIZE_FORMAT, mMapSize));
-			}
+			standardChoice();
 			return true;
 		case R.id.large_item:
-			if (mMapSize != MapSize.LARGE) {
-				mMapSize = MapSize.LARGE;
-				asyncMapShuffle();
-				analytics.trackPageView(String.format(Consts.ANALYTICS_CHANGE_MAP_SIZE_FORMAT, mMapSize));
-			}
+			largeChoice();
 			return true;
 		case R.id.xlarge_item:
-			if (mMapSize != MapSize.XLARGE) {
-				mMapSize = MapSize.XLARGE;
-				asyncMapShuffle();
-				analytics.trackPageView(String.format(Consts.ANALYTICS_CHANGE_MAP_SIZE_FORMAT, mMapSize));
-			}
-			return true;
-		// Placements
-		case R.id.placements_item:
-			if (mPlacementBookmark < 0) {
-				item.setTitle(getString(R.string.placements_on));
-				mPlacementBookmark = 0;
-				analytics.trackPageView(Consts.ANALYTICS_USE_PLACEMENTS);
-				mLeftArrowIcon.setVisibility(View.VISIBLE);
-				mRightArrowIcon.setVisibility(View.VISIBLE);
-			} else {
-				item.setTitle(getString(R.string.placements_off));
-				mPlacementBookmark = -1;
-				mLeftArrowIcon.setVisibility(View.GONE);
-				mRightArrowIcon.setVisibility(View.GONE);
-			}
-			refreshView();
+			xlargeChoice();
 			return true;
 		case R.id.shuffle_probs_item:
 			asyncProbsShuffle();
@@ -391,13 +349,66 @@ public class MapFragment extends Fragment {
 			analytics.trackPageView(Consts.ANALYTICS_SHUFFLE_HARBORS);
 			return true;
 		case R.id.about_item:
-			mAboutDialog.show(getFragmentManager(), "AboutDialogFragment");
-			return true;
-		case R.id.legal_item:
-			(new LegalDialogFragment()).show(getFragmentManager(), "LegalDialogFragment");
+			AboutDialogFragment.newInstance().show(getFragmentManager(), "AboutDialogFragment");
 			return true;
 		default:
 			return false;
 		}
+	}
+	
+	private void typeChoice(MapType type, String analyticsKey) {
+		if (mMapType != type) {
+			mMapType = type;
+			asyncMapShuffle();
+			GoogleAnalyticsTracker.getInstance().trackPageView(String.format(analyticsKey, mMapType));
+		}
+	}
+	
+	public void betterSettlersChoice() {
+		typeChoice(MapType.FAIR, Consts.ANALYTICS_CHANGE_MAP_TYPE_FORMAT);
+	}
+	
+	public void traditionalChoice() {
+		typeChoice(MapType.TRADITIONAL, Consts.ANALYTICS_CHANGE_MAP_TYPE_FORMAT);
+	}
+	
+	public void randomChoice() {
+		typeChoice(MapType.RANDOM, Consts.ANALYTICS_CHANGE_MAP_TYPE_FORMAT);
+	}
+	
+	private void sizeChoice(MapSize size, String analyticsKey) {
+		if (mMapSize != size) {
+			mMapSize = size;
+			asyncMapShuffle();
+			GoogleAnalyticsTracker.getInstance().trackPageView(String.format(analyticsKey, mMapSize));
+		}
+	}
+	
+	public void standardChoice() {
+		sizeChoice(MapSize.STANDARD, Consts.ANALYTICS_CHANGE_MAP_SIZE_FORMAT);
+	}
+	
+	public void largeChoice() {
+		sizeChoice(MapSize.LARGE, Consts.ANALYTICS_CHANGE_MAP_SIZE_FORMAT);
+	}
+	
+	public void xlargeChoice() {
+		sizeChoice(MapSize.XLARGE, Consts.ANALYTICS_CHANGE_MAP_SIZE_FORMAT);
+	}
+	
+	public void europeChoice() {
+		sizeChoice(MapSize.EUROPE, Consts.ANALYTICS_CHANGE_MAP_SIZE_FORMAT);
+	}
+	
+	public void togglePlacements(boolean on) {
+		if (on) {
+			GoogleAnalyticsTracker.getInstance().trackPageView(Consts.ANALYTICS_USE_PLACEMENTS);
+			if (mPlacementBookmark < 0) {
+				mPlacementBookmark = 0;
+			}
+		} else {
+			mPlacementBookmark = -1;
+		}
+		refreshView();
 	}
 }

@@ -1,14 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
 	android:id="@+id/main_fragment_container"
 	android:layout_width="match_parent"
-	android:layout_height="match_parent">
+	android:layout_height="match_parent"
+    android:orientation="vertical">
+    <include layout="@layout/actionbar" />
 	<fragment android:id="@+id/map_fragment"
 		android:name="com.nut.bettersettlers.fragment.MapFragment"
 		android:layout_width="match_parent"
-		android:layout_height="match_parent" />
+		android:layout_height="match_parent"
+        android:layout_weight="1" />
 	<fragment android:id="@+id/graph_fragment"
 		android:name="com.nut.bettersettlers.fragment.GraphFragment"
 		android:layout_width="match_parent"
-		android:layout_height="match_parent" />
-</FrameLayout>
+		android:layout_height="match_parent"
+        android:layout_weight="1" />
+</LinearLayout>
