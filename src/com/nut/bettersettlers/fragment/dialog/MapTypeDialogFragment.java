@@ -7,6 +7,7 @@ import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
 
 import com.nut.bettersettlers.R;
+import com.nut.bettersettlers.data.MapProvider;
 import com.nut.bettersettlers.fragment.MapFragment;
 
 public class MapTypeDialogFragment extends DialogFragment {
@@ -45,7 +46,12 @@ public class MapTypeDialogFragment extends DialogFragment {
 				mapFragment.betterSettlersChoice();
 				break;
 			case 1:
-				mapFragment.traditionalChoice();
+				// Traditional only makes sense for normal maps
+				if (mapFragment.getMapSize().getName().equals(MapProvider.MapSize.STANDARD.name)
+						|| mapFragment.getMapSize().getName().equals(MapProvider.MapSize.LARGE.name)
+						|| mapFragment.getMapSize().getName().equals(MapProvider.MapSize.XLARGE.name)) {
+					mapFragment.traditionalChoice();
+				}
 				break;
 			case 2:
 				mapFragment.randomChoice();

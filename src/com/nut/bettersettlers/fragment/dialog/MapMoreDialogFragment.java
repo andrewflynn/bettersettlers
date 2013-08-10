@@ -7,8 +7,7 @@ import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
 
 import com.nut.bettersettlers.R;
-import com.nut.bettersettlers.activity.MainActivity;
-import com.nut.bettersettlers.data.MapSpecs.MapType;
+import com.nut.bettersettlers.data.MapConsts.MapType;
 import com.nut.bettersettlers.fragment.MapFragment;
 
 public class MapMoreDialogFragment extends DialogFragment {

@@ -11,6 +11,7 @@ import android.os.PowerManager;
 import android.os.PowerManager.WakeLock;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentTransaction;
+import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
@@ -19,10 +20,10 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 
 import com.google.android.apps.analytics.GoogleAnalyticsTracker;
-
 import com.nut.bettersettlers.R;
-import com.nut.bettersettlers.data.MapSpecs.MapSize;
-import com.nut.bettersettlers.data.MapSpecs.MapType;
+import com.nut.bettersettlers.data.CatanMap;
+import com.nut.bettersettlers.data.MapConsts.MapType;
+import com.nut.bettersettlers.data.MapProvider;
 import com.nut.bettersettlers.fragment.GraphFragment;
 import com.nut.bettersettlers.fragment.MapFragment;
 import com.nut.bettersettlers.fragment.dialog.GraphMoreDialogFragment;
@@ -42,6 +43,7 @@ public class MainActivity extends FragmentActivity {
 	
 	private MapFragment mMapFragment;
 	private GraphFragment mGraphFragment;
+	private MapProvider mMapProvider;
 	
 	private WakeLock mWakeLock;
 	private GoogleAnalyticsTracker mAnalytics;
@@ -81,7 +83,10 @@ public class MainActivity extends FragmentActivity {
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		
 		setContentView(R.layout.main);
+		
+		mMapProvider = new MapProvider(this);
 		
 		mMapFragment = (MapFragment) getSupportFragmentManager().findFragmentById(R.id.map_fragment);
 		mGraphFragment = (GraphFragment) getSupportFragmentManager().findFragmentById(R.id.graph_fragment);
@@ -360,16 +365,14 @@ public class MainActivity extends FragmentActivity {
     private class MapSizeClickListener implements OnClickListener {
 		@Override
 		public void onClick(View v) {
-			MapSize size = getMapFragment().getMapSize();
+			CatanMap map = getMapFragment().getMapSize();
 			int selected = 0;
-			if (size == MapSize.STANDARD) {
+			if (map.getName() == MapProvider.MapSize.STANDARD.name) {
 				selected = 0;
-			} else if (size == MapSize.LARGE) {
+			} else if (map.getName() == MapProvider.MapSize.LARGE.name) {
 				selected = 1;
-			} else if (size == MapSize.XLARGE) {
+			} else if (map.getName() == MapProvider.MapSize.XLARGE.name) {
 				selected = 2;
-			} else if (size == MapSize.EUROPE) {
-				selected = 3;
 			}
 			MapSizeDialogFragment.newInstance(selected).show(getSupportFragmentManager(), "MapSizeDialogFragment");
 		}
@@ -417,6 +420,10 @@ public class MainActivity extends FragmentActivity {
 		public void onClick(View v) {
 			HelpDialogFragment.newInstance().show(getSupportFragmentManager(), "HelpDialogFragment");
 		}
+    }
+    
+    public MapProvider getMapProvider() {
+    	return mMapProvider;
     }
     
     private MapFragment getMapFragment() {

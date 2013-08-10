@@ -3,6 +3,7 @@ package com.nut.bettersettlers.misc;
 import android.os.Build;
 
 public class Consts {
+	public static final boolean TEST = false;
 	//public static final String ANALYTICS_KEY = "UA-22984277-1"; // PROD
 	public static final String ANALYTICS_KEY = "UA-24622139-1"; // TEST
 	public static final int ANALYTICS_INTERVAL = 10;
