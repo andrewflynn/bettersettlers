@@ -1,112 +1,94 @@
 package com.nut.bettersettlers.fragment.dialog;
 
-import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.Set;
 
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Context;
-import android.content.DialogInterface;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
-import android.util.Pair;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
-import android.widget.CheckedTextView;
+import android.widget.FrameLayout;
+import android.widget.ImageView;
+import android.widget.TextView;
 
 import com.nut.bettersettlers.R;
 import com.nut.bettersettlers.activity.MainActivity;
 import com.nut.bettersettlers.fragment.MapFragment;
+import com.nut.bettersettlers.iab.IabConsts;
 import com.nut.bettersettlers.iab.IabConsts.MapContainer;
 import com.nut.bettersettlers.misc.Consts;
 
 public class SeafarersDialogFragment extends DialogFragment {
-	private static final String UNLOCKED_KEY = "unlocked";
+	private static final String SHARED_PREFS_NAME = "Seafarers";
+	private static final String SHARED_PREFS_SHOWN_HELP = "TheFogIsland";
 	
-	private Set<String> mUnlocked = new HashSet<String>();;
-	
-	public static SeafarersDialogFragment newInstance(Set<String> unlocked) {
-		SeafarersDialogFragment f = new SeafarersDialogFragment();
-		
-		ArrayList<String> unlockedArray = new ArrayList<String>();
-		for (String str : unlocked) {
-			unlockedArray.add(str);
-		}
-		
-		Bundle args = new Bundle();
-		args.putStringArrayList(UNLOCKED_KEY, unlockedArray);
-		f.setArguments(args);
-		
-		return f;
+	public static SeafarersDialogFragment newInstance() {
+		return new SeafarersDialogFragment();
 	}
 	
 	@Override
 	public Dialog onCreateDialog(Bundle savedInstanceState) {
-		if (getArguments() != null) {
-			mUnlocked.addAll(getArguments().getStringArrayList(UNLOCKED_KEY));
-		}
-		
-		SeafarersAdapter adapter = new SeafarersAdapter(getActivity(), R.layout.seafarers_item);
-		for (MapContainer mc : MapContainer.values()) {
-			adapter.add(mc);
-		}
-		
-		return new AlertDialog.Builder(getActivity())
-			.setIcon(R.drawable.icon)
-			.setTitle("Seafarers")
-			.setSingleChoiceItems(adapter, 4, new MapSizeDialogClickListener())
-			.create();
-	}
-	
-	private class SeafarersAdapter extends ArrayAdapter<MapContainer> {
-		public SeafarersAdapter(Context context, int textViewResourceId) {
-			super(context, textViewResourceId);
-		}
-		
-		@Override
-		public View getView(int position, View convertView, ViewGroup parent) {
-			if (convertView == null) {
-				convertView = getActivity().getLayoutInflater().inflate(R.layout.seafarers_item, null);
-			}
-			MapContainer mapContainer = getItem(position);
-			if (mapContainer != null) {
-				CheckedTextView titleTextView = (CheckedTextView) convertView.findViewById(R.id.seafarers_item_title);
-				titleTextView.setText(mapContainer.name);
-				if (!mUnlocked.contains(mapContainer.id)) {
-					titleTextView.setCheckMarkDrawable(R.drawable.lock);
-				} else {
-					titleTextView.setCheckMarkDrawable(android.R.drawable.btn_radio);
-				}
-			}
-			return convertView;
-		}
-	}
-	
-	private class MapSizeDialogClickListener implements DialogInterface.OnClickListener {
-		@Override
-		public void onClick(DialogInterface dialog, int which) {
-			dialog.dismiss();
-			
-			MainActivity mainActivity = (MainActivity) getActivity();
-			MapFragment mapFragment = (MapFragment) mainActivity.getSupportFragmentManager().findFragmentById(R.id.map_fragment);
-			MapContainer mapContainer = MapContainer.values()[which];
+		Context mContext = getActivity().getApplicationContext();
+		LayoutInflater inflater =
+			(LayoutInflater) mContext.getSystemService(Activity.LAYOUT_INFLATER_SERVICE);
+		View layout =
+			inflater.inflate(R.layout.seafarers, (ViewGroup) getActivity().findViewById(R.id.seafarers_root), false);
 
-			// If we need to buy it, buy it
-			//if (!mUnlocked.contains(mapContainer.id)) {
-			//	mainActivity.purchaseItem(mapContainer.productId, mapContainer.id);
-			//	return;
-			//}
-			
-			// Else just show it
-			switch (which) {
-			case 0:
+		final MainActivity mainActivity = (MainActivity) getActivity();
+		final MapFragment mapFragment = (MapFragment) mainActivity.getSupportFragmentManager().findFragmentById(R.id.map_fragment);
+		Set<String> maps = mainActivity.getOwnedMaps();
+
+		ImageView headingForNewShoresButton = (ImageView) layout.findViewById(R.id.heading_for_new_shores_item);
+		headingForNewShoresButton.setImageResource(R.drawable.sea_heading_for_new_shores_button);
+		headingForNewShoresButton.setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View v) {
 				mapFragment.headingForNewShoresChoice();
-				break;
-			default:
-				break;
+				mainActivity.getSupportFragmentManager().popBackStack();
+				mainActivity.getSupportFragmentManager().popBackStack();
 			}
+		});
+		
+		TextView text = (TextView) layout.findViewById(R.id.seafarers_intro);
+		FrameLayout buyAllContainer = (FrameLayout) layout.findViewById(R.id.buy_all_container);
+		ImageView buyAllButton = (ImageView) buyAllContainer.findViewById(R.id.buy_all_button);
+		if (containsAll(maps)) {
+			// We have them all, make it invisible (and the text)
+			buyAllContainer.setVisibility(View.GONE);
+			text.setVisibility(View.GONE);
+		} else {
+			buyAllContainer.setVisibility(View.VISIBLE);
+			text.setVisibility(View.VISIBLE);
+			buyAllButton.setOnClickListener(new OnClickListener() {
+				@Override
+				public void onClick(View v) {
+					mainActivity.purchaseItem(IabConsts.BUY_ALL);
+					mainActivity.getSupportFragmentManager().popBackStack();
+					mainActivity.getSupportFragmentManager().popBackStack();
+					mainActivity.getAnalytics().trackPageView(
+							String.format(Consts.ANALYTICS_SEAFARERS_PURCHASE_FORMAT, IabConsts.BUY_ALL));
+				}
+			});
 		}
+
+		AlertDialog ret = new AlertDialog.Builder(mainActivity)
+			.create();
+		ret.setView(layout, 0, 0, 0, 5); // Remove top padding
+		ret.getWindow().getAttributes().windowAnimations = R.style.SlideDialogAnimation;
+		return ret;
+	}
+	
+	public boolean contains(Set<String> maps, String test) {
+		return containsAll(maps) || maps.contains(test);
+	}
+	
+	public boolean containsAll(Set<String> maps) {
+		return maps.contains(IabConsts.BUY_ALL) || maps.size() == MapContainer.values().length;
 	}
 }

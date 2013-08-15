@@ -11,6 +11,7 @@ import com.nut.bettersettlers.data.MapConsts.Resource;
 
 public abstract class CatanMap {
 	private String name;
+	private String title;
 	private int lowResourceNumber;
 	private int highResourceNumber;
 	private int landWaterNumber;
@@ -46,6 +47,14 @@ public abstract class CatanMap {
 	}
 	public void setName(String name) {
 		this.name = name;
+	}
+	
+	/** The display title of this map. */
+	public String getTitle() {
+		return title;
+	}
+	public void setTitle(String title) {
+		this.title = title;
 	}
 
 	/** How many rocks/clays there are available on to distribute. */

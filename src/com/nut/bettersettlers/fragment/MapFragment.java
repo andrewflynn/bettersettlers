@@ -14,15 +14,15 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
-import android.util.Log;
 import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.Animation;
+import android.view.animation.Animation.AnimationListener;
+import android.view.animation.AnimationUtils;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
 
-import com.google.android.apps.analytics.GoogleAnalyticsTracker;
 import com.nut.bettersettlers.R;
 import com.nut.bettersettlers.activity.MainActivity;
 import com.nut.bettersettlers.data.CatanMap;
@@ -31,10 +31,7 @@ import com.nut.bettersettlers.data.MapConsts.MapType;
 import com.nut.bettersettlers.data.MapConsts.Resource;
 import com.nut.bettersettlers.data.MapProvider;
 import com.nut.bettersettlers.data.MapProvider.MapSize;
-import com.nut.bettersettlers.fragment.dialog.AboutDialogFragment;
-import com.nut.bettersettlers.fragment.dialog.RateDialogFragment;
-import com.nut.bettersettlers.fragment.dialog.RulesDialogFragment;
-import com.nut.bettersettlers.fragment.dialog.SeafarersDialogFragment;
+import com.nut.bettersettlers.fragment.dialog.MapsDialogFragment;
 import com.nut.bettersettlers.fragment.dialog.WelcomeDialogFragment;
 import com.nut.bettersettlers.logic.MapLogic;
 import com.nut.bettersettlers.logic.PlacementLogic;
@@ -56,10 +53,18 @@ public class MapFragment extends Fragment {
 	private static final String STATE_PLACEMENT_BOOKMARK = "PLACEMENT_BOOKMARK";
 	private static final String STATE_ZOOM_LEVEL = "ZOOM_LEVEL";
 
-	private static final String SHARED_PREFS_NAME = "MapActivity";
-	private static final String SHARED_PREFS_SHOWN_WHATS_NEW = "ShownWhatsNewVersion13";
+	private static final String SHARED_PREFS_NAME = "Map";
+	private static final String SHARED_PREFS_SHOWN_WHATS_NEW = "ShownWhatsNewVersion14";
 	
 	private MapView mMapView;
+	
+	private ImageView mSettingsButton;
+	private ImageView mPlacementsButton;
+	private ImageView mPlacementsLeftButton;
+	private ImageView mPlacementsRightButton;
+	private LinearLayout mPlacementsContainer;
+	private ImageView mRefreshButton;
+	private ImageView mRefreshDownButton;
 
 	private CatanMap mMapSize;
 	private MapType mMapType = MapType.FAIR;
@@ -78,8 +83,6 @@ public class MapFragment extends Fragment {
 	private ArrayList<Integer> mOrderedPlacementList = new ArrayList<Integer>();
 	private int mPlacementBookmark = -1;
 	
-	private int mRollTrackerItemId = -1;
-	
 	private boolean mShowSeafarers = false;
 
 	///////////////////////////////
@@ -90,6 +93,60 @@ public class MapFragment extends Fragment {
 		super.onCreateView(inflater, container, savedInstanceState);
 		View view = inflater.inflate(R.layout.map, container, false);
 		mMapView = (MapView) view.findViewById(R.id.map_view);
+		
+		mSettingsButton = (ImageView) view.findViewById(R.id.settings_button);
+		mSettingsButton.setOnClickListener(new View.OnClickListener() {
+			@Override public void onClick(View v) {
+				FragmentTransaction ft = getActivity().getSupportFragmentManager().beginTransaction();
+			    ft.addToBackStack(null);
+		    	MapsDialogFragment.newInstance().show(ft, "MapsDialogFragment");
+			}
+		});
+		
+		mPlacementsButton = (ImageView) view.findViewById(R.id.placements_button);
+		mPlacementsButton.setOnClickListener(new View.OnClickListener() {
+			@Override public void onClick(View v) {
+		    	if (showingPlacements()) {
+		    		hidePlacements(true);
+		    	} else {
+		    		showPlacements(true);
+					((MainActivity) getActivity()).getAnalytics().trackPageView(Consts.ANALYTICS_USE_PLACEMENTS);
+		    	}
+			}
+		});
+		
+		mPlacementsContainer = (LinearLayout) view.findViewById(R.id.placements_container);
+		
+		mPlacementsLeftButton = (ImageView) view.findViewById(R.id.placements_left_button);
+		mPlacementsLeftButton.setOnClickListener(new View.OnClickListener() {
+			@Override public void onClick(View v) {
+				prevPlacement();
+			}
+		});
+		
+		mPlacementsRightButton = (ImageView) view.findViewById(R.id.placements_right_button);
+		mPlacementsRightButton.setOnClickListener(new View.OnClickListener() {
+			@Override public void onClick(View v) {
+				nextPlacement();
+			}
+		});
+		
+		mRefreshButton = (ImageView) view.findViewById(R.id.refresh_button);
+		mRefreshButton.setOnClickListener(new View.OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				asyncMapShuffle();
+				((MainActivity) getActivity()).getAnalytics().trackPageView(Consts.ANALYTICS_SHUFFLE_MAP);
+			}
+		});
+		mRefreshDownButton = (ImageView) view.findViewById(R.id.refresh_down_button);
+
+		// Set initial state of placement buttons
+		if (showingPlacements()) {
+			showPlacements(false);
+		} else {
+			hidePlacements(false);
+		}
 		
 		return view;
 	}
@@ -174,13 +231,66 @@ public class MapFragment extends Fragment {
 			asyncMapShuffle();
 		}
 	}
+    
+    private void showProgressBar() {
+    	if (mRefreshButton.getVisibility() == View.VISIBLE) {
+    		mRefreshDownButton.setVisibility(View.VISIBLE);
+    		mRefreshButton.setVisibility(View.INVISIBLE);
+    	}
+    }
+    
+    private void killProgressBar() {
+    	if (mRefreshDownButton.getVisibility() == View.VISIBLE) {
+    		mRefreshDownButton.setVisibility(View.INVISIBLE);
+    		mRefreshButton.setVisibility(View.VISIBLE);
+    	}
+    }
+    
+    public void hidePlacements(boolean animate) {
+		mPlacementsButton.setImageDrawable(getResources().getDrawable(R.drawable.main_placements));
+		
+    	if (animate) {
+    		Animation animation = AnimationUtils.loadAnimation(getActivity(), R.anim.placements_out);
+    		animation.setAnimationListener(new AnimationListener() {
+    			@Override public void onAnimationStart(Animation animation) {}
+    			@Override public void onAnimationRepeat(Animation animation) {}
+    			@Override public void onAnimationEnd(Animation animation) {
+    				togglePlacements(false);
+    				mPlacementsContainer.setVisibility(View.GONE);
+    			}
+    		});
+    		mPlacementsContainer.startAnimation(animation);
+    	} else {
+			togglePlacements(false);
+			mPlacementsContainer.setVisibility(View.GONE);
+    	}
+    }
+    
+    public void showPlacements(boolean animate) {
+		mPlacementsButton.setImageDrawable(getResources().getDrawable(R.drawable.main_placements_down));
+		mPlacementsContainer.setVisibility(View.VISIBLE);
+		
+    	if (animate) {
+    		Animation animation = AnimationUtils.loadAnimation(getActivity(), R.anim.placements_in);
+    		animation.setAnimationListener(new AnimationListener() {
+    			@Override public void onAnimationStart(Animation animation) {}
+    			@Override public void onAnimationRepeat(Animation animation) {}
+    			@Override public void onAnimationEnd(Animation animation) {
+    				togglePlacements(true);
+    			}
+    		});
+    		mPlacementsContainer.startAnimation(animation);
+    	} else {
+    		togglePlacements(true);
+    	}
+    }
 
 	//////////////////////////
 	// Async generate tasks //
 	//////////////////////////
 	public void asyncMapShuffle() {
 		if (getActivity() != null) {
-			((MainActivity) getActivity()).showProgressBar();
+			showProgressBar();
 		}
 		new ShuffleMapAsyncTask().execute();
 	}
@@ -203,7 +313,7 @@ public class MapFragment extends Fragment {
 
 	public void asyncProbsShuffle() {
 		if (getActivity() != null) {
-			((MainActivity) getActivity()).showProgressBar();
+			showProgressBar();
 		}
 		new ShuffleProbabilitiesAsyncTask().execute();
 	}
@@ -224,7 +334,7 @@ public class MapFragment extends Fragment {
 
 	public void asyncHarborsShuffle() {
 		if (getActivity() != null) {
-			((MainActivity) getActivity()).showProgressBar();
+			showProgressBar();
 		}
 		new ShuffleHarborsAsyncTask().execute();
 	}
@@ -269,7 +379,7 @@ public class MapFragment extends Fragment {
 		mMapView.invalidate();  // Force refresh
 		
 		if (getActivity() != null) {
-			((MainActivity) getActivity()).killProgressBar();
+			killProgressBar();
 		}
 	}
 
@@ -333,114 +443,6 @@ public class MapFragment extends Fragment {
 	public void setShowSeafarers(boolean showSeafarers) {
 		mShowSeafarers = showSeafarers;
 	}
-
-	////////////////////
-	// Menu functions //
-	////////////////////
-	@Override
-	public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-		super.onCreateOptionsMenu(menu, inflater);
-		
-		if (Consts.AT_LEAST_HONEYCOMB) {
-			if (showingPlacements()) {
-				inflater.inflate(R.menu.map_placements_hc, menu);
-			} else {
-				inflater.inflate(R.menu.map_hc, menu);
-			}
-		}
-	}
-	
-	@Override
-	public void onPrepareOptionsMenu(Menu menu) {
-		super.onPrepareOptionsMenu(menu);
-		
-		Log.i(X, "onPrepareOptionsMenu " + mShowSeafarers);
-		MenuItem seaItem = menu.findItem(R.id.seafarers_item);
-		if (seaItem != null) {
-			seaItem.setVisible(mShowSeafarers);
-		}
-	}
-
-	@Override
-	public boolean onOptionsItemSelected(MenuItem item) {
-		GoogleAnalyticsTracker analytics = ((MainActivity) getActivity()).getAnalytics();
-		item.setChecked(true);
-		
-		if (item.getItemId() == mRollTrackerItemId) {
-			FragmentTransaction ft = getFragmentManager().beginTransaction();
-			ft.hide(getFragmentManager().findFragmentById(R.id.map_fragment));
-			ft.show(getFragmentManager().findFragmentById(R.id.graph_fragment));
-			ft.addToBackStack("MapToGraph");
-			ft.commit();
-			return true;
-		}
-		
-		switch (item.getItemId()) {
-		case R.id.refresh_item:
-			asyncMapShuffle();
-			analytics.trackPageView(Consts.ANALYTICS_SHUFFLE_MAP);
-			return true;
-		case R.id.prev_item:
-			prevPlacement();
-			return true;
-		case R.id.next_item:
-			nextPlacement();
-			return true;
-		// MAP TYPE
-		case R.id.better_settlers_item:
-			betterSettlersChoice();
-			return true;
-		case R.id.traditional_item:
-			// Traditional only makes sense for normal maps
-			if (getMapSize().getName().equals(MapProvider.MapSize.STANDARD.name)
-					|| getMapSize().getName().equals(MapProvider.MapSize.LARGE.name)
-					|| getMapSize().getName().equals(MapProvider.MapSize.XLARGE.name)) {
-				traditionalChoice();
-			}
-			return true;
-		case R.id.random_item:
-			randomChoice();
-			return true;
-		// MAP SIZE
-		case R.id.standard_item:
-			standardChoice();
-			return true;
-		case R.id.large_item:
-			largeChoice();
-			return true;
-		case R.id.xlarge_item:
-			xlargeChoice();
-			return true;
-		case R.id.seafarers_item:
-			seafarersChoice();
-			return true;
-		case R.id.heading_for_new_shores_item:
-			headingForNewShoresChoice();
-			return true;
-		case R.id.shuffle_probs_item:
-			// We don't want to shuffle for traditional maps since it doesn't make sense
-			if (getMapType() != MapType.TRADITIONAL) {
-				asyncProbsShuffle();
-				analytics.trackPageView(Consts.ANALYTICS_SHUFFLE_PROBABILITIES);
-			}
-			return true;
-		case R.id.shuffle_harbors_item:
-			asyncHarborsShuffle();
-			analytics.trackPageView(Consts.ANALYTICS_SHUFFLE_HARBORS);
-			return true;
-		case R.id.rules_item:
-			RulesDialogFragment.newInstance().show(getFragmentManager(), "RulesDialogFragment");
-			return true;
-		case R.id.rate_item:
-			RateDialogFragment.newInstance().show(getFragmentManager(), "RateDialogFragment");
-			return true;
-		case R.id.about_item:
-			AboutDialogFragment.newInstance().show(getFragmentManager(), "AboutDialogFragment");
-			return true;
-		default:
-			return false;
-		}
-	}
 	
 	private void typeChoice(MapType type, String analyticsKey) {
 		if (mMapType != type) {
@@ -462,35 +464,39 @@ public class MapFragment extends Fragment {
 		typeChoice(MapType.RANDOM, Consts.ANALYTICS_CHANGE_MAP_TYPE_FORMAT);
 	}
 	
-	public void sizeChoice(CatanMap size) {
+	public void sizeChoice(MapSize mapSize) {
+		CatanMap size = getMapProvider().getMap(mapSize);
+		
+		// Only Settlers maps can have traditional
+		if (mMapType == MapType.TRADITIONAL
+				&& (mapSize != MapSize.STANDARD && mapSize != MapSize.LARGE && mapSize != MapSize.XLARGE)) {
+			mMapType = MapType.FAIR;
+		}
+		
 		if (mMapSize != size) {
 			mMapSize = size;
 			asyncMapShuffle();
-			((MainActivity) getActivity()).getAnalytics().trackPageView(
+			MainActivity mainActivity = (MainActivity) getActivity();
+			mainActivity.setTitleButtonText(mapSize.titleDrawableId);
+			mainActivity.getAnalytics().trackPageView(
 					String.format(Consts.ANALYTICS_CHANGE_MAP_SIZE_FORMAT, mMapSize.getName()));
 		}
 	}
 	
 	public void standardChoice() {
-		sizeChoice(getMapProvider().getMap(MapSize.STANDARD));
+		sizeChoice(MapSize.STANDARD);
 	}
 	
 	public void largeChoice() {
-		sizeChoice(getMapProvider().getMap(MapSize.LARGE));
+		sizeChoice(MapSize.LARGE);
 	}
 	
 	public void xlargeChoice() {
-		sizeChoice(getMapProvider().getMap(MapSize.XLARGE));
-	}
-	
-	public void seafarersChoice() {
-		MainActivity mainActivity = (MainActivity) getActivity();
-		mainActivity.getAnalytics().trackPageView(Consts.ANALYTICS_VIEW_SEAFARERS);
-		SeafarersDialogFragment.newInstance(mainActivity.getOwnedMaps()).show(getActivity().getSupportFragmentManager(), "SeafarersDialogFragment");
+		sizeChoice(MapSize.XLARGE);
 	}
 	
 	public void headingForNewShoresChoice() {
-		sizeChoice(getMapProvider().getMap(MapSize.HEADING_FOR_NEW_SHORES));
+		sizeChoice(MapSize.HEADING_FOR_NEW_SHORES);
 	}
 	
 	public void togglePlacements(boolean on) {
