@@ -2,8 +2,8 @@
 <resources>
   <dimen name="graph_font_size">12sp</dimen>
   <dimen name="graph_padding">30dp</dimen>
-  <dimen name="graph_button_padding">10dp</dimen>
-  <dimen name="graph_button_buffer">5dp</dimen>
+  <dimen name="graph_button_padding">0dp</dimen>
+  <dimen name="graph_button_buffer">0dp</dimen>
   <dimen name="graph_bar_buffer">10dp</dimen>
   <dimen name="graph_base_buffer">15dp</dimen>
 </resources>

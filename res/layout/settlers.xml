@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/settlers_root"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+    
+  <LinearLayout android:id="@+id/settlers_container"
+      android:layout_width="fill_parent"
+      android:layout_height="fill_parent"
+      android:orientation="vertical">
+    <ImageView android:id="@+id/standard_item"
+      android:layout_height="wrap_content"
+      android:layout_width="match_parent"
+      android:src="@drawable/map_standard_button"
+      android:layout_alignParentTop="true"
+      android:layout_margin="10dp"
+      android:gravity="center"/>
+    <ImageView android:id="@+id/large_item"
+      android:layout_height="wrap_content"
+      android:layout_width="match_parent"
+      android:src="@drawable/map_large_button"
+      android:layout_below="@id/standard_item"
+      android:layout_marginLeft="10dp"
+      android:layout_marginRight="10dp"
+      android:layout_marginBottom="10dp"
+      android:gravity="center"/>
+    <ImageView android:id="@+id/xlarge_item"
+      android:layout_height="wrap_content"
+      android:layout_width="match_parent"
+      android:src="@drawable/map_xlarge_button"
+      android:layout_below="@id/large_item"
+      android:layout_marginLeft="10dp"
+      android:layout_marginRight="10dp"
+      android:layout_marginBottom="10dp"
+      android:gravity="center"/>
+  </LinearLayout>
+</ScrollView>

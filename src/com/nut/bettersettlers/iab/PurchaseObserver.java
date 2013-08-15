@@ -124,7 +124,7 @@ public abstract class PurchaseObserver {
                 mStartIntentSenderArgs[4] = Integer.valueOf(0);
                 mStartIntentSender.invoke(mActivity, mStartIntentSenderArgs);
             } catch (Exception e) {
-                Log.e(TAG, "error starting activity", e);
+                //Log.e(TAG, "error starting activity", e);
             }
         } else {
             // This is on Android version 1.6. The in-app buy page activity must be on its
@@ -133,7 +133,7 @@ public abstract class PurchaseObserver {
             try {
                 pendingIntent.send(mActivity, 0 /* code */, intent);
             } catch (CanceledException e) {
-                Log.e(TAG, "error starting activity", e);
+                //Log.e(TAG, "error starting activity", e);
             }
         }
     }

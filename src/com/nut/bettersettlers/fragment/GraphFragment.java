@@ -3,30 +3,21 @@ package com.nut.bettersettlers.fragment;
 import java.util.ArrayList;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentTransaction;
-import android.view.Gravity;
 import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.View.OnLongClickListener;
 import android.view.ViewGroup;
 import android.view.WindowManager;
-import android.widget.Button;
-import android.widget.TableLayout;
-import android.widget.TableRow;
+import android.widget.ImageView;
 
 import com.nut.bettersettlers.R;
-import com.nut.bettersettlers.fragment.dialog.AboutDialogFragment;
-import com.nut.bettersettlers.fragment.dialog.HelpDialogFragment;
-import com.nut.bettersettlers.fragment.dialog.RateDialogFragment;
+import com.nut.bettersettlers.fragment.dialog.GraphHelpDialogFragment;
 import com.nut.bettersettlers.fragment.dialog.ResetDialogFragment;
-import com.nut.bettersettlers.fragment.dialog.RulesDialogFragment;
-import com.nut.bettersettlers.misc.Consts;
+import com.nut.bettersettlers.fragment.dialog.WelcomeDialogFragment;
 import com.nut.bettersettlers.ui.GraphView;
 
 public class GraphFragment extends Fragment {
@@ -36,17 +27,27 @@ public class GraphFragment extends Fragment {
 	private static final String STATE_ROBBER_PROBS = "STATE_ROBBER_PROBS";
 	private static final String STATE_PROBS_STACK = "STATE_PROBS_STACK";
 
-	private int dRollButtonSize;
 	private int dRollButtonPadding;
 
 	private GraphView mGraphView;
+
+	private ImageView mTwoButton;
+	private ImageView mThreeButton;
+	private ImageView mFourButton;
+	private ImageView mFiveButton;
+	private ImageView mSixButton;
+	private ImageView mSevenButton;
+	private ImageView mEightButton;
+	private ImageView mNineButton;
+	private ImageView mTenButton;
+	private ImageView mElevenButton;
+	private ImageView mTwelveButton;
+	private ImageView mDelButton;
 
 	private int[] mProbs;
 	private int[] mRobberProbs;
 	// Negative numbers will represent robber values in this stack
 	private ArrayList<Integer> mProbsList = new ArrayList<Integer>();
-	
-	private int mMapItemId = -1;
 
 	///////////////////////////////
 	// Fragment method overrides //
@@ -55,8 +56,6 @@ public class GraphFragment extends Fragment {
 	@Override
 	public void onCreate(Bundle savedState) {
 		super.onCreate(savedState);
-		
-		setHasOptionsMenu(true);
 
 		mProbs = new int[13];
 		mRobberProbs = new int[13];
@@ -89,6 +88,21 @@ public class GraphFragment extends Fragment {
 		super.onCreateView(inflater, container, savedInstanceState);
 		View view = inflater.inflate(R.layout.graph, container, false);
 		mGraphView = (GraphView) view.findViewById(R.id.graph_view);
+
+		mTwoButton = (ImageView) view.findViewById(R.id.two_button);
+		mThreeButton = (ImageView) view.findViewById(R.id.three_button);
+		mFourButton = (ImageView) view.findViewById(R.id.four_button);
+		mFiveButton = (ImageView) view.findViewById(R.id.five_button);
+		mSixButton = (ImageView) view.findViewById(R.id.six_button);
+		mSevenButton = (ImageView) view.findViewById(R.id.seven_button);
+		mEightButton = (ImageView) view.findViewById(R.id.eight_button);
+		mNineButton = (ImageView) view.findViewById(R.id.nine_button);
+		mTenButton = (ImageView) view.findViewById(R.id.ten_button);
+		mElevenButton = (ImageView) view.findViewById(R.id.eleven_button);
+		mTwelveButton = (ImageView) view.findViewById(R.id.twelve_button);
+		mDelButton = (ImageView) view.findViewById(R.id.del_button);
+		
+		setUpButtons();
 		
 		return view;
 	}
@@ -100,22 +114,12 @@ public class GraphFragment extends Fragment {
 		float width = ((WindowManager) getActivity().getSystemService(Context.WINDOW_SERVICE)).getDefaultDisplay().getWidth();
 		float height = ((WindowManager) getActivity().getSystemService(Context.WINDOW_SERVICE)).getDefaultDisplay().getHeight();
 		if (width > height) {
-			initLandscape();
+			initDimens(((WindowManager) getActivity().getSystemService(Context.WINDOW_SERVICE)).getDefaultDisplay().getHeight());
 		} else {
-			initPortrait();
+			initDimens(((WindowManager) getActivity().getSystemService(Context.WINDOW_SERVICE)).getDefaultDisplay().getWidth());
 		}
 
 		setAndInvalidate();
-	}
-
-	private void initPortrait() {
-		initDimens(((WindowManager) getActivity().getSystemService(Context.WINDOW_SERVICE)).getDefaultDisplay().getWidth());
-		initRollButtons(2, 6);
-	}
-
-	private void initLandscape() {
-		initDimens(((WindowManager) getActivity().getSystemService(Context.WINDOW_SERVICE)).getDefaultDisplay().getHeight());
-		initRollButtons(4, 3);
 	}
 
 	/** Called when the activity is going to disappear. */
@@ -127,74 +131,129 @@ public class GraphFragment extends Fragment {
 		outState.putIntegerArrayList(STATE_PROBS_STACK, mProbsList);
 	}
 	
+	private void setUpButtons() {
+		setUpButton(mTwoButton, 2);
+		setUpButton(mThreeButton, 3);
+		setUpButton(mFourButton, 4);
+		setUpButton(mFiveButton, 5);
+		setUpButton(mSixButton, 6);
+		setUpButton(mSevenButton, 7);
+		setUpButton(mEightButton, 8);
+		setUpButton(mNineButton, 9);
+		setUpButton(mTenButton, 10);
+		setUpButton(mElevenButton, 11);
+		setUpButton(mTwelveButton, 12);
+
+		mDelButton.setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				undo();
+			}
+		});
+		mDelButton.setOnLongClickListener(new OnLongClickListener() {
+			@Override
+			public boolean onLongClick(View v) {
+				areYouSureReset();
+				return true;
+			}
+		});
+	}
+	
+	private void setUpButton(ImageView button, final int n) {
+		button.setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				incrementGraph(n, false);
+			}
+		});
+		button.setOnLongClickListener(new OnLongClickListener() {
+			@Override
+			public boolean onLongClick(View v) {
+				incrementGraph(n, true);
+				return true;
+			}
+		});
+	}
+	
 	private void initDimens(int size) {
 		int padding = (int) getResources().getDimension(R.dimen.graph_button_padding);
 		dRollButtonPadding = (int) getResources().getDimension(R.dimen.graph_button_buffer);
 		int width = size - (2 * padding) - (5 * dRollButtonPadding);
-		dRollButtonSize = width / 6;
 	}
-
-	private void initRollButtons(int rows, int buttonsPerRow) {
-		TableLayout buttons = (TableLayout) getView().findViewById(R.id.roll_buttons);
-		
-		// For some reason, sometimes we init twice
-		if (buttons.getChildCount() > 0) {
-			return;
+	
+	private void increment(View v) {
+		switch (v.getId()) {
+		case R.id.two_button:
+			incrementGraph(2, false);
+			break;
+		case R.id.three_button:
+			incrementGraph(3, false);
+			break;
+		case R.id.four_button:
+			incrementGraph(4, false);
+			break;
+		case R.id.five_button:
+			incrementGraph(5, false);
+			break;
+		case R.id.six_button:
+			incrementGraph(6, false);
+			break;
+		case R.id.seven_button:
+			incrementGraph(7, false);
+			break;
+		case R.id.eight_button:
+			incrementGraph(8, false);
+			break;
+		case R.id.nine_button:
+			incrementGraph(9, false);
+			break;
+		case R.id.ten_button:
+			incrementGraph(10, false);
+			break;
+		case R.id.eleven_button:
+			incrementGraph(11, false);
+			break;
+		case R.id.twelve_button:
+			incrementGraph(12, false);
+			break;
 		}
-		
-		int counter = 2;
-		for (int i = 0; i < rows; i++) {
-			TableRow row = new TableRow(getActivity());
-			row.setGravity(Gravity.CENTER);
-			for (int j = 0; j < buttonsPerRow; j++) {
-				if (counter == 13) {
-					break;
-				}
-				final int finalCounter = counter;
-				Button button = (Button) getActivity().getLayoutInflater().inflate(R.layout.graph_button, null);
-				button.setText(Integer.toString(finalCounter));
-				button.setWidth(dRollButtonSize);
-				button.setHeight(dRollButtonSize);
-				button.setPadding(dRollButtonPadding, dRollButtonPadding, dRollButtonPadding, dRollButtonPadding);
-				button.setOnClickListener(new OnClickListener() {
-					@Override
-					public void onClick(View v) {
-						incrementGraph(finalCounter, false);
-					}
-				});
-				button.setOnLongClickListener(new OnLongClickListener() {
-					@Override
-					public boolean onLongClick(View v) {
-						incrementGraph(finalCounter, true);
-						return true;
-					}
-				});
-				row.addView(button);
-				counter++;
-			}
-			if (counter == 13) {
-				// Also add a backspace button
-				Button button = (Button) getActivity().getLayoutInflater().inflate(R.layout.graph_button, null);
-				button.setText("DEL");
-				button.setWidth(dRollButtonSize);
-				button.setHeight(dRollButtonSize);
-				button.setPadding(dRollButtonPadding, dRollButtonPadding, dRollButtonPadding, dRollButtonPadding);
-				button.setOnClickListener(new OnClickListener() {
-					@Override
-					public void onClick(View v) {
-						undo();
-					}
-				});
-				button.setOnLongClickListener(new OnLongClickListener() {
-					@Override
-					public boolean onLongClick(View v) {
-						areYouSureReset();
-						return true;
-					}
-				});
-				row.addView(button);
-			}
-			buttons.addView(row);
+	}
+	
+	private void longIncrement(View v) {
+		switch (v.getId()) {
+		case R.id.two_button:
+			incrementGraph(2, true);
+			break;
+		case R.id.three_button:
+			incrementGraph(3, true);
+			break;
+		case R.id.four_button:
+			incrementGraph(4, true);
+			break;
+		case R.id.five_button:
+			incrementGraph(5, true);
+			break;
+		case R.id.six_button:
+			incrementGraph(6, true);
+			break;
+		case R.id.seven_button:
+			incrementGraph(7, true);
+			break;
+		case R.id.eight_button:
+			incrementGraph(8, true);
+			break;
+		case R.id.nine_button:
+			incrementGraph(9, true);
+			break;
+		case R.id.ten_button:
+			incrementGraph(10, true);
+			break;
+		case R.id.eleven_button:
+			incrementGraph(11, true);
+			break;
+		case R.id.twelve_button:
+			incrementGraph(12, true);
+			break;
 		}
 	}
 
@@ -249,47 +308,5 @@ public class GraphFragment extends Fragment {
 		mGraphView.setProbs(mProbs);
 		mGraphView.setRobberProbs(mRobberProbs);
 		mGraphView.invalidate(); // Force refresh
-	}
-
-	////////////////////
-	// Menu functions //
-	////////////////////
-	@Override
-	public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-		inflater.inflate(R.menu.graph_hc, menu);
-		if (Consts.AT_LEAST_HONEYCOMB) {
-			// Set up action items for Action Bar
-			menu.findItem(R.id.help_item).setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM);
-		}
-	}
-
-	@Override
-	public boolean onOptionsItemSelected(MenuItem item) {
-		item.setChecked(true);
-		
-		if (item.getItemId() == mMapItemId) {
-			FragmentTransaction ft = getFragmentManager().beginTransaction();
-			ft.hide(getFragmentManager().findFragmentById(R.id.graph_fragment));
-			ft.show(getFragmentManager().findFragmentById(R.id.map_fragment));
-			ft.commit();
-			return true;
-		}
-		
-		switch (item.getItemId()) {
-		case R.id.help_item:
-			HelpDialogFragment.newInstance().show(getFragmentManager(), "HelpDialogFragment");
-			return true;
-		case R.id.rules_item:
-			RulesDialogFragment.newInstance().show(getFragmentManager(), "RulesDialogFragment");
-			return true;
-		case R.id.about_item:
-			AboutDialogFragment.newInstance().show(getFragmentManager(), "AboutDialogFragment");
-			return true;
-		case R.id.rate_item:
-			RateDialogFragment.newInstance().show(getFragmentManager(), "RateDialogFragment");
-			return true;
-		default:
-			return false;
-		}
 	}
 }

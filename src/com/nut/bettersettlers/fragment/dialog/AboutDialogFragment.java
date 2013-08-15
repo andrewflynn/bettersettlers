@@ -4,7 +4,9 @@ import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnClickListener;
+import android.content.Intent;
 import android.graphics.Color;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
 import android.text.Html;
@@ -44,6 +46,12 @@ public class AboutDialogFragment extends DialogFragment {
 			.setIcon(R.drawable.icon)
 			.setTitle("Better Settlers Board Generator")
 			.setView(textView)
+			.setPositiveButton("Rate us", new OnClickListener() {
+				public void onClick(DialogInterface dialog, int id) {
+					getActivity().startActivity(new Intent(Intent.ACTION_VIEW,
+							Uri.parse("http://market.android.com/details?id=com.nut.bettersettlers")));
+				}
+			})
 			.setNegativeButton("Dismiss", new OnClickListener() {
 				public void onClick(DialogInterface dialog, int id) {
 					dialog.dismiss();
