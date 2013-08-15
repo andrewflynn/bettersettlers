@@ -30,7 +30,7 @@ import com.nut.bettersettlers.misc.Consts;
 import com.nut.bettersettlers.ui.GraphView;
 
 public class GraphFragment extends Fragment {
-	private static final String X = GraphFragment.class.getSimpleName();
+	private static final String X = "BetterSettlers";
 
 	private static final String STATE_PROBS = "STATE_PROBS";
 	private static final String STATE_ROBBER_PROBS = "STATE_ROBBER_PROBS";
