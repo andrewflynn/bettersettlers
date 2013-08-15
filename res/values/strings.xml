@@ -9,6 +9,7 @@
     <string name="standard">Standard (3-4 people)</string>
     <string name="large">Large (5 people)</string>
     <string name="xlarge">X-Large (6 people)</string>
+    <string name="seafarers">Seafarers</string>
     <string name="heading_for_new_shores">Heading for New Shores</string>
     <string name="map_size">Map Size</string>
     <string name="map_type">Map Type</string>
@@ -27,4 +28,10 @@
     <string name="refresh">Refresh</string>
     <string name="rate_this_app">Rate this app</string>
     <string name="rules">How it works</string>
+    <string name="iab_not_supported_title">Android Market billing unavailable</string>
+    <string name="iab_not_supported_message">We apologize, but the Android Market billing
+     service is not available at this time.  You can continue to use this app but you
+     won\'t be able to make purchases.</string>
+    <string name="learn_more">Learn More</string>
+    <string name="iab_help_url">http://market.android.com/support/bin/answer.py?answer=1050566</string>
 </resources>

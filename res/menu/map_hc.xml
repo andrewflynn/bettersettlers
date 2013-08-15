@@ -19,9 +19,11 @@
 					android:title="@string/large" />
 				<item android:id="@+id/xlarge_item"
 					android:title="@string/xlarge" />
+			</group>
+			<item android:id="@+id/seafarers_item"
+				android:title="@string/seafarers" />
 				<item android:id="@+id/heading_for_new_shores_item"
 					android:title="@string/heading_for_new_shores" />
-			</group>
 		</menu>
 	</item>
 	<item android:id="@+id/map_type_item"

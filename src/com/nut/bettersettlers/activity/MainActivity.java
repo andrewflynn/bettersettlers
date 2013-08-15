@@ -1,14 +1,24 @@
 package com.nut.bettersettlers.activity;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import android.app.ActionBar;
 import android.app.ActionBar.Tab;
 import android.app.ActionBar.TabListener;
+import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.Context;
+import android.content.DialogInterface;
+import android.content.Intent;
+import android.content.SharedPreferences;
+import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.PowerManager;
 import android.os.PowerManager.WakeLock;
+import android.provider.Settings.Secure;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentTransaction;
 import android.util.Log;
@@ -30,17 +40,31 @@ import com.nut.bettersettlers.fragment.dialog.GraphMoreDialogFragment;
 import com.nut.bettersettlers.fragment.dialog.HelpDialogFragment;
 import com.nut.bettersettlers.fragment.dialog.MapMoreDialogFragment;
 import com.nut.bettersettlers.fragment.dialog.MapSizeDialogFragment;
+import com.nut.bettersettlers.fragment.dialog.MapSizeWithSeafarersDialogFragment;
 import com.nut.bettersettlers.fragment.dialog.MapTypeDialogFragment;
 import com.nut.bettersettlers.fragment.dialog.PlacementsMoreDialogFragment;
+import com.nut.bettersettlers.iab.BillingService;
+import com.nut.bettersettlers.iab.BillingService.RequestPurchase;
+import com.nut.bettersettlers.iab.BillingService.RestoreTransactions;
+import com.nut.bettersettlers.iab.IabConsts;
+import com.nut.bettersettlers.iab.IabConsts.MapContainer;
+import com.nut.bettersettlers.iab.IabConsts.PurchaseState;
+import com.nut.bettersettlers.iab.IabConsts.ResponseCode;
+import com.nut.bettersettlers.iab.Obfuscate;
+import com.nut.bettersettlers.iab.PurchaseObserver;
+import com.nut.bettersettlers.iab.ResponseHandler;
+import com.nut.bettersettlers.iab.util.Base64;
 import com.nut.bettersettlers.misc.Consts;
 
 public class MainActivity extends FragmentActivity {
-	private static final String X = MainActivity.class.getSimpleName();
+	private static final String X = "BetterSettlers";
 	
 	private static final String STATE_SHOW_GRAPH = "STATE_SHOW_GRAPH";
 	private static final String STATE_SHOW_PLACEMENTS = "STATE_SHOW_PLACEMENTS";
 	private static final String STATE_THEFT_ORDER = "STATE_THEFT_ORDER";
+	private static final String SHARED_PREFS_IAB_STATE_CURRENT = "SHARED_PREFS_STATE_CURRENT";
 	private static final int DIALOG_PROGRESS_ID = 1;
+	private static final int DIALOG_IAB_NOT_SUPPORTED = 2;
 	
 	private MapFragment mMapFragment;
 	private GraphFragment mGraphFragment;
@@ -48,22 +72,103 @@ public class MainActivity extends FragmentActivity {
 	
 	private WakeLock mWakeLock;
 	private GoogleAnalyticsTracker mAnalytics;
+	
+	private Handler mIabHandler;
+	private IabPurchaseObserver mPurchaseObserver;
+	private BillingService mIabService;
+	private boolean mIabSupported = false;
+	private Set<String> mOwnedMaps = new HashSet<String>();
+	
+	private class IabPurchaseObserver extends PurchaseObserver {
+		public IabPurchaseObserver(Handler handler) {
+			super(MainActivity.this, handler);
+		}
+		
+		@Override
+		public void onBillingSupported(boolean supported) {
+			Log.i(X, "onBillingSupported: " + supported);
+			if (supported) {
+				restoreIabState();
+				mIabSupported = true;
+				mMapFragment.setShowSeafarers(mIabSupported);
+				
+				if (Consts.AT_LEAST_HONEYCOMB) {
+					MainActivity.this.invalidateOptionsMenu();
+				}
+			}
+		}
+		
+		@Override
+		public void onPurchaseStateChange(PurchaseState purchaseState, String itemId,
+				String developerPayload) {
+			Log.i(X, "onPurcaseStateChange: ");
+			Log.i(X, "  purchaseState: " + purchaseState);
+			Log.i(X, "  itemId: " + itemId);
+			Log.i(X, "  developerPayload: " + developerPayload);
+			
+			if (purchaseState == PurchaseState.PURCHASED) {
+				mOwnedMaps.add(itemId);
+				getMapFragment().sizeChoice(getMapProvider().getMap(itemId));
+			}
+		}
+
+        @Override
+        public void onRequestPurchaseResponse(RequestPurchase request,
+                ResponseCode responseCode) {
+			Log.i(X, "onRequestPurchaseResponse: ");
+			Log.i(X, "  request: " + request);
+			Log.i(X, "  responseCode: " + responseCode);
+        }
+
+        @Override
+        public void onRestoreTransactionsResponse(RestoreTransactions request,
+                ResponseCode responseCode) {
+			Log.i(X, "onRestoreTransactionsResponse: ");
+			Log.i(X, "  request: " + request);
+			Log.i(X, "  responseCode: " + responseCode);
+            if (responseCode == ResponseCode.RESULT_OK) {
+                Log.d(X, "completed RestoreTransactions request");
+                // Update the shared preferences so that we don't perform
+                // a RestoreTransactions again.
+                SharedPreferences prefs = getPreferences(Context.MODE_PRIVATE);
+                SharedPreferences.Editor edit = prefs.edit();
+                edit.putBoolean(SHARED_PREFS_IAB_STATE_CURRENT, true);
+                edit.commit();
+            } else {
+                Log.d(X, "RestoreTransactions error: " + responseCode);
+            }
+        }
+	}
 
 	///////////////////////////////
 	// Activity method overrides //
 	///////////////////////////////
 	@Override
 	protected Dialog onCreateDialog(int id) {
-		if(id == DIALOG_PROGRESS_ID){
+		if (id == DIALOG_PROGRESS_ID){
 			ProgressDialog progressDialog = new ProgressDialog(this);
 			progressDialog = new ProgressDialog(this);
 			progressDialog.setTitle("Better Settlers");
 			progressDialog.setMessage("Generating");
 			progressDialog.setIndeterminate(true);
 			return progressDialog;
+		} else if (id == DIALOG_IAB_NOT_SUPPORTED) {
+	        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+	        builder.setTitle(R.string.iab_not_supported_title)
+	            .setIcon(android.R.drawable.stat_sys_warning)
+	            .setMessage(R.string.iab_not_supported_title)
+	            .setCancelable(false)
+	            .setPositiveButton(android.R.string.ok, null)
+	            .setNegativeButton(R.string.learn_more, new DialogInterface.OnClickListener() {
+	                public void onClick(DialogInterface dialog, int which) {
+	                    Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(getString(R.string.iab_help_url)));
+	                    startActivity(intent);
+	                }
+	            });
+	        return builder.create();
+		} else {
+			return super.onCreateDialog(id);
 		}
-
-		return super.onCreateDialog(id);
 	}
 
 	/** Called when the activity is going to disappear. */
@@ -149,7 +254,33 @@ public class MainActivity extends FragmentActivity {
 				showPlacements();
 			}
 		}
+		
+		// IAB
+		mIabHandler = new Handler();
+		mPurchaseObserver = new IabPurchaseObserver(mIabHandler);
+		ResponseHandler.register(mPurchaseObserver);
+		
+		mIabService = new BillingService();
+		mIabService.setContext(this);
+		
+		mOwnedMaps.add("heading_for_new_shores");
+		
+		if (!mIabService.checkBillingSupported()) {
+			Log.i(X, "Could not connect to Market client");
+			// No action as it should default to not showing Seafarers maps
+		}
 	}
+    @Override
+    protected void onStart() {
+        super.onStart();
+        ResponseHandler.register(mPurchaseObserver);
+        initializeOwnedItems();
+    }
+    @Override
+    protected void onStop() {
+        super.onStop();
+        ResponseHandler.unregister(mPurchaseObserver);
+    }
 	
 	@Override
 	public void onResume() {
@@ -167,6 +298,47 @@ public class MainActivity extends FragmentActivity {
 	public void onDestroy() {
 		super.onDestroy();
 		mAnalytics.stop();
+		mIabService.unbind();
+	}
+	
+	private void restoreIabState() {
+		SharedPreferences prefs = getPreferences(MODE_PRIVATE);
+		boolean current = prefs.getBoolean(SHARED_PREFS_IAB_STATE_CURRENT, false);
+		if (!current) {
+			mIabService.restoreTransactions();
+		}
+	}
+	
+	private void initializeOwnedItems() {
+		new Thread(new Runnable() {
+			@Override
+			public void run() {
+				doInitializeOwnedItems();
+			}
+		}).start();
+	}
+	
+	private void doInitializeOwnedItems() {
+    	String id = Secure.getString(getContentResolver(), Secure.ANDROID_ID);
+		SharedPreferences prefs = getSharedPreferences(Consts.SHARED_PREFS_SEAFARERS_KEY, Context.MODE_PRIVATE);
+        
+		for (MapContainer mapContainer : MapContainer.values()) {
+			String ret = prefs.getString(Base64.encode(mapContainer.id.getBytes()), null);
+			
+			if (ret != null) {
+				String attempt = Obfuscate.decode(id, ret);
+				if (attempt != null && attempt.equals(mapContainer.id)) {
+					mOwnedMaps.add(attempt);
+				}
+			}
+		}
+	}
+	
+	public void purchaseItem(String itemId, String mapId) {
+		Log.i(X, "Buying " + itemId + " for " + mapId);
+        if (!mIabService.requestPurchase(itemId, mapId)) {
+            showDialog(DIALOG_IAB_NOT_SUPPORTED);
+        }
 	}
 	
 	public class MapActivityTabListener implements TabListener {
@@ -304,6 +476,7 @@ public class MainActivity extends FragmentActivity {
      * {@link ActivityHelper#addActionButtonCompatFromMenuItem(android.view.MenuItem)}
      * (where the item ID was menu_refresh).
      */
+    /* UNUSED?? */
     public void setRefreshActionButtonCompatState(boolean refreshing) {
         View refreshButton = findViewById(R.id.menu_refresh);
         View refreshIndicator = findViewById(R.id.menu_refresh_progress);
@@ -384,7 +557,12 @@ public class MainActivity extends FragmentActivity {
 			} else if (map.getName() == MapProvider.MapSize.XLARGE.name) {
 				selected = 2;
 			}
-			MapSizeDialogFragment.newInstance(selected).show(getSupportFragmentManager(), "MapSizeDialogFragment");
+			if (mIabSupported) {
+				MapSizeWithSeafarersDialogFragment.newInstance(selected).show(getSupportFragmentManager(), "MapSizeWithSeafarersDialogFragment");
+			} else {
+				MapSizeDialogFragment.newInstance(selected).show(getSupportFragmentManager(), "MapSizeDialogFragment");
+				//MapSizeWithSeafarersDialogFragment.newInstance(selected).show(getSupportFragmentManager(), "MapSizeWithSeafarersDialogFragment");
+			}
 		}
     }
     
@@ -430,6 +608,10 @@ public class MainActivity extends FragmentActivity {
 		public void onClick(View v) {
 			HelpDialogFragment.newInstance().show(getSupportFragmentManager(), "HelpDialogFragment");
 		}
+    }
+    
+    public Set<String> getOwnedMaps() {
+    	return mOwnedMaps;
     }
     
     public MapProvider getMapProvider() {
