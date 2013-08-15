@@ -296,7 +296,7 @@ public class MapFragment extends Fragment {
 
 	private void fillPlacements() {
 		mPlacementList = PlacementLogic.getBestPlacements(mMapSize, 0 /* all */, mResourceList, mProbabilityList, mHarborList);
-		Log.i(X, "mPlacementList: " + mPlacementList);
+		//Log.i(X, "mPlacementList: " + mPlacementList);
 		mOrderedPlacementList.clear();
 		for (int key : mPlacementList.keySet()) {
 			mOrderedPlacementList.add(key);

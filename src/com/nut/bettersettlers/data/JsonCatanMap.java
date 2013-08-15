@@ -6,6 +6,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -50,7 +51,15 @@ public class JsonCatanMap extends CatanMap {
 	private static final String UNKNOWN_PROBABILITIES = "unknown_probabilities";
 	private static final String PLACEMENT_BLACKLIST = "placement_blacklist";
 	
+	private ArrayList<Integer> theftOrder;
+	
 	public JsonCatanMap(InputStream is) {
+		this(is, null);
+	}
+	
+	public JsonCatanMap(InputStream is, ArrayList<Integer> theftOrder) {
+		this.theftOrder = theftOrder;
+		
 		try {
 			init(is);
 		} catch (IOException e) {
@@ -63,9 +72,6 @@ public class JsonCatanMap extends CatanMap {
 			return;
 		}
 		
-		if (getName().equals("heading_for_new_shores")) {
-			System.out.println(toString());
-		}
 		if (getName() == null
 				|| getLowResourceNumber() <= 0
 				|| getHighResourceNumber() <= 0
@@ -448,17 +454,28 @@ public class JsonCatanMap extends CatanMap {
 	private void setHarborLinesAndWaterNeighborsHelper(boolean[] landWithHarbors) {
 		int[][] harborLines = new int[getWaterGrid().length][];
 		int[][] neighborLines = new int[getWaterGrid().length][];
+		int[][] waterNeighborLines = new int[getWaterGrid().length][];
+
+		List<Point> landList = Arrays.asList(getLandGrid());
+		List<Point> waterList = Arrays.asList(getWaterGrid());
 		for (int i = 0; i < getWaterGrid().length; i++) {
 			Point water = getWaterGrid()[i];
-			List<Point> landList = Arrays.asList(getLandGrid());
-			
+
 			Map<Integer, Boolean> has = new HashMap<Integer, Boolean>();
+			Map<Integer, Boolean> waterHas = new HashMap<Integer, Boolean>();
 			for (int j = 0; j < 6; j++) {
-				boolean close = false;
-				if (landList.contains(getNeighbor(water, j))) {
-					close = landWithHarbors[landList.indexOf(getNeighbor(water, j))];
+				Point neighbor = getNeighbor(water, j);
+				if (landList.contains(neighbor)) {
+					has.put(j, landWithHarbors[landList.indexOf(neighbor)]);
+				} else {
+					has.put(j, false);
 				}
-				has.put(j, close);
+				
+				if (waterList.contains(neighbor)) {
+					waterHas.put(j, true);
+				} else {
+					waterHas.put(j, false);
+				}
 			}
 			
 			int leftMost = -1;
@@ -470,18 +487,25 @@ public class JsonCatanMap extends CatanMap {
 			if (leftMost == -1) {
 				continue;
 			}
-			
+
 			List<Integer> neighborList = new ArrayList<Integer>();
+			List<Integer> waterNeighborList = new ArrayList<Integer>();
 			for (int j = 0; j < 6; j++) {
 				int k = (leftMost + j) % 6;
 				if (has.get(k)) {
 					neighborList.add(landList.indexOf(getNeighbor(water, k)));
+				} else if (waterHas.get(k)) {
+					waterNeighborList.add(waterList.indexOf(getNeighbor(water, k)));
 				}
 			}
-			
+
 			neighborLines[i] = new int[neighborList.size()];
 			for (int j = 0; j < neighborList.size(); j++) {
 				neighborLines[i][j] = neighborList.get(j);
+			}
+			waterNeighborLines[i] = new int[waterNeighborList.size()];
+			for (int j = 0; j < waterNeighborList.size(); j++) {
+				waterNeighborLines[i][j] = waterNeighborList.get(j);
 			}
 
 			List<Integer> harborList = new ArrayList<Integer>();
@@ -510,6 +534,7 @@ public class JsonCatanMap extends CatanMap {
 			}
 		}
 		setWaterNeighbors(neighborLines);
+		setWaterWaterNeighbors(waterNeighborLines);
 		setHarborLines(harborLines);
 	}
 	
@@ -676,23 +701,45 @@ public class JsonCatanMap extends CatanMap {
 			waterList.add(waterGrid[i]);
 		}
 		
-		// Randomly choose either an existing water or steal one from land
-		boolean choice;
-		int counter = 0;
-		while (num > 0 || !waterList.isEmpty()) {
-			choice = RAND.nextBoolean();
-			if (choice) {
-				// Use existing water
-				if (!waterList.isEmpty()) {
+		if (theftOrder != null) {
+			// Use it
+			int counter = 0;
+			while (num > 0 || !waterList.isEmpty()) {
+				if (theftOrder.get(counter) >= 0) {
+					int chosen = theftOrder.get(counter);
+					newWaterGrid[counter] = landList.remove(chosen);
+					num--;
+					counter++;
+				} else {
 					newWaterGrid[counter] = waterList.remove(0);
 					counter++;
 				}
-			} else {
-				// Steal from land
-				if (num > 0) {
-					newWaterGrid[counter] = landList.remove(RAND.nextInt(landList.size()));
-					num--;
-					counter++;
+			}
+		} else {
+			// Keep track of the order for same map restoration
+			theftOrder = new ArrayList<Integer>();
+
+			// Randomly choose either an existing water or steal one from land
+			boolean choice;
+			int counter = 0;
+			while (num > 0 || !waterList.isEmpty()) {
+				choice = RAND.nextBoolean();
+				if (choice) {
+					// Use existing water
+					if (!waterList.isEmpty()) {
+						newWaterGrid[counter] = waterList.remove(0);
+						counter++;
+						theftOrder.add(-18);
+					}
+				} else {
+					// Steal from land
+					if (num > 0) {
+						int chosen = RAND.nextInt(landList.size());
+						newWaterGrid[counter] = landList.remove(chosen);
+						num--;
+						counter++;
+						theftOrder.add(chosen);
+					}
 				}
 			}
 		}
@@ -702,6 +749,7 @@ public class JsonCatanMap extends CatanMap {
 			newLandGrid[i] = landList.remove(0);
 		}
 		
+		setTheftOrder(theftOrder);
 		setLandGrid(newLandGrid);
 		setWaterGrid(newWaterGrid);
 	}
