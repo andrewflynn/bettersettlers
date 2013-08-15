@@ -13,17 +13,22 @@ public class MapProvider {
 	private final Map<MapSize, CatanMap> maps;
 	
 	public enum MapSize {
-		STANDARD(R.raw.standard, "standard"),
-		LARGE(R.raw.large, "large"),
-		XLARGE(R.raw.xlarge, "xlarge"),
-		HEADING_FOR_NEW_SHORES(R.raw.heading_for_new_shores, "heading_for_new_shores");
+		STANDARD(R.raw.standard, "standard", R.drawable.title_settlers, "standard"),
+		LARGE(R.raw.large, "large", R.drawable.title_settlers, "large"),
+		XLARGE(R.raw.xlarge, "xlarge", R.drawable.title_settlers, "xlarge"),
+		HEADING_FOR_NEW_SHORES(R.raw.heading_for_new_shores, "heading_for_new_shores",
+				R.drawable.title_heading_for_new_shores, "seafarers.heading_for_new_shores");
 		
 		public final int rawResId;
 		public final String name;
+		public final int titleDrawableId;
+		public final String productId;
 		
-		MapSize(int rawResId, String name) {
+		MapSize(int rawResId, String name, int titleDrawableId, String productId) {
 			this.rawResId = rawResId;
 			this.name = name;
+			this.titleDrawableId = titleDrawableId;
+			this.productId = productId;
 		}
 	}
 	
@@ -48,6 +53,15 @@ public class MapProvider {
 		for (CatanMap map : maps.values()) {
 			if (map.getName().equals(name)) {
 				return map;
+			}
+		}
+		return null;
+	}
+	
+	public MapSize getMapSizeByProductId(String name) {
+		for (MapSize mapSize : MapSize.values()) {
+			if (mapSize.productId.equals(name)) {
+				return mapSize;
 			}
 		}
 		return null;

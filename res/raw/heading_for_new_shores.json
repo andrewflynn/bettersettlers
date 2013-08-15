@@ -1,4 +1,5 @@
 { "name": "heading_for_new_shores",
+  "title": "Heading for New Shores",
   "land": [
     { "x": 6, "y": 8, "harbor": false, "whitelist": "islands", "placement_blacklist": [ 0, 1, 2, 3, 4, 5 ] },
     { "x": 10, "y": 8, "harbor": false, "whitelist": "islands", "placement_blacklist": [ 0, 1, 2, 3, 4, 5 ] },

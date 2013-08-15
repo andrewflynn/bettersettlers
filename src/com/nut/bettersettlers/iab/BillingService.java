@@ -112,13 +112,13 @@ public class BillingService extends Service implements ServiceConnection {
          */
         public boolean runIfConnected() {
             if (IabConsts.DEBUG) {
-                Log.d(TAG, getClass().getSimpleName());
+                //Log.d(TAG, getClass().getSimpleName());
             }
             if (mService != null) {
                 try {
                     mRequestId = run();
                     if (IabConsts.DEBUG) {
-                        Log.d(TAG, "request id: " + mRequestId);
+                        //Log.d(TAG, "request id: " + mRequestId);
                     }
                     if (mRequestId >= 0) {
                         mSentRequests.put(mRequestId, this);
@@ -138,7 +138,7 @@ public class BillingService extends Service implements ServiceConnection {
          * @param e the exception
          */
         protected void onRemoteException(RemoteException e) {
-            Log.w(TAG, "remote billing service crashed");
+            //Log.w(TAG, "remote billing service crashed");
             mService = null;
         }
 
@@ -168,7 +168,7 @@ public class BillingService extends Service implements ServiceConnection {
             ResponseCode responseCode = ResponseCode.valueOf(
                     response.getInt(IabConsts.BILLING_RESPONSE_RESPONSE_CODE));
             if (IabConsts.DEBUG) {
-                Log.e(TAG, method + " received " + responseCode.toString());
+                ////log.e(TAG, method + " received " + responseCode.toString());
             }
         }
     }
@@ -190,8 +190,8 @@ public class BillingService extends Service implements ServiceConnection {
             Bundle response = mService.sendBillingRequest(request);
             int responseCode = response.getInt(IabConsts.BILLING_RESPONSE_RESPONSE_CODE);
             if (IabConsts.DEBUG) {
-                Log.i(TAG, "CheckBillingSupported response code: " +
-                        ResponseCode.valueOf(responseCode));
+                //log.i(TAG, "CheckBillingSupported response code: " +
+                //        ResponseCode.valueOf(responseCode));
             }
             boolean billingSupported = (responseCode == ResponseCode.RESULT_OK.ordinal());
             ResponseHandler.checkBillingSupportedResponse(billingSupported);
@@ -231,7 +231,7 @@ public class BillingService extends Service implements ServiceConnection {
             PendingIntent pendingIntent
                     = response.getParcelable(IabConsts.BILLING_RESPONSE_PURCHASE_INTENT);
             if (pendingIntent == null) {
-                Log.e(TAG, "Error with requestPurchase");
+                //log.e(TAG, "Error with requestPurchase");
                 return IabConsts.BILLING_RESPONSE_INVALID_REQUEST_ID;
             }
 
@@ -366,9 +366,13 @@ public class BillingService extends Service implements ServiceConnection {
      * @param startId an identifier for the invocation instance of this service
      */
     public void handleCommand(Intent intent, int startId) {
+    	if (intent == null) {
+    		return; // blech
+    	}
+    	
         String action = intent.getAction();
         if (IabConsts.DEBUG) {
-            Log.i(TAG, "handleCommand() action: " + action);
+            //log.i(TAG, "handleCommand() action: " + action);
         }
         if (IabConsts.ACTION_CONFIRM_NOTIFICATION.equals(action)) {
             String[] notifyIds = intent.getStringArrayExtra(IabConsts.NOTIFICATION_ID);
@@ -397,7 +401,7 @@ public class BillingService extends Service implements ServiceConnection {
     private boolean bindToMarketBillingService() {
         try {
             if (IabConsts.DEBUG) {
-                Log.i(TAG, "binding to Market billing service");
+                //log.i(TAG, "binding to Market billing service");
             }
             boolean bindResult = bindService(
                     new Intent(IabConsts.MARKET_BILLING_SERVICE_ACTION),
@@ -407,10 +411,10 @@ public class BillingService extends Service implements ServiceConnection {
             if (bindResult) {
                 return true;
             } else {
-                Log.e(TAG, "Could not bind to service.");
+                //log.e(TAG, "Could not bind to service.");
             }
         } catch (SecurityException e) {
-            Log.e(TAG, "Security exception: " + e);
+            //log.e(TAG, "Security exception: " + e);
         }
         return false;
     }
@@ -524,7 +528,7 @@ public class BillingService extends Service implements ServiceConnection {
         BillingRequest request = mSentRequests.get(requestId);
         if (request != null) {
             if (IabConsts.DEBUG) {
-                Log.d(TAG, request.getClass().getSimpleName() + ": " + responseCode);
+                //log.d(TAG, request.getClass().getSimpleName() + ": " + responseCode);
             }
             request.responseCodeReceived(responseCode);
         }
@@ -561,7 +565,7 @@ public class BillingService extends Service implements ServiceConnection {
         // stop it now.
         if (maxStartId >= 0) {
             if (IabConsts.DEBUG) {
-                Log.i(TAG, "stopping service, startId: " + maxStartId);
+                //log.i(TAG, "stopping service, startId: " + maxStartId);
             }
             stopSelf(maxStartId);
         }
@@ -573,7 +577,7 @@ public class BillingService extends Service implements ServiceConnection {
      */
     public void onServiceConnected(ComponentName name, IBinder service) {
         if (IabConsts.DEBUG) {
-            Log.d(TAG, "Billing service connected");
+            //log.d(TAG, "Billing service connected");
         }
         mService = IMarketBillingService.Stub.asInterface(service);
         runPendingRequests();
@@ -583,7 +587,7 @@ public class BillingService extends Service implements ServiceConnection {
      * This is called when we are disconnected from the MarketBillingService.
      */
     public void onServiceDisconnected(ComponentName name) {
-        Log.w(TAG, "Billing service disconnected");
+        //log.w(TAG, "Billing service disconnected");
         mService = null;
     }
 

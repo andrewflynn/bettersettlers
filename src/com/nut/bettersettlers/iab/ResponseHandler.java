@@ -11,6 +11,7 @@ import android.util.Log;
 
 import com.nut.bettersettlers.iab.BillingService.RequestPurchase;
 import com.nut.bettersettlers.iab.BillingService.RestoreTransactions;
+import com.nut.bettersettlers.iab.IabConsts.MapContainer;
 import com.nut.bettersettlers.iab.IabConsts.PurchaseState;
 import com.nut.bettersettlers.iab.IabConsts.ResponseCode;
 import com.nut.bettersettlers.iab.util.Base64;
@@ -78,7 +79,7 @@ public class ResponseHandler {
     public static void buyPageIntentResponse(PendingIntent pendingIntent, Intent intent) {
         if (sPurchaseObserver == null) {
             if (IabConsts.DEBUG) {
-                Log.d(TAG, "UI is not running");
+                //Log.d(TAG, "UI is not running");
             }
             return;
         }
@@ -108,12 +109,12 @@ public class ResponseHandler {
             final Context context, final PurchaseState purchaseState, final String productId,
             final String orderId, final long purchaseTime, final String developerPayload) {
     	
-    	Log.i(TAG, "purchaseResponse");
-    	Log.i(TAG, "  purchaseState " + purchaseState);
-    	Log.i(TAG, "  productId " + productId);
-    	Log.i(TAG, "  orderId " + orderId);
-    	Log.i(TAG, "  purchaseTime " + purchaseTime);
-    	Log.i(TAG, "  developerPayload " + developerPayload);
+    	//Log.i(TAG, "purchaseResponse");
+    	//Log.i(TAG, "  purchaseState " + purchaseState);
+    	//Log.i(TAG, "  productId " + productId);
+    	//Log.i(TAG, "  orderId " + orderId);
+    	//Log.i(TAG, "  purchaseTime " + purchaseTime);
+    	//Log.i(TAG, "  developerPayload " + developerPayload);
 
         // Update the database with the purchase state. We shouldn't do that
         // from the main thread so we do the work in a background thread.
@@ -127,14 +128,14 @@ public class ResponseHandler {
 
     				SharedPreferences prefs = context.getSharedPreferences(Consts.SHARED_PREFS_SEAFARERS_KEY, Context.MODE_PRIVATE);
     				SharedPreferences.Editor prefsEditor = prefs.edit();
-    				prefsEditor.putString(Base64.encode(productId.getBytes()), Obfuscate.encode(id, productId));
-    				prefsEditor.commit();
+					prefsEditor.putString(Base64.encode(productId.getBytes()), Obfuscate.encode(id, productId));
+					prefsEditor.commit();
 
     				// This needs to be synchronized because the UI thread can change the
     				// value of sPurchaseObserver.
     				synchronized(ResponseHandler.class) {
     					if (sPurchaseObserver != null) {
-    						sPurchaseObserver.postPurchaseStateChange(purchaseState, productId, developerPayload);
+							sPurchaseObserver.postPurchaseStateChange(purchaseState, productId, developerPayload);
     					}
     				}
     			}

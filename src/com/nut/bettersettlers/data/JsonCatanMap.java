@@ -25,8 +25,9 @@ public class JsonCatanMap extends CatanMap {
 	private static final String LOG_TAG = JsonCatanMap.class.getSimpleName();
 	
 	private static final Random RAND = new Random();
-	
+
 	private static final String NAME = "name";
+	private static final String TITLE = "title";
 	private static final String LAND = "land";
 	private static final String ORDERED_LAND = "ordered_land";
 	private static final String WATER = "water";
@@ -63,11 +64,11 @@ public class JsonCatanMap extends CatanMap {
 		try {
 			init(is);
 		} catch (IOException e) {
-			Log.e(LOG_TAG, "IOException parsing JsonMap");
+			//Log.e(LOG_TAG, "IOException parsing JsonMap");
 			e.printStackTrace();
 			return;
 		} catch (JSONException e) {
-			Log.e(LOG_TAG, "JSONException parsing JsonMap");
+			//Log.e(LOG_TAG, "JSONException parsing JsonMap");
 			e.printStackTrace();
 			return;
 		}
@@ -105,6 +106,7 @@ public class JsonCatanMap extends CatanMap {
 		JSONObject json = new JSONObject(str.toString());
 		
 		setName(json.getString(NAME));
+		setTitle(json.getString(TITLE));
 		
 		boolean[] landWithHarbors = setLandGridAndLandWithHarborsGridFromJson(json.getJSONArray(LAND));
 		setLandWhitelists(json.has(LAND_WHITELIST) ? json.getJSONArray(LAND_WHITELIST) : null);

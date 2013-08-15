@@ -21,17 +21,27 @@ package com.nut.bettersettlers.iab;
  * to support in-app billing.
  */
 public class IabConsts {
+	public static final String BUY_ALL = "seafarers.all";
+	public static final String FAKE_PRODUCT_ID = "android.test.purchased";
+	
 	public enum MapContainer {
-		HEADING_FOR_NEW_SHORES("heading_for_new_shores", "Heading for New Shores", "seafarers.heading_for_new_shores");
+		HEADING_FOR_NEW_SHORES("Heading for New Shores", "seafarers.heading_for_new_shores");
 		
 		public final String id;
 		public final String name;
-		public final String productId;
 		
-		MapContainer(String id, String name, String productId) {
+		MapContainer(String name, String id) {
 			this.id = id;
 			this.name = name;
-			this.productId = productId;
+		}
+		
+		public static MapContainer getMapContainer(String id) {
+			for (MapContainer container : MapContainer.values()) {
+				if (id.equals(container.id)) {
+					return container;
+				}
+			}
+			return null;
 		}
 	}
 	
@@ -115,5 +125,5 @@ public class IabConsts {
     public static final String BILLING_RESPONSE_REQUEST_ID = "REQUEST_ID";
     public static long BILLING_RESPONSE_INVALID_REQUEST_ID = -1;
 
-    public static final boolean DEBUG = true;
+    public static final boolean DEBUG = false;
 }

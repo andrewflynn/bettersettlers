@@ -3,4 +3,5 @@
     <dimen name="actionbar_compat_height">45dp</dimen>
     <dimen name="actionbar_compat_progress">27dp</dimen>
     <dimen name="menu_text_size">18sp</dimen>
+    <dimen name="seafarers_menu_width">280dp</dimen>
 </resources>

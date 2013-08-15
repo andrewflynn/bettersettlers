@@ -3,53 +3,15 @@
 	<style name="BetterSettlersThemeSelector" parent="android:Theme.Light">
         <item name="android:windowNoTitle">true</item>
         <item name="android:windowContentOverlay">@null</item>
-        
-        <item name="actionbarCompatButtonStyle">@style/ActionBarCompatButton</item>
-        <item name="actionbarCompatButtonStyleNoOrange">@style/ActionBarCompatButtonNoOrange</item>
-        <item name="actionbarCompatProgressIndicatorStyle">@style/ActionBarCompatProgressIndicator</item>
-        <item name="actionbarCompatSeparatorStyle">@style/ActionBarCompatSeparator</item>
-        <item name="actionbarCompatTextStyle">@style/ActionBarCompatText</item>
     </style>
 
-    <style name="ActionBarCompatButton">
-        <item name="android:layout_width">@dimen/actionbar_compat_height</item>
-        <item name="android:layout_height">fill_parent</item>
-        <item name="android:scaleType">center</item>
-        <item name="android:background">@drawable/actionbar_compat_button</item>
+    <style name="FadeDialogAnimation">
+        <item name="android:windowEnterAnimation">@android:anim/fade_in</item>
+        <item name="android:windowExitAnimation">@android:anim/fade_out</item>
     </style>
 
-    <style name="ActionBarCompatButtonNoOrange">
-        <item name="android:layout_width">@dimen/actionbar_compat_height</item>
-        <item name="android:layout_height">fill_parent</item>
-        <item name="android:scaleType">center</item>
-    </style>
-
-    <style name="ActionBarCompatProgressIndicator" parent="android:style/Widget.ProgressBar.Small">
-        <item name="android:indeterminate">true</item>
-    </style>
-
-    <style name="ActionBarCompatSeparator">
-        <item name="android:layout_width">2px</item>
-        <item name="android:layout_height">fill_parent</item>
-        <item name="android:background">@drawable/actionbar_compat_separator</item>
-    </style>
-
-    <style name="ActionBarCompatText">
-        <item name="android:id">@id/actionbar_compat_text</item>
-        <item name="android:layout_width">0dp</item>
-        <item name="android:layout_height">fill_parent</item>
-        <item name="android:layout_weight">1</item>
-        <item name="android:gravity">center_vertical</item>
-        <item name="android:textSize">@dimen/menu_text_size</item>
-        <item name="android:paddingLeft">12dp</item>
-        <item name="android:paddingRight">12dp</item>
-        <item name="android:textStyle">bold</item>
-        <item name="android:textColor">@color/actionbar_text</item>
-        <item name="android:shadowColor">#fff</item>
-        <item name="android:shadowDx">0</item>
-        <item name="android:shadowDy">1</item>
-        <item name="android:shadowRadius">0.00001</item>
-        <item name="android:singleLine">true</item>
-        <item name="android:ellipsize">end</item>
+    <style name="SlideDialogAnimation">
+        <item name="android:windowEnterAnimation">@anim/slide_in_right</item>
+        <item name="android:windowExitAnimation">@anim/slide_out_right</item>
     </style>
 </resources>

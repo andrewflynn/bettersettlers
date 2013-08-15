@@ -54,7 +54,7 @@ public class BillingReceiver extends BroadcastReceiver {
         } else if (IabConsts.ACTION_NOTIFY.equals(action)) {
             String notifyId = intent.getStringExtra(IabConsts.NOTIFICATION_ID);
             if (IabConsts.DEBUG) {
-                Log.i(TAG, "notifyId: " + notifyId);
+                //Log.i(TAG, "notifyId: " + notifyId);
             }
             notify(context, notifyId);
         } else if (IabConsts.ACTION_RESPONSE_CODE.equals(action)) {
@@ -63,7 +63,7 @@ public class BillingReceiver extends BroadcastReceiver {
                     ResponseCode.RESULT_ERROR.ordinal());
             checkResponseCode(context, requestId, responseCodeIndex);
         } else {
-            Log.w(TAG, "unexpected action: " + action);
+            //Log.w(TAG, "unexpected action: " + action);
         }
     }
 

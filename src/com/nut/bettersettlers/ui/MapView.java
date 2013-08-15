@@ -12,9 +12,7 @@ import java.util.List;
 
 import android.content.Context;
 import android.graphics.Canvas;
-import android.graphics.Color;
 import android.graphics.Paint;
-import android.graphics.Paint.Style;
 import android.graphics.Path;
 import android.graphics.Point;
 import android.graphics.Rect;
@@ -22,7 +20,6 @@ import android.graphics.RectF;
 import android.graphics.Typeface;
 import android.graphics.drawable.ShapeDrawable;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.util.Pair;
 import android.view.Display;
 import android.view.GestureDetector;
@@ -36,6 +33,7 @@ import com.nut.bettersettlers.data.CatanMap;
 import com.nut.bettersettlers.data.MapConsts.Harbor;
 import com.nut.bettersettlers.data.MapConsts.Piece;
 import com.nut.bettersettlers.data.MapConsts.Resource;
+import com.nut.bettersettlers.fragment.MapFragment;
 import com.nut.bettersettlers.logic.MapLogic;
 import com.nut.bettersettlers.misc.Consts;
 
@@ -81,6 +79,8 @@ public class MapView extends View {
     private float mLastTouchY;
     // The ‘active pointer’ is the one currently moving our object.
     private int mActivePointerId = INVALID_POINTER_ID;
+    
+    private MapFragment mMapFragment;
 	
 	public MapView(Context context) {
 		super(context);
@@ -152,6 +152,10 @@ public class MapView extends View {
 		//Log.i(X, "dMiddleX: " + dMiddleX);
 		//Log.i(X, "dMiddleY: " + dMiddleY);
 		//Log.i(X, "mScaleFactor: " + mScaleFactor);
+	}
+	
+	public void setMapFragment(MapFragment mapFragment) {
+		mMapFragment = mapFragment;
 	}
 
 	public void setMapSize(CatanMap currentMap) {
