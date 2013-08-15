@@ -1,5 +1,6 @@
 package com.nut.bettersettlers.data;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -15,7 +16,7 @@ public class MapProvider {
 		STANDARD(R.raw.standard, "standard"),
 		LARGE(R.raw.large, "large"),
 		XLARGE(R.raw.xlarge, "xlarge"),
-		HEADING_FOR_NEW_SHORES(R.raw.heading_for_new_shores, "heading_for_new_shores"),;
+		HEADING_FOR_NEW_SHORES(R.raw.heading_for_new_shores, "heading_for_new_shores");
 		
 		public final int rawResId;
 		public final String name;
@@ -27,6 +28,10 @@ public class MapProvider {
 	}
 	
 	public MapProvider(Context context) {
+		this(context, null);
+	}
+	
+	public MapProvider(Context context, ArrayList<Integer> theftOrder) {
 		mContext = context;
 		
 		maps = new HashMap<MapSize, CatanMap>();

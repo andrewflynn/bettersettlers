@@ -1,9 +1,9 @@
 package com.nut.bettersettlers.data;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import android.graphics.Point;
 
@@ -25,6 +25,7 @@ public abstract class CatanMap {
 	private int[][] harborLines;
 	private int[][] landNeighbors;
 	private int[][] waterNeighbors;
+	private int[][] waterWaterNeighbors;
 	private int[][] landIntersections;
 	private int[][] landIntersectionIndexes;
 	private int[][] placementIndexes;
@@ -37,6 +38,7 @@ public abstract class CatanMap {
 	private Resource[] availableUnknownResources;
 	private int[] availableUnknownProbabilities;
 	private List<int[]> placementBlacklists;
+	private ArrayList<Integer> theftOrder;
 	
 	/** The name of this map. */
 	public String getName() {
@@ -173,6 +175,17 @@ public abstract class CatanMap {
 	}
 
 	/**
+	 * This list of list is like waterNeighbors except it contains the ocean tiles each ocean tile
+	 * is neighbors with (not including itself)
+	 */
+	public int[][] getWaterWaterNeighbors() {
+		return waterWaterNeighbors;
+	}
+	public void setWaterWaterNeighbors(int[][] waterWaterNeighbors) {
+		this.waterWaterNeighbors = waterWaterNeighbors;
+	}
+	
+	/**
 	 * "Triplets" are defined as three terrain tiles that come together at an intersection
 	 * (ports do not count). These are ordered starting in the TL corner going L -> R, T -> B
 	 * (going straight across such that the top three terrain tiles are the "top two" for the
@@ -278,6 +291,14 @@ public abstract class CatanMap {
 		this.placementBlacklists = placementBlacklists;
 	}
 	
+	/** Order of any land converted to water so we can keep the same map for New World on a rotation. */
+	public ArrayList<Integer> getTheftOrder() {
+		return theftOrder;
+	}
+	public void setTheftOrder(ArrayList<Integer> theftOrder) {
+		this.theftOrder = theftOrder;
+	}
+	
 	protected String deepToString(List<int[]> array) {
 		StringBuilder sb = new StringBuilder();
 		sb.append("[ ");
@@ -296,6 +317,7 @@ public abstract class CatanMap {
 			.append("  Land Grid: ").append(Arrays.toString(getLandGrid())).append("\n")
 			.append("  Land Grid Whitelist: ").append(Arrays.toString(getLandGridWhitelists())).append("\n")
 			.append("  Land Grid Probabilities: ").append(Arrays.toString(getLandGridProbabilities())).append("\n")
+			.append("  Land Grid Resources: ").append(Arrays.toString(getLandGridResources())).append("\n")
 			.append("  Land Resource Whitelist: ").append(getLandResourceWhitelists()).append("\n")
 			.append("  Land Probability Whitelist: ").append(getLandProbabilityWhitelists()).append("\n")
 			.append("  Land Grid Order: ").append(Arrays.toString(getLandGridOrder())).append("\n")
@@ -303,6 +325,7 @@ public abstract class CatanMap {
 			.append("  Harbor Lines: ").append(Arrays.deepToString(getHarborLines())).append("\n")
 			.append("  Land Neighbors: ").append(Arrays.deepToString(getLandNeighbors())).append("\n")
 			.append("  Water Neighbors: ").append(Arrays.deepToString(getWaterNeighbors())).append("\n")
+			.append("  Water Water Neighbors: ").append(Arrays.deepToString(getWaterWaterNeighbors())).append("\n")
 			.append("  Land Intersections: ").append(Arrays.deepToString(getLandIntersections())).append("\n")
 			.append("  Land Intersections Size: ").append(getLandIntersections().length).append("\n")
 			.append("  Land Intersection Indexes: ").append(Arrays.deepToString(getLandIntersectionIndexes())).append("\n")

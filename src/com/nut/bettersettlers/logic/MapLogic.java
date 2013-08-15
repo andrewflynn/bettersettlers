@@ -3,14 +3,12 @@ package com.nut.bettersettlers.logic;
 import static com.nut.bettersettlers.data.MapConsts.PROBABILITY_MAPPING;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
-
-import android.graphics.Point;
-import android.util.Log;
+import java.util.Set;
 
 import com.nut.bettersettlers.data.CatanMap;
 import com.nut.bettersettlers.data.MapConsts.Harbor;
@@ -82,7 +80,7 @@ public class MapLogic {
 		
 		// Insert random desert locations
 		while (avail.size() < currentMap.getLandGrid().length) {
-  		avail.add(RAND.nextInt(avail.size()), 0);
+			avail.add(RAND.nextInt(avail.size()), 0);
 		}
 		
 		// Map it to the left to right top to bottom we expect
@@ -103,7 +101,15 @@ public class MapLogic {
 		ArrayList<Integer> set = new ArrayList<Integer>();
 		ArrayList<Integer> avail = initProbabilities(currentMap);
 		while (!avail.isEmpty()) {
-			set.add(avail.remove(RAND.nextInt(avail.size())));
+			// If we have an assigned prob, use it
+			if (currentMap.getLandGridProbabilities()[set.size()] != Integer.MAX_VALUE) {
+				//System.out.println(" pulling special " + counter);
+				int nextProb = currentMap.getLandGridProbabilities()[set.size()];
+				avail.remove((Integer) nextProb);
+				set.add(nextProb);
+			} else {
+				set.add(avail.remove(RAND.nextInt(avail.size())));
+			}
 		}
 		return set;
 	}
@@ -126,11 +132,20 @@ public class MapLogic {
 		ArrayList<Integer> avail = initProbabilitiesNoZeros(currentMap);
 		int counter = 0;
 		while (!avail.isEmpty()) {
-			if (resources.get(counter) == Resource.DESERT) {
-				set.add(0);
+			// If we have an assigned prob, use it
+			if (currentMap.getLandGridProbabilities()[counter] != Integer.MAX_VALUE) {
+				//System.out.println(" pulling special " + counter);
+				int nextProb = currentMap.getLandGridProbabilities()[counter];
+				avail.remove((Integer) nextProb);
+				set.add(nextProb);
 			} else {
-  			set.add(avail.remove(RAND.nextInt(avail.size())));
+				if (resources.get(counter) == Resource.DESERT) {
+					set.add(0);
+				} else {
+					set.add(avail.remove(RAND.nextInt(avail.size())));
+				}
 			}
+			//System.out.println("Check " + counter + ", set " + set.get(counter));
 			counter++;
 		}
 		
@@ -264,14 +279,14 @@ public class MapLogic {
 	}
 	
 	private static ArrayList<Integer> getOrderedProbabilities(CatanMap currentMap, ArrayList<Resource> resources) {
-    // Contains a mapping to which resources have what so far
+		// Contains a mapping to which resources have what so far
 		Map<Resource, ArrayList<Integer>> resourceMap = initResourceMap(currentMap);
 		// Contains the resources already set
 		ArrayList<Integer> set = new ArrayList<Integer>();
 		// Contains the resources already consumed in this iteration
 		ArrayList<Integer> tried = new ArrayList<Integer>();
 		// Contains the (non desert) resources yet to be consumed
-		ArrayList<Integer> avail = initOrderedProbabilitiesNoZeros(currentMap);
+		ArrayList<Integer> avail = initProbabilitiesNoZeros(currentMap);
 		boolean placedRecently = false;
 		
 		while (!tried.isEmpty() || !avail.isEmpty()) {
@@ -286,19 +301,40 @@ public class MapLogic {
 				resourceMap = initResourceMap(currentMap);
 				set.clear();
 				tried.clear();
-				avail = initOrderedProbabilitiesNoZeros(currentMap);
+				avail = initProbabilitiesNoZeros(currentMap);
 				placedRecently = false;
 			} else {
 				int nextIndex = set.size();
 				Resource nextResource = resources.get(nextIndex);
+				String whitelistName = currentMap.getLandGridWhitelists()[set.size()];
 				
 				// Consume
 				// Always place a 0 on a desert
 				int nextProb;
-				if (nextResource == Resource.DESERT) {
+				if (currentMap.getLandGridProbabilities()[set.size()] != Integer.MAX_VALUE) {
+					// If we have an assigned prob, use it
+					nextProb = currentMap.getLandGridProbabilities()[set.size()];
+					avail.remove((Integer) nextProb);
+					set.add(nextProb);
+					placedRecently = true;
+					continue;
+				} else if (nextResource == Resource.DESERT) {
 					set.add(0);
 					placedRecently = true;
 					continue;
+				} else if (whitelistName != null
+						&& currentMap.getLandProbabilityWhitelists().containsKey(whitelistName)) {
+					// If we have a prob whitelist, pull one from it.
+					// Grab a random one
+					List<Integer> probChoices = currentMap.getLandProbabilityWhitelists().get(whitelistName);
+					nextProb = -1;
+					while (nextProb == -1) {
+						int maybeNextProb = probChoices.get(RAND.nextInt(probChoices.size()));
+						if (avail.contains(maybeNextProb)) {
+							nextProb = maybeNextProb;
+							avail.remove((Integer) maybeNextProb);
+						}
+					}
 				} else {
 					nextProb = avail.remove(RAND.nextInt(avail.size()));
 				}
@@ -308,6 +344,13 @@ public class MapLogic {
 				//System.out.println("  Tried: " + tried);
 				//System.out.println("  Consuming: " + nextResource);
 				boolean canPlaceHere = true;
+				
+				// If it's a desert (picking a 0), make sure the whitelist (if it has one) has desert
+				if (nextProb == 0 && whitelistName != null
+						&& currentMap.getLandResourceWhitelists().containsKey(whitelistName)
+						&& !currentMap.getLandResourceWhitelists().get(whitelistName).contains(Resource.DESERT)) {
+					canPlaceHere = false;
+				}
 
 				// Check all intersections that contain this piece
 				for (int tripletIndex : currentMap.getLandIntersectionIndexes()[set.size()]) {
@@ -318,18 +361,33 @@ public class MapLogic {
 					
 					ArrayList<Integer> tempTriplets = new ArrayList<Integer>();
 					tempTriplets.add(nextProb);
+					boolean goAhead = true;
 					for (int trip : triplet) {
 						if (trip < set.size()) {
-							tempTriplets.add(set.get(trip));
+							int num = set.get(trip);
+							if (num < 0) {
+								goAhead = false; // Skip empty probs
+								break;
+							}
+							tempTriplets.add(num);
 						}
 					}
+					if (!goAhead) {
+						continue;
+					}
+					
 					if (!noDuplicates(currentMap, tempTriplets)) {
 						canPlaceHere = false;
 					} else if (tempTriplets.size() == 3) {
 						if (tempTriplets.contains(0)) {
-							// Has a desert has to be 4<=x<=8
-							if (sumProbability(tempTriplets) < 4 || sumProbability(tempTriplets) > 8) {
-								canPlaceHere = false;
+							// Ignore if it has more than one desert (only for customs)
+							tempTriplets.remove((Integer) 0);
+							if (!tempTriplets.contains(0)) {
+								tempTriplets.add(0);
+								// Has a desert has to be 4<=x<=8
+								if (sumProbability(tempTriplets) < 4 || sumProbability(tempTriplets) > 8) {
+									canPlaceHere = false;
+								}
 							}
 						} else {
 							if (sumProbability(tempTriplets) < 5 || sumProbability(tempTriplets) > 11) {
@@ -400,27 +458,6 @@ public class MapLogic {
 		}
 	}
 	
-	private static ArrayList<Resource> getRandomResources(CatanMap currentMap, ArrayList<Integer> probs) {
-		ArrayList<Resource> set = new ArrayList<Resource>();
-		ArrayList<Resource> avail = initAvailResourcesNoDesert(currentMap);
-		while (!avail.isEmpty()) {
-			int nextProb = probs.get(set.size());
-			
-			if (nextProb == 0) {
-				set.add(Resource.DESERT);
-			} else {
-				set.add(avail.remove(RAND.nextInt(avail.size())));
-			}
-		}
-		
-		// Check for deserts at the end
-		while (set.size() < probs.size()) {
-			set.add(Resource.DESERT);
-		}
-		
-		return set;
-	}
-	
 	public static ArrayList<Resource> getUnknowns(CatanMap currentMap, ArrayList<Integer> probs) {
 		ArrayList<Resource> set = new ArrayList<Resource>();
 		ArrayList<Resource> avail = new ArrayList<Resource>();
@@ -450,8 +487,47 @@ public class MapLogic {
 		return set;
 	}
 	
+	private static ArrayList<Resource> getRandomResources(CatanMap currentMap, ArrayList<Integer> probs) {
+		ArrayList<Resource> set = new ArrayList<Resource>();
+		ArrayList<Resource> avail = initAvailResourcesNoDesert(currentMap);
+		Map<String, List<Resource>> allowedWhitelists = getAllowedWhitelists(currentMap);
+		
+		while (!avail.isEmpty()) {
+			int nextIndex = set.size();
+			int nextProb = probs.get(nextIndex);
+
+			String whitelistName = currentMap.getLandGridWhitelists()[nextIndex];
+			
+			// Consume
+			// Always place a random resource on a -1
+			// Always place a desert on a 0
+			Resource nextResource;
+			if (nextProb == 0) {
+				set.add(Resource.DESERT);
+			} else if (nextProb < -1 && whitelistName != null && allowedWhitelists.containsKey(whitelistName)
+					&& allowedWhitelists.get(whitelistName).contains(Resource.DESERT)) {
+				// Special case deserts with probs
+				set.add(Resource.DESERT);
+			} else if (currentMap.getLandGridResources()[nextIndex] != null) {
+				nextResource = currentMap.getLandGridResources()[nextIndex];
+				// If we have an assigned resource, use it
+				set.add(nextResource);
+				avail.remove(nextResource);
+			} else {
+				set.add(avail.remove(RAND.nextInt(avail.size())));
+			}
+		}
+		
+		// Check for deserts at the end
+		while (set.size() < probs.size()) {
+			set.add(Resource.DESERT);
+		}
+		
+		return set;
+	}
+	
 	private static ArrayList<Resource> getOrderedResources(CatanMap currentMap, ArrayList<Integer> probs) {
-      // Contains a mapping to which resources have what so far
+		// Contains a mapping to which resources have what so far
 		Map<Resource, ArrayList<Integer>> resourceMap = initResourceMap(currentMap);
 		// Contains the resources already set
 		ArrayList<Resource> set = new ArrayList<Resource>();
@@ -652,7 +728,7 @@ public class MapLogic {
 		
 		// First fill with water
 		for (int i = 0; i < currentMap.getWaterGrid().length; i++) {
-			harbors.add(new Harbor(i, Resource.WATER, currentMap.getWaterNeighbors()[i][0]));      
+			harbors.add(new Harbor(i, Resource.WATER, -1));      
 		}
 		
 		while (!toTake.isEmpty()) {
@@ -661,9 +737,19 @@ public class MapLogic {
 			while (harbors.get(rand).getResource() != Resource.WATER) {
 				rand = RAND.nextInt(currentMap.getWaterGrid().length);
 			}
+			
+			// If no land, skip it
+			if (currentMap.getWaterNeighbors()[rand] == null) {
+				continue;
+			}
+
 			harbors.get(rand).setResource(toTake.remove(0));
 			if (currentMap.getWaterNeighbors()[rand].length > 1) {
-				harbors.get(rand).setFacing(currentMap.getWaterNeighbors()[rand][RAND.nextInt(2)]);
+				if (isCustom(currentMap)) {
+					harbors.get(rand).setFacing(currentMap.getWaterNeighbors()[rand][0]);
+				} else {
+					harbors.get(rand).setFacing(currentMap.getWaterNeighbors()[rand][RAND.nextInt(2)]);
+				}
 			} else {
 				harbors.get(rand).setFacing(currentMap.getWaterNeighbors()[rand][0]);
 			}
@@ -698,13 +784,33 @@ public class MapLogic {
 				
 				int nextResourceIndex = RAND.nextInt(resources.size());
 				if (coinFlip) {
+					if (currentMap.getName().equals("new_world")) {
+						boolean skip = false;
+						while (neighborConflict(currentMap, harbors, pos)) {
+							harbors.add(new Harbor(pos, Resource.WATER, -1));
+							pos++;
+							if (pos >= currentMap.getWaterGrid().length) {
+								skip = true;
+								break;
+							}
+						}
+						if (skip) {
+							break;
+						}
+					}
+					
 					// no land around it
 					if (currentMap.getWaterNeighbors()[pos] == null) {
 						harbors.add(new Harbor(pos, Resource.WATER, -1));
 					} else {
 						if (currentMap.getWaterNeighbors()[pos].length > 1) {
-							harbors.add(new Harbor(pos, resources.remove(nextResourceIndex),
-									currentMap.getWaterNeighbors()[pos][RAND.nextInt(2)]));
+							if (isCustom(currentMap)) {
+								harbors.add(new Harbor(pos, resources.remove(nextResourceIndex),
+										currentMap.getWaterNeighbors()[pos][0]));
+							} else {
+								harbors.add(new Harbor(pos, resources.remove(nextResourceIndex),
+										currentMap.getWaterNeighbors()[pos][RAND.nextInt(2)]));
+							}
 						} else {
 							harbors.add(new Harbor(pos, resources.remove(nextResourceIndex),
 									currentMap.getWaterNeighbors()[pos][0]));
@@ -735,14 +841,34 @@ public class MapLogic {
 					if (harbors.size() >= currentMap.getWaterGrid().length) {
 						break;
 					}
+					
+					if (currentMap.getName().equals("new_world")) {
+						boolean skip = false;
+						while (neighborConflict(currentMap, harbors, pos)) {
+							harbors.add(new Harbor(pos, Resource.WATER, -1));
+							pos++;
+							if (pos >= currentMap.getWaterGrid().length) {
+								skip = true;
+								break;
+							}
+						}
+						if (skip) {
+							break;
+						}
+					}
 
 					// no land around it
 					if (currentMap.getWaterNeighbors()[pos] == null) {
 						harbors.add(new Harbor(pos, Resource.WATER, -1));
 					} else {
 						if (currentMap.getWaterNeighbors()[pos].length > 1) {
-							harbors.add(new Harbor(pos, resources.remove(nextResourceIndex),
-									currentMap.getWaterNeighbors()[pos][RAND.nextInt(2)]));
+							if (isCustom(currentMap)) {
+								harbors.add(new Harbor(pos, resources.remove(nextResourceIndex),
+										currentMap.getWaterNeighbors()[pos][0]));
+							} else {
+								harbors.add(new Harbor(pos, resources.remove(nextResourceIndex),
+										currentMap.getWaterNeighbors()[pos][RAND.nextInt(2)]));
+							}
 						} else {
 							harbors.add(new Harbor(pos, resources.remove(nextResourceIndex),
 									currentMap.getWaterNeighbors()[pos][0]));
@@ -751,36 +877,63 @@ public class MapLogic {
 					pos++;
 				}
 			}
-      
+
 			// Check to see if things are fair. A 2:1 harbor can't touch one of it's own terrain
 			// tiles of probability 5, 6, 8, or 9.
-		  boolean goAhead = true;
-		  for (int i = 0; i < harbors.size(); i++) {
-		  	Harbor harbor = harbors.get(i);
+			boolean goAhead = true;
+			for (int i = 0; i < harbors.size(); i++) {
+				Harbor harbor = harbors.get(i);
 				Resource harborResource = harbor.getResource();
+
 				if (harborResource == Resource.DESERT || harborResource == Resource.WATER) {
 					continue;
 				} else {
 					int[] neighbors = currentMap.getWaterNeighbors()[i];
 					for (int neighbor : neighbors) {
-  					Resource landResource = resourceList.get(neighbor);
-	  				int landNumber = numberList.get(neighbor);
-		  			if (harborResource == landResource && (landNumber >= 5 && landNumber <= 9)) {
-		  				//Log.i("BS", "    Skipping " + harborResource + ", " + landNumber);
-			  			goAhead = false;
-				  		break;
-					  } else {
-					  	//Log.i("BS", "NOT SKipping " + harborResource + ", " + landNumber);
-					  }
+						Resource landResource = resourceList.get(neighbor);
+						int landNumber = numberList.get(neighbor);
+						if (harborResource == landResource && (landNumber >= 5 && landNumber <= 9)) {
+							//Log.i("BS", "    Skipping " + harborResource + ", " + landNumber);
+							goAhead = false;
+							break;
+						} else {
+							//Log.i("BS", "NOT SKipping " + harborResource + ", " + landNumber);
+						}
 					}
 				}
-		  }
-		  if (goAhead) {
-		  	break;
-		  }
+			}
+			if (goAhead) {
+				break;
+			}
 		}
 
 		return harbors;
+	}
+	
+	/**
+	 * Helper for getOrderdHarbors for New World
+	 */
+	private static boolean neighborConflict(CatanMap currentMap, ArrayList<Harbor> harbors, int position) {
+		Set<Integer> seenNeighbors = new HashSet<Integer>();
+		for (int i = 0; i < harbors.size(); i++) {
+			if (harbors.get(i).getResource() != Resource.WATER && currentMap.getWaterNeighbors()[i] != null) {
+				seenNeighbors.add(harbors.get(i).getPosition());
+				for (int neighbor : currentMap.getWaterWaterNeighbors()[i]) {
+					seenNeighbors.add(neighbor);
+				}
+			}
+		}
+
+		// Check neighbors conflicting with neighbors
+		if (currentMap.getWaterWaterNeighbors()[position] != null) {
+			for (int positionNeighbor : currentMap.getWaterWaterNeighbors()[position]) {
+				if (seenNeighbors.contains(positionNeighbor)) {
+					return true;
+				}
+			}
+		}
+		// Also check itself
+		return seenNeighbors.contains(position);
 	}
 
 	/**
@@ -792,6 +945,11 @@ public class MapLogic {
 	 */
 	public static int whichWayHarborFaces(CatanMap currentMap, Harbor harbor) {
 		int pos = harbor.getPosition();
+		
+		if (currentMap.getWaterNeighbors()[pos] == null) {
+			return -1;
+		}
+		
 		int len = currentMap.getWaterNeighbors()[pos].length;
 		if (len == 1) {
 			return 0;
@@ -877,7 +1035,7 @@ public class MapLogic {
 		ArrayList<Integer> numbers = new ArrayList<Integer>();
 		for (int i : currentMap.getAvailableProbabilities()) {
 			if (i != 0) {
-  			numbers.add(i);
+				numbers.add(i);
 			}
 		}
 		return numbers;
@@ -941,5 +1099,13 @@ public class MapLogic {
 			harbors.add(resource);
 		}
 		return harbors;
+	}
+	
+	private static boolean isCustom(CatanMap currentMap) {
+		Set<String> nonCustomNames = new HashSet<String>();
+		nonCustomNames.add("standard");
+		nonCustomNames.add("large");
+		nonCustomNames.add("xlarge");
+		return !nonCustomNames.contains(currentMap.getName());
 	}
 }

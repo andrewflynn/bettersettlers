@@ -39,6 +39,7 @@ public class MainActivity extends FragmentActivity {
 	
 	private static final String STATE_SHOW_GRAPH = "STATE_SHOW_GRAPH";
 	private static final String STATE_SHOW_PLACEMENTS = "STATE_SHOW_PLACEMENTS";
+	private static final String STATE_THEFT_ORDER = "STATE_THEFT_ORDER";
 	private static final int DIALOG_PROGRESS_ID = 1;
 	
 	private MapFragment mMapFragment;
@@ -77,6 +78,11 @@ public class MainActivity extends FragmentActivity {
 				outState.putBoolean(STATE_SHOW_PLACEMENTS, true);
 			}
 		}
+		
+		if (mMapFragment != null && mMapFragment.getMapSize().getTheftOrder() != null
+				&& !mMapFragment.getMapSize().getTheftOrder().isEmpty()) {
+			outState.putIntegerArrayList(STATE_THEFT_ORDER, mMapFragment.getMapSize().getTheftOrder());
+		}
 	}
 	
 	/** Called when the activity is first created. */
@@ -86,7 +92,11 @@ public class MainActivity extends FragmentActivity {
 		
 		setContentView(R.layout.main);
 		
-		mMapProvider = new MapProvider(this);
+		if (savedInstanceState != null && savedInstanceState.getStringArrayList(STATE_THEFT_ORDER) != null) {
+			mMapProvider = new MapProvider(this, savedInstanceState.getIntegerArrayList(STATE_THEFT_ORDER));
+		} else {
+			mMapProvider = new MapProvider(this);
+		}
 		
 		mMapFragment = (MapFragment) getSupportFragmentManager().findFragmentById(R.id.map_fragment);
 		mGraphFragment = (GraphFragment) getSupportFragmentManager().findFragmentById(R.id.graph_fragment);
