@@ -4,7 +4,6 @@ import static com.nut.bettersettlers.data.MapConsts.BOARD_RANGE_X;
 import static com.nut.bettersettlers.data.MapConsts.BOARD_RANGE_Y;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
 
@@ -35,6 +34,7 @@ import com.nut.bettersettlers.data.MapProvider.MapSize;
 import com.nut.bettersettlers.fragment.dialog.AboutDialogFragment;
 import com.nut.bettersettlers.fragment.dialog.RateDialogFragment;
 import com.nut.bettersettlers.fragment.dialog.RulesDialogFragment;
+import com.nut.bettersettlers.fragment.dialog.SeafarersDialogFragment;
 import com.nut.bettersettlers.fragment.dialog.WelcomeDialogFragment;
 import com.nut.bettersettlers.logic.MapLogic;
 import com.nut.bettersettlers.logic.PlacementLogic;
@@ -42,7 +42,7 @@ import com.nut.bettersettlers.misc.Consts;
 import com.nut.bettersettlers.ui.MapView;
 
 public class MapFragment extends Fragment {
-	private static final String X = MapFragment.class.getSimpleName();
+	private static final String X = "BetterSettlers";
 	
 	private static final String STATE_MAP_SIZE = "MAP_SIZE";
 	private static final String STATE_MAP_TYPE = "MAP_TYPE";
@@ -79,6 +79,8 @@ public class MapFragment extends Fragment {
 	private int mPlacementBookmark = -1;
 	
 	private int mRollTrackerItemId = -1;
+	
+	private boolean mShowSeafarers = false;
 
 	///////////////////////////////
 	// Fragment method overrides //
@@ -323,6 +325,14 @@ public class MapFragment extends Fragment {
 	public MapType getMapType() {
 		return mMapType;
 	}
+	
+	public boolean getShowSeafarers() {
+		return mShowSeafarers;
+	}
+
+	public void setShowSeafarers(boolean showSeafarers) {
+		mShowSeafarers = showSeafarers;
+	}
 
 	////////////////////
 	// Menu functions //
@@ -337,6 +347,17 @@ public class MapFragment extends Fragment {
 			} else {
 				inflater.inflate(R.menu.map_hc, menu);
 			}
+		}
+	}
+	
+	@Override
+	public void onPrepareOptionsMenu(Menu menu) {
+		super.onPrepareOptionsMenu(menu);
+		
+		Log.i(X, "onPrepareOptionsMenu " + mShowSeafarers);
+		MenuItem seaItem = menu.findItem(R.id.seafarers_item);
+		if (seaItem != null) {
+			seaItem.setVisible(mShowSeafarers);
 		}
 	}
 
@@ -390,6 +411,9 @@ public class MapFragment extends Fragment {
 		case R.id.xlarge_item:
 			xlargeChoice();
 			return true;
+		case R.id.seafarers_item:
+			seafarersChoice();
+			return true;
 		case R.id.heading_for_new_shores_item:
 			headingForNewShoresChoice();
 			return true;
@@ -438,28 +462,35 @@ public class MapFragment extends Fragment {
 		typeChoice(MapType.RANDOM, Consts.ANALYTICS_CHANGE_MAP_TYPE_FORMAT);
 	}
 	
-	private void sizeChoice(CatanMap size, String analyticsKey) {
+	public void sizeChoice(CatanMap size) {
 		if (mMapSize != size) {
 			mMapSize = size;
 			asyncMapShuffle();
-			((MainActivity) getActivity()).getAnalytics().trackPageView(String.format(analyticsKey, mMapSize.getName()));
+			((MainActivity) getActivity()).getAnalytics().trackPageView(
+					String.format(Consts.ANALYTICS_CHANGE_MAP_SIZE_FORMAT, mMapSize.getName()));
 		}
 	}
 	
 	public void standardChoice() {
-		sizeChoice(getMapProvider().getMap(MapSize.STANDARD), Consts.ANALYTICS_CHANGE_MAP_SIZE_FORMAT);
+		sizeChoice(getMapProvider().getMap(MapSize.STANDARD));
 	}
 	
 	public void largeChoice() {
-		sizeChoice(getMapProvider().getMap(MapSize.LARGE), Consts.ANALYTICS_CHANGE_MAP_SIZE_FORMAT);
+		sizeChoice(getMapProvider().getMap(MapSize.LARGE));
 	}
 	
 	public void xlargeChoice() {
-		sizeChoice(getMapProvider().getMap(MapSize.XLARGE), Consts.ANALYTICS_CHANGE_MAP_SIZE_FORMAT);
+		sizeChoice(getMapProvider().getMap(MapSize.XLARGE));
+	}
+	
+	public void seafarersChoice() {
+		MainActivity mainActivity = (MainActivity) getActivity();
+		mainActivity.getAnalytics().trackPageView(Consts.ANALYTICS_VIEW_SEAFARERS);
+		SeafarersDialogFragment.newInstance(mainActivity.getOwnedMaps()).show(getActivity().getSupportFragmentManager(), "SeafarersDialogFragment");
 	}
 	
 	public void headingForNewShoresChoice() {
-		sizeChoice(getMapProvider().getMap(MapSize.HEADING_FOR_NEW_SHORES), Consts.ANALYTICS_CHANGE_MAP_SIZE_FORMAT);
+		sizeChoice(getMapProvider().getMap(MapSize.HEADING_FOR_NEW_SHORES));
 	}
 	
 	public void togglePlacements(boolean on) {

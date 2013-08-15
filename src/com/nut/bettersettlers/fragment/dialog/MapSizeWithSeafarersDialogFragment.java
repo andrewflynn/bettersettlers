@@ -5,17 +5,19 @@ import android.app.Dialog;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
+import android.support.v4.app.FragmentManager;
 
 import com.nut.bettersettlers.R;
-import com.nut.bettersettlers.data.MapConsts.MapType;
+import com.nut.bettersettlers.activity.MainActivity;
 import com.nut.bettersettlers.fragment.MapFragment;
 
-public class MapSizeDialogFragment extends DialogFragment {
-	private static final String[] SIZES = {"Standard (3-4 people)", "Large (5 people)", "X-Large (6 people)" };
+public class MapSizeWithSeafarersDialogFragment extends DialogFragment {
+	private static final String[] SIZES = { "Standard (3-4 people)", "Large (5 people)", "X-Large (6 people)",
+		"Seafarers" };
 	private static final String SELECTED_KEY = "selected";
 	
-	public static MapSizeDialogFragment newInstance(int selected) {
-		MapSizeDialogFragment f = new MapSizeDialogFragment();
+	public static MapSizeWithSeafarersDialogFragment newInstance(int selected) {
+		MapSizeWithSeafarersDialogFragment f = new MapSizeWithSeafarersDialogFragment();
 		
 		Bundle args = new Bundle();
 		args.putInt(SELECTED_KEY, selected);
@@ -40,7 +42,9 @@ public class MapSizeDialogFragment extends DialogFragment {
 		public void onClick(DialogInterface dialog, int which) {
 			dialog.dismiss();
 			
-			MapFragment mapFragment = (MapFragment) getActivity().getSupportFragmentManager().findFragmentById(R.id.map_fragment);
+			FragmentManager fragmentManager = getActivity().getSupportFragmentManager();
+			MapFragment mapFragment = (MapFragment) fragmentManager.findFragmentById(R.id.map_fragment);
+			MainActivity mainActivity = (MainActivity) getActivity();
 			switch (which) {
 			case 0:
 				mapFragment.standardChoice();
@@ -49,6 +53,10 @@ public class MapSizeDialogFragment extends DialogFragment {
 				mapFragment.largeChoice();
 				break;
 			case 2:
+				mapFragment.xlargeChoice();
+				break;
+			case 3:
+				SeafarersDialogFragment.newInstance(mainActivity.getOwnedMaps()).show(fragmentManager, "SeafarersDialogFragment");
 			default:
 				break;
 			}

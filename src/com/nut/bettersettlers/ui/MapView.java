@@ -40,7 +40,7 @@ import com.nut.bettersettlers.logic.MapLogic;
 import com.nut.bettersettlers.misc.Consts;
 
 public class MapView extends View {
-	private static final String X = MapView.class.getSimpleName();
+	private static final String X = "BetterSettlers";
 	
 	private static final int INVALID_POINTER_ID = -1;
 	
