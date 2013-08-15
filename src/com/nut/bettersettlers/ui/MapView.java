@@ -669,12 +669,12 @@ public class MapView extends View {
 	private void drawHarbor(Canvas canvas, Paint paint, Harbor harbor, Rect rect, int i) {
 		float x = rect.centerX();
 		float y = rect.centerY() - (dProbTopBuffer + dBorder) * mScaleFactor;
+		int dir = MapLogic.whichWayHarborFaces(mCurrentMap, harbor);
 
-		if (harbor.getResource() == Resource.WATER){
+		if (harbor.getResource() == Resource.WATER || dir == -1) {
 			return; // Do nothing
 		}
 		
-		int dir = MapLogic.whichWayHarborFaces(mCurrentMap, harbor);
 		if (harbor.getResource() == Resource.DESERT) {
 			paint.setColor(0xFFFFFFFF);
 			canvas.drawCircle(x, y, dHarborCircle * mScaleFactor, paint);

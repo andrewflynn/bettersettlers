@@ -94,10 +94,11 @@ public final class MapConsts {
 		
 		@Override
 		public String toString() {
-			return new StringBuilder("[Harbor: ").append("\n")
-				.append("  position: ").append(position)
-				.append("  resource: ").append(resource)
-				.append("  facing:   ").append(facing)
+			return new StringBuilder("[Harbor:")
+				.append(" position: ").append(position)
+				.append(" resource: ").append(resource)
+				.append(" facing:   ").append(facing)
+				.append(" ]").append("\n")
 				.toString();
 		}
 	}
