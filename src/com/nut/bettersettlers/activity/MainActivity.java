@@ -17,7 +17,6 @@ import android.os.PowerManager.WakeLock;
 import android.provider.Settings.Secure;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentTransaction;
-import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.ImageView;
@@ -29,6 +28,7 @@ import com.nut.bettersettlers.data.MapProvider.MapSize;
 import com.nut.bettersettlers.fragment.GraphFragment;
 import com.nut.bettersettlers.fragment.MapFragment;
 import com.nut.bettersettlers.fragment.dialog.AboutDialogFragment;
+import com.nut.bettersettlers.fragment.dialog.FakePurchaseDialogFragment;
 import com.nut.bettersettlers.fragment.dialog.FogIslandHelpDialogFragment;
 import com.nut.bettersettlers.iab.BillingService;
 import com.nut.bettersettlers.iab.BillingService.RequestPurchase;
@@ -49,6 +49,7 @@ public class MainActivity extends FragmentActivity {
 	private static final String STATE_SHOW_GRAPH = "STATE_SHOW_GRAPH";
 	private static final String STATE_SHOW_PLACEMENTS = "STATE_SHOW_PLACEMENTS";
 	private static final String STATE_THEFT_ORDER = "STATE_THEFT_ORDER";
+	private static final String STATE_EXP_THEFT_ORDER = "STATE_EXP_THEFT_ORDER";
 	private static final String STATE_TITLE_ID = "STATE_TITLE_ID";
 	
 	private static final String SHARED_PREFS_IAB_STATE_CURRENT = "SHARED_PREFS_STATE_CURRENT";
@@ -180,11 +181,6 @@ public class MainActivity extends FragmentActivity {
 			}
 		}
 		
-		if (mMapFragment != null && mMapFragment.getMapSize().getTheftOrder() != null
-				&& !mMapFragment.getMapSize().getTheftOrder().isEmpty()) {
-			outState.putIntegerArrayList(STATE_THEFT_ORDER, mMapFragment.getMapSize().getTheftOrder());
-		}
-		
 		outState.putInt(STATE_TITLE_ID, mTitleId);
 	}
 	
@@ -195,8 +191,10 @@ public class MainActivity extends FragmentActivity {
 		
 		setContentView(R.layout.main);
 		
-		if (savedInstanceState != null && savedInstanceState.getStringArrayList(STATE_THEFT_ORDER) != null) {
-			mMapProvider = new MapProvider(this, savedInstanceState.getIntegerArrayList(STATE_THEFT_ORDER));
+		if (savedInstanceState != null && (savedInstanceState.getStringArrayList(STATE_THEFT_ORDER) != null
+				|| savedInstanceState.getStringArrayList(STATE_EXP_THEFT_ORDER) != null)) {
+			mMapProvider = new MapProvider(this, savedInstanceState.getIntegerArrayList(STATE_THEFT_ORDER),
+					savedInstanceState.getIntegerArrayList(STATE_EXP_THEFT_ORDER));
 		} else {
 			mMapProvider = new MapProvider(this);
 		}
@@ -334,21 +332,23 @@ public class MainActivity extends FragmentActivity {
 	
 	public void purchaseItem(MapContainer map) {
 		//Log.i(X, "Buying " + map.id);
-		//FakePurchaseDialogFragment.newInstance(map.id).show(getSupportFragmentManager(), "FakePurchase");
 		/*
 		 * if (!mIabService.requestPurchase(IabConsts.FAKE_PRODUCT_ID, null)) {
 			showDialog(DIALOG_IAB_NOT_SUPPORTED);
 		}
 		*/
-        if (!mIabService.requestPurchase(map.id, null)) {
+		if (Consts.TEST) {
+			FakePurchaseDialogFragment.newInstance(map.id).show(getSupportFragmentManager(), "FakePurchase");
+		} else if (!mIabService.requestPurchase(map.id, null)) {
             showDialog(DIALOG_IAB_NOT_SUPPORTED);
-        }
+		}
 	}
 	
 	public void purchaseItem(String id) {
 		//Log.i(X, "Buying " + id);
-		//FakePurchaseDialogFragment.newInstance(id).show(getSupportFragmentManager(), "FakePurchase");
-        if (!mIabService.requestPurchase(id, null)) {
+		if (Consts.TEST){
+			FakePurchaseDialogFragment.newInstance(id).show(getSupportFragmentManager(), "FakePurchase");
+		} else if (!mIabService.requestPurchase(id, null)) {
             showDialog(DIALOG_IAB_NOT_SUPPORTED);
         }
 	}

@@ -17,7 +17,9 @@ public class MapProvider {
 		LARGE(R.raw.large, "large", R.drawable.title_settlers, "large"),
 		XLARGE(R.raw.xlarge, "xlarge", R.drawable.title_settlers, "xlarge"),
 		HEADING_FOR_NEW_SHORES(R.raw.heading_for_new_shores, "heading_for_new_shores",
-				R.drawable.title_heading_for_new_shores, "seafarers.heading_for_new_shores");
+				R.drawable.title_heading_for_new_shores, "seafarers.heading_for_new_shores"),
+		HEADING_FOR_NEW_SHORES_EXP(R.raw.heading_for_new_shores_exp, "heading_for_new_shores_exp",
+				R.drawable.title_heading_for_new_shores, null);
 		
 		public final int rawResId;
 		public final String name;
@@ -33,10 +35,10 @@ public class MapProvider {
 	}
 	
 	public MapProvider(Context context) {
-		this(context, null);
+		this(context, null, null);
 	}
 	
-	public MapProvider(Context context, ArrayList<Integer> theftOrder) {
+	public MapProvider(Context context, ArrayList<Integer> theftOrder, ArrayList<Integer> expTheftOrder) {
 		mContext = context;
 		
 		maps = new HashMap<MapSize, CatanMap>();

@@ -1,0 +1,6 @@
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:id="@+id/expansion_small_list"
+        android:drawable="@drawable/expansion_small" />
+    <item android:id="@+id/orange_small_list"
+        android:drawable="@drawable/orange_small" />
+ </layer-list>

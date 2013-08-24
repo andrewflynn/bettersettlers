@@ -128,7 +128,7 @@ public class ResponseHandler {
 
     				SharedPreferences prefs = context.getSharedPreferences(Consts.SHARED_PREFS_SEAFARERS_KEY, Context.MODE_PRIVATE);
     				SharedPreferences.Editor prefsEditor = prefs.edit();
-					prefsEditor.putString(Base64.encode(productId.getBytes()), Obfuscate.encode(id, productId));
+    				prefsEditor.putString(Base64.encode(productId.getBytes()), Obfuscate.encode(id, productId));
 					prefsEditor.commit();
 
     				// This needs to be synchronized because the UI thread can change the
