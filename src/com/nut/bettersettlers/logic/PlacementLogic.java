@@ -428,6 +428,11 @@ public class PlacementLogic {
 				landOnly = i + 1; // 0 indexing
 				continue;
 			}
+			
+			// Avoid NPE
+			if ((i - landOnly) >= harbors.size()) {
+				continue;
+			}
 
 			Resource harborResource = harbors.get(i - landOnly).getResource();
 			if (harborResource != Resource.DESERT) {
@@ -480,7 +485,12 @@ public class PlacementLogic {
 				landOnly = i + 1; // 0 indexing
 				continue;
 			}
-
+			
+			// Avoid NPE
+			if ((i - landOnly) >= harbors.size()) {
+				continue;
+			}
+			
 			Resource harborResource = harbors.get(i - landOnly).getResource();
 			if (harborResource == Resource.DESERT || harborResource == Resource.WATER) {
 				continue; // Only harbors

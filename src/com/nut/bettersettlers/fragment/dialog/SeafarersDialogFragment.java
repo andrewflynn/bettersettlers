@@ -6,9 +6,9 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Context;
-import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
+import android.support.v4.app.FragmentTransaction;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -19,15 +19,13 @@ import android.widget.TextView;
 
 import com.nut.bettersettlers.R;
 import com.nut.bettersettlers.activity.MainActivity;
+import com.nut.bettersettlers.data.MapProvider;
 import com.nut.bettersettlers.fragment.MapFragment;
 import com.nut.bettersettlers.iab.IabConsts;
 import com.nut.bettersettlers.iab.IabConsts.MapContainer;
 import com.nut.bettersettlers.misc.Consts;
 
-public class SeafarersDialogFragment extends DialogFragment {
-	private static final String SHARED_PREFS_NAME = "Seafarers";
-	private static final String SHARED_PREFS_SHOWN_HELP = "TheFogIsland";
-	
+public class SeafarersDialogFragment extends DialogFragment {	
 	public static SeafarersDialogFragment newInstance() {
 		return new SeafarersDialogFragment();
 	}
@@ -49,9 +47,11 @@ public class SeafarersDialogFragment extends DialogFragment {
 		headingForNewShoresButton.setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				mapFragment.headingForNewShoresChoice();
-				mainActivity.getSupportFragmentManager().popBackStack();
-				mainActivity.getSupportFragmentManager().popBackStack();
+				FragmentTransaction ft = getActivity().getSupportFragmentManager().beginTransaction();
+			    ft.addToBackStack(null);
+			    
+			    ExpansionDialogFragment.newInstance(MapProvider.MapSize.HEADING_FOR_NEW_SHORES, MapProvider.MapSize.HEADING_FOR_NEW_SHORES_EXP)
+			    	.show(ft, "ExpansionDialogFragment");
 			}
 		});
 		

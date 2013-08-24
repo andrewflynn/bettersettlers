@@ -3,15 +3,26 @@ package com.nut.bettersettlers.fragment;
 import static com.nut.bettersettlers.data.MapConsts.BOARD_RANGE_X;
 import static com.nut.bettersettlers.data.MapConsts.BOARD_RANGE_Y;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.ObjectInput;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutput;
+import java.io.ObjectOutputStream;
+import java.io.Serializable;
+import java.io.StreamCorruptedException;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Point;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Debug;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
 import android.view.LayoutInflater;
@@ -44,17 +55,21 @@ public class MapFragment extends Fragment {
 	private static final String STATE_MAP_SIZE = "MAP_SIZE";
 	private static final String STATE_MAP_TYPE = "MAP_TYPE";
 	private static final String STATE_RESOURCES = "MAP_RESOURCES";
+	private static final String STATE_RESOURCES_BYTES = "MAP_RESOURCES_BYTES";
 	private static final String STATE_UNKNOWNS = "UNKNOWNS";
+	private static final String STATE_UNKNOWNS_BYTES = "UNKNOWNS_BTYES";
 	private static final String STATE_PROBABILITIES = "PROBABILITIES";
 	private static final String STATE_UNKNOWN_PROBABILITIES = "UNKNOWN_PROBABILITIES";
 	private static final String STATE_HARBORS = "HARBORS";
+	private static final String STATE_HARBORS_BYTES = "HARBORS_BYTES";
 	private static final String STATE_PLACEMENTS = "PLACEMENTS";
+	private static final String STATE_PLACEMENTS_BYTES = "PLACEMENTS_BYTES";
 	private static final String STATE_ORDERED_PLACEMENTS = "ORDERED_PLACEMENTS";
 	private static final String STATE_PLACEMENT_BOOKMARK = "PLACEMENT_BOOKMARK";
 	private static final String STATE_ZOOM_LEVEL = "ZOOM_LEVEL";
 
 	private static final String SHARED_PREFS_NAME = "Map";
-	private static final String SHARED_PREFS_SHOWN_WHATS_NEW = "ShownWhatsNewVersion14";
+	private static final String SHARED_PREFS_SHOWN_WHATS_NEW = "ShownWhatsNewVersion19";
 	
 	private MapView mMapView;
 	
@@ -151,10 +166,60 @@ public class MapFragment extends Fragment {
 		return view;
 	}
 
+	private byte[] toBytes(Serializable resources) {
+		byte[] bytes = null;
+		
+		ByteArrayOutputStream bos = new ByteArrayOutputStream();
+		ObjectOutput out = null;
+		try {
+			out = new ObjectOutputStream(bos);   
+			out.writeObject(resources);
+			bytes = bos.toByteArray();
+		} catch (IOException e) {
+			e.printStackTrace();
+		} finally {
+			try {
+				out.close();
+				bos.close();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+		
+		return bytes;
+	}
+	
+	private Object fromBytes(byte[] bytes) {
+		Object object = null;
+		
+		ByteArrayInputStream bis = new ByteArrayInputStream(bytes);
+		ObjectInput in = null;
+		try {
+			in = new ObjectInputStream(bis);
+			object = in.readObject();
+		} catch (StreamCorruptedException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		} catch (ClassNotFoundException e) {
+			e.printStackTrace();
+		} finally {
+			try {
+				bis.close();
+				in.close();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+		
+		return object;
+	}
+
 	/** Called when the activity is going to disappear. */
 	@Override
 	public void onSaveInstanceState(Bundle outState) {
 		super.onSaveInstanceState(outState);
+
 		outState.putString(STATE_MAP_SIZE, mMapSize.getName());
 		outState.putString(STATE_MAP_TYPE, mMapType.name());
 		outState.putSerializable(STATE_RESOURCES, mResourceList);
@@ -190,38 +255,70 @@ public class MapFragment extends Fragment {
 			prefsEditor.commit();
 		}
 		
-		if (savedInstanceState != null) {
-			if (savedInstanceState.getString(STATE_MAP_SIZE) != null) {
-				mMapSize = getMapProvider().getMap(savedInstanceState.getString(STATE_MAP_SIZE));
+		Bundle instanceState = savedInstanceState;
+		
+		Intent startIntent = getActivity().getIntent();
+		if (startIntent != null && startIntent.getAction().equals(Consts.LAUNCH_MAP_ACTION)) {
+			instanceState = startIntent.getExtras();
+			
+			// From bytes
+			byte[] resourceBytes = instanceState.getByteArray(STATE_RESOURCES_BYTES);
+			if (resourceBytes != null) {
+			    instanceState.putSerializable(STATE_RESOURCES, (Serializable) fromBytes(resourceBytes));
+			    instanceState.remove(STATE_RESOURCES_BYTES);
+			}
+
+			byte[] unknownsBytes = instanceState.getByteArray(STATE_UNKNOWNS_BYTES);
+			if (unknownsBytes != null) {
+    			instanceState.putSerializable(STATE_UNKNOWNS, (Serializable) fromBytes(unknownsBytes));
+	    		instanceState.remove(STATE_UNKNOWNS_BYTES);
+			}
+
+			byte[] harborsBytes = instanceState.getByteArray(STATE_HARBORS_BYTES);
+			if (harborsBytes != null) {
+    			instanceState.putSerializable(STATE_HARBORS, (Serializable) fromBytes(harborsBytes));
+		    	instanceState.remove(STATE_HARBORS_BYTES);
+			}
+
+			byte[] placementsBytes = instanceState.getByteArray(STATE_PLACEMENTS_BYTES);
+			if (placementsBytes != null) {
+    			instanceState.putSerializable(STATE_PLACEMENTS, (Serializable) fromBytes(placementsBytes));
+    			instanceState.remove(STATE_PLACEMENTS_BYTES);
+			}
+		}
+		
+		if (instanceState != null) {
+			if (instanceState.getString(STATE_MAP_SIZE) != null) {
+				mMapSize = getMapProvider().getMap(instanceState.getString(STATE_MAP_SIZE));
 			} else {
 				mMapSize = getMapProvider().getMap(MapSize.STANDARD);
 			}
 
-			if (savedInstanceState.getString(STATE_MAP_TYPE) != null) {
-				mMapType = MapType.valueOf(savedInstanceState.getString(STATE_MAP_TYPE));
+			if (instanceState.getString(STATE_MAP_TYPE) != null) {
+				mMapType = MapType.valueOf(instanceState.getString(STATE_MAP_TYPE));
 			} else {
 				mMapType = MapType.FAIR;
 			}
 
-			if (savedInstanceState.getSerializable(STATE_RESOURCES) != null
-					&& savedInstanceState.getSerializable(STATE_UNKNOWNS) != null
-					&& savedInstanceState.getSerializable(STATE_PROBABILITIES) != null
-					&& savedInstanceState.getSerializable(STATE_UNKNOWN_PROBABILITIES) != null
-					&& savedInstanceState.getSerializable(STATE_HARBORS) != null) {
-				mResourceList = (ArrayList<Resource>) savedInstanceState.getSerializable(STATE_RESOURCES);
-				mUnknownsList = (ArrayList<Resource>) savedInstanceState.getSerializable(STATE_UNKNOWNS);
-				mProbabilityList = (ArrayList<Integer>) savedInstanceState.getSerializable(STATE_PROBABILITIES);
-				mUnknownProbabilitiesList = (ArrayList<Integer>) savedInstanceState.getSerializable(STATE_UNKNOWN_PROBABILITIES);
-				mHarborList = (ArrayList<Harbor>) savedInstanceState.getSerializable(STATE_HARBORS);
-				if (savedInstanceState.getSerializable(STATE_PLACEMENTS) != null
-						&& savedInstanceState.getSerializable(STATE_ORDERED_PLACEMENTS) != null
-						&& savedInstanceState.getSerializable(STATE_PLACEMENT_BOOKMARK) != null) {
-					mPlacementList = (LinkedHashMap<Integer, List<String>>) savedInstanceState.getSerializable(STATE_PLACEMENTS);
-					mOrderedPlacementList = (ArrayList<Integer>) savedInstanceState.getSerializable(STATE_ORDERED_PLACEMENTS);
-					mPlacementBookmark = (Integer) savedInstanceState.getSerializable(STATE_PLACEMENT_BOOKMARK);
+			if (instanceState.getSerializable(STATE_RESOURCES) != null
+					&& instanceState.getSerializable(STATE_UNKNOWNS) != null
+					&& instanceState.getSerializable(STATE_PROBABILITIES) != null
+					&& instanceState.getSerializable(STATE_UNKNOWN_PROBABILITIES) != null
+					&& instanceState.getSerializable(STATE_HARBORS) != null) {
+				mResourceList = (ArrayList<Resource>) instanceState.getSerializable(STATE_RESOURCES);
+				mUnknownsList = (ArrayList<Resource>) instanceState.getSerializable(STATE_UNKNOWNS);
+				mProbabilityList = (ArrayList<Integer>) instanceState.getSerializable(STATE_PROBABILITIES);
+				mUnknownProbabilitiesList = (ArrayList<Integer>) instanceState.getSerializable(STATE_UNKNOWN_PROBABILITIES);
+				mHarborList = (ArrayList<Harbor>) instanceState.getSerializable(STATE_HARBORS);
+				if (instanceState.getSerializable(STATE_PLACEMENTS) != null
+						&& instanceState.getSerializable(STATE_ORDERED_PLACEMENTS) != null
+						&& instanceState.getSerializable(STATE_PLACEMENT_BOOKMARK) != null) {
+					mPlacementList = (LinkedHashMap<Integer, List<String>>) instanceState.getSerializable(STATE_PLACEMENTS);
+					mOrderedPlacementList = (ArrayList<Integer>) instanceState.getSerializable(STATE_ORDERED_PLACEMENTS);
+					mPlacementBookmark = (Integer) instanceState.getSerializable(STATE_PLACEMENT_BOOKMARK);
 				}
-				if (savedInstanceState.getSerializable(STATE_ZOOM_LEVEL) != null) {
-					refreshView((Float) savedInstanceState.getSerializable(STATE_ZOOM_LEVEL));
+				if (instanceState.getSerializable(STATE_ZOOM_LEVEL) != null) {
+					refreshView((Float) instanceState.getSerializable(STATE_ZOOM_LEVEL));
 				} else {
 					refreshView();
 				}
@@ -497,6 +594,10 @@ public class MapFragment extends Fragment {
 	
 	public void headingForNewShoresChoice() {
 		sizeChoice(MapSize.HEADING_FOR_NEW_SHORES);
+	}
+	
+	public void headingForNewShoresExpChoice() {
+		sizeChoice(MapSize.HEADING_FOR_NEW_SHORES_EXP);
 	}
 	
 	public void togglePlacements(boolean on) {

@@ -6,7 +6,6 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -20,6 +19,7 @@ import android.graphics.Point;
 import android.util.Log;
 
 import com.nut.bettersettlers.data.MapConsts.Resource;
+import com.nut.bettersettlers.misc.Consts;
 
 public class JsonCatanMap extends CatanMap {
 	private static final String LOG_TAG = JsonCatanMap.class.getSimpleName();

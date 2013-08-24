@@ -63,6 +63,8 @@ public final class MapConsts {
 	 * harbor's arms are facing, according to the numbering of the land tiles.
 	 */
 	public static class Harbor implements Serializable {
+		static final long serialVersionUID = 1L;
+		
 		private int position;
 		private Resource resource;
 		private int facing;
@@ -144,8 +146,8 @@ public final class MapConsts {
         2,  // 11
         1}; // 12
 	
-	public static final int BOARD_RANGE_X = 19;
-	public static final int BOARD_RANGE_HALF_X = 9;
-	public static final int BOARD_RANGE_Y = 11;
-	public static final int BOARD_RANGE_HALF_Y = 6;
+	public static final int BOARD_RANGE_X = 22;//19;
+	public static final int BOARD_RANGE_HALF_X = 11;//9;
+	public static final int BOARD_RANGE_Y = 13;//11;
+	public static final int BOARD_RANGE_HALF_Y = 7;//6;
 }
