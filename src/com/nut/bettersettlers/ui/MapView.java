@@ -279,7 +279,7 @@ public class MapView extends View {
 				int i = pair.first;
 				int j = pair.second;
 				
-				if (Consts.TEST) {
+				if (Consts.DEBUG_MAP) {
 					Piece piece = mPieces[i][j];
 					if (piece.getColor() == 0xFF00FF00) {
 						mPieces[i][j] = new Piece(piece.getGridX(), piece.getGridY(), 0xFF0000FF);	
@@ -429,7 +429,7 @@ public class MapView extends View {
 		}
 		*/
 		
-		if (Consts.TEST) {
+		if (Consts.DEBUG_MAP) {
 			onDrawTest(canvas);
 			return;
 		}

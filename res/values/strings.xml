@@ -28,8 +28,8 @@
     <string name="refresh">Refresh</string>
     <string name="rate_this_app">Rate this app</string>
     <string name="rules">How it works</string>
-    <string name="iab_not_supported_title">Android Market billing unavailable</string>
-    <string name="iab_not_supported_message">We apologize, but the Android Market billing
+    <string name="iab_not_supported_title">Google Play billing unavailable</string>
+    <string name="iab_not_supported_message">We apologize, but the Google Play billing
      service is not available at this time.  You can continue to use this app but you
      won\'t be able to make purchases.</string>
     <string name="learn_more">Learn More</string>

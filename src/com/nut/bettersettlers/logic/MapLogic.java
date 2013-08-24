@@ -613,7 +613,8 @@ public class MapLogic {
 				}
 				
 				// Check neighbors for same resource.
-				if (!currentMap.getName().equals("the_pirate_islands")) {
+				if (!currentMap.getName().equals("the_pirate_islands")
+						&& !currentMap.getName().equals("the_pirate_islands_exp")) {
 					for (int neighbor : currentMap.getLandNeighbors()[nextIndex]) {
 						//Log.i("XXX XXX XXX", "    " + neighbor);
 						if (neighbor >= set.size()) {
@@ -630,7 +631,9 @@ public class MapLogic {
 				}
 				
 				// If this number is already used by the same resource
-				if (resourceMap.get(nextResource).contains(nextProb) && !currentMap.getName().equals("the_pirate_islands")) {
+				if (resourceMap.get(nextResource).contains(nextProb)
+						&& !currentMap.getName().equals("the_pirate_islands")
+						&& !currentMap.getName().equals("the_pirate_islands_exp")) {
 					canPlaceHere = false;
 				}
 				
@@ -784,7 +787,7 @@ public class MapLogic {
 				
 				int nextResourceIndex = RAND.nextInt(resources.size());
 				if (coinFlip) {
-					if (currentMap.getName().equals("new_world")) {
+					if (currentMap.getName().equals("new_world") || currentMap.getName().equals("new_world_exp")) {
 						boolean skip = false;
 						while (neighborConflict(currentMap, harbors, pos)) {
 							harbors.add(new Harbor(pos, Resource.WATER, -1));
@@ -842,7 +845,7 @@ public class MapLogic {
 						break;
 					}
 					
-					if (currentMap.getName().equals("new_world")) {
+					if (currentMap.getName().equals("new_world") || currentMap.getName().equals("new_world_exp")) {
 						boolean skip = false;
 						while (neighborConflict(currentMap, harbors, pos)) {
 							harbors.add(new Harbor(pos, Resource.WATER, -1));
@@ -1050,7 +1053,9 @@ public class MapLogic {
 			int num = numbers.remove(i);
 			if (numbers.contains(num)
 					&& !(currentMap.getName().equals("through_the_desert") && num == 0)
-					&& !(currentMap.getName().equals("the_wonders_of_catan") && num == 0)) {
+					&& !(currentMap.getName().equals("through_the_desert_exp") && num == 0)
+					&& !(currentMap.getName().equals("the_wonders_of_catan") && num == 0)
+					&& !(currentMap.getName().equals("the_wonders_of_catan_exp") && num == 0)) {
 				// Be sure to put back at the proper place in the array so
 				// that we actually go through all elements
 				numbers.add(i, num);

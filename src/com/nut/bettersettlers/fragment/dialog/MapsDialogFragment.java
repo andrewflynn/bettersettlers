@@ -49,7 +49,7 @@ public class MapsDialogFragment extends DialogFragment {
 		
 		ImageView seafarersButton = (ImageView) layout.findViewById(R.id.seafarers_item);
 		MapFragment mapFragment = (MapFragment) getActivity().getSupportFragmentManager().findFragmentById(R.id.map_fragment);
-		if (mapFragment.getShowSeafarers()) {
+		if (Consts.TEST || mapFragment.getShowSeafarers()) {
 			seafarersButton.setVisibility(View.VISIBLE);
 			seafarersButton.setOnClickListener(new OnClickListener() {
 				@Override
