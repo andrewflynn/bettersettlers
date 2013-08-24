@@ -1,63 +1,81 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-	android:layout_width="fill_parent"
-	android:layout_height="fill_parent"
-	android:background="#FFFFFFFF" >
-    
-	<com.nut.bettersettlers.ui.MapView
-		android:id="@+id/map_view"
-		android:layout_width="fill_parent"
-		android:layout_height="fill_parent" />
-    	
-    <RelativeLayout android:id="@+id/button_panel"
-    	android:layout_width="fill_parent"
-    	android:layout_height="wrap_content"
-    	android:layout_marginBottom="13dp"
-    	android:layout_marginLeft="13dp"
-    	android:layout_alignParentBottom="true"
-    	android:layout_alignParentLeft="true" >
-    	<!-- SETTINGS -->
-    	<ImageView android:id="@+id/settings_button"
-    		android:layout_width="wrap_content"
-    		android:layout_height="wrap_content"
-    		android:src="@drawable/main_settings_button" />
-    	
-   		<!-- PLACEMENTS -->
-    	<ImageView android:id="@+id/placements_button"
-    		android:layout_width="wrap_content"
-    		android:layout_height="wrap_content"
-    		android:layout_marginLeft="13dp"
-    		android:layout_toRightOf="@id/settings_button"
-    		android:src="@drawable/main_placements" />
-    	<LinearLayout android:id="@+id/placements_container"
-    		android:layout_width="wrap_content"
-    		android:layout_height="wrap_content"
-    		android:layout_marginLeft="13dp"
-    		android:layout_toRightOf="@id/placements_button"
-    		android:orientation="horizontal" >
-    		<ImageView android:id="@+id/placements_left_button"
-    			android:layout_width="wrap_content"
-    			android:layout_height="wrap_content"
-    			android:src="@drawable/main_left_button" />
-    		<ImageView android:id="@+id/placements_right_button"
-    			android:layout_width="wrap_content"
-   	 			android:layout_height="wrap_content"
-    			android:layout_marginLeft="13dp"
-    			android:src="@drawable/main_right_button" />
-    	</LinearLayout>
-        
-    	<!-- REFRESH -->
-    	<ImageView android:id="@+id/refresh_button"
-    		android:layout_width="wrap_content"
-    		android:layout_height="wrap_content"
-    		android:layout_marginRight="13dp"
-    		android:layout_alignParentRight="true"
-    		android:src="@drawable/main_refresh" />
-    	<ImageView android:id="@+id/refresh_down_button"
-    		android:layout_width="wrap_content"
-    		android:layout_height="wrap_content"
-    		android:layout_marginRight="13dp"
-    		android:layout_alignParentRight="true"
-    		android:src="@drawable/main_refresh_down" />
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:background="#FFFFFFFF" >
+
+    <com.nut.bettersettlers.ui.MapView
+        android:id="@+id/map_view"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent" />
+
+    <RelativeLayout
+        android:id="@+id/button_panel"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentLeft="true"
+        android:layout_marginBottom="13dp"
+        android:layout_marginLeft="13dp" >
+
+        <!-- SETTINGS -->
+
+        <ImageView
+            android:id="@+id/settings_button"
+            android:layout_width="@dimen/main_button"
+            android:layout_height="@dimen/main_button"
+            android:src="@drawable/main_settings_button" />
+
+        <!-- PLACEMENTS -->
+
+        <ImageView
+            android:id="@+id/placements_button"
+            android:layout_width="@dimen/main_button"
+            android:layout_height="@dimen/main_button"
+            android:layout_marginLeft="13dp"
+            android:layout_toRightOf="@id/settings_button"
+            android:src="@drawable/main_placements" />
+
+        <LinearLayout
+            android:id="@+id/placements_container"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="13dp"
+            android:layout_toRightOf="@id/placements_button"
+            android:orientation="horizontal" >
+
+            <ImageView
+                android:id="@+id/placements_left_button"
+                android:layout_width="@dimen/main_button"
+                android:layout_height="@dimen/main_button"
+                android:src="@drawable/main_left_button" />
+
+            <ImageView
+                android:id="@+id/placements_right_button"
+                android:layout_width="@dimen/main_button"
+                android:layout_height="@dimen/main_button"
+                android:layout_marginLeft="13dp"
+                android:src="@drawable/main_right_button" />
+        </LinearLayout>
+
+        <!-- REFRESH -->
+
+        <ImageView
+            android:id="@+id/refresh_button"
+            android:layout_width="@dimen/main_button"
+            android:layout_height="@dimen/main_button"
+            android:layout_alignParentRight="true"
+            android:layout_marginRight="13dp"
+            android:src="@drawable/main_refresh" />
+
+        <ImageView
+            android:id="@+id/refresh_down_button"
+            android:layout_width="@dimen/main_button"
+            android:layout_height="@dimen/main_button"
+            android:layout_alignParentRight="true"
+            android:layout_marginRight="13dp"
+            android:src="@drawable/main_refresh_down"
+            android:visibility="invisible" />
     </RelativeLayout>
+
 </RelativeLayout>

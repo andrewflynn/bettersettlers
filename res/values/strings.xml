@@ -1,37 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 	<string name="better_settlers">Better Settlers</string>
-    <string name="shuffle_map">Shuffle Map</string>
-    <string name="shuffle_probabilities">Shuffle Probabilities</string>
-    <string name="shuffle_harbors">Shuffle Harbors</string>
-    <string name="traditional">Traditional</string>
-    <string name="random">Random</string>
-    <string name="standard">Standard (3-4 people)</string>
-    <string name="large">Large (5 people)</string>
-    <string name="xlarge">X-Large (6 people)</string>
-    <string name="seafarers">Seafarers</string>
-    <string name="heading_for_new_shores">Heading for New Shores</string>
-    <string name="map_size">Map Size</string>
-    <string name="map_type">Map Type</string>
-    <string name="placements">Placements</string>
-    <string name="placements_off">Placements: Off</string>
-    <string name="placements_on">Placements: On</string>
-    <string name="prev">Prev</string>
-    <string name="next">Next</string>
-    <string name="return_to_map">Return to Map</string>
-    <string name="help">Help</string>
-    <string name="about">About</string>
-    <string name="map">Map</string>
-    <string name="rolls">Rolls</string>
-    <string name="legal">Legal</string>
-    <string name="more">More</string>
-    <string name="refresh">Refresh</string>
-    <string name="rate_this_app">Rate this app</string>
-    <string name="rules">How it works</string>
-    <string name="iab_not_supported_title">Google Play billing unavailable</string>
-    <string name="iab_not_supported_message">We apologize, but the Google Play billing
-     service is not available at this time.  You can continue to use this app but you
-     won\'t be able to make purchases.</string>
-    <string name="learn_more">Learn More</string>
-    <string name="iab_help_url">http://market.android.com/support/bin/answer.py?answer=1050566</string>
+	<string name="seafarers_intro">Get the new Seafarers of Catan maps! We\'re giving you the Heading for New Shores as a free map. Buy each other map for $.99 each or buy all 9 for just $2.99</string>
+	<string name="expansion_intro">Which size?</string>
 </resources>

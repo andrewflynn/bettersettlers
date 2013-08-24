@@ -17,7 +17,7 @@ import android.widget.ImageView;
 import com.nut.bettersettlers.R;
 import com.nut.bettersettlers.activity.MainActivity;
 import com.nut.bettersettlers.fragment.MapFragment;
-import com.nut.bettersettlers.misc.Consts;
+import com.nut.bettersettlers.util.Consts;
 
 public class MapsDialogFragment extends DialogFragment {
 	private static final String SHARED_PREFS_NAME = "Maps";
@@ -47,8 +47,30 @@ public class MapsDialogFragment extends DialogFragment {
 			}
 		});
 		
-		ImageView seafarersButton = (ImageView) layout.findViewById(R.id.seafarers_item);
-		MapFragment mapFragment = (MapFragment) getActivity().getSupportFragmentManager().findFragmentById(R.id.map_fragment);
+		maybeShowSeafarers(layout.findViewById(R.id.seafarers_item),
+				(MapFragment) getActivity().getSupportFragmentManager().findFragmentById(R.id.map_fragment));
+		
+		ImageView moreButton = (ImageView) layout.findViewById(R.id.more_item);
+		moreButton.setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				FragmentTransaction ft = getActivity().getSupportFragmentManager().beginTransaction();
+			    ft.addToBackStack(null);
+			    
+				MenuDialogFragment.newInstance().show(ft, "MenuDialogFragment");
+				((MainActivity) getActivity()).getAnalytics().trackPageView(Consts.ANALYTICS_VIEW_MORE);
+			}
+		});
+
+		AlertDialog ret = new AlertDialog.Builder(getActivity())
+			.create();
+		ret.setView(layout, 0, 0, 0, 5); // Remove top padding
+		ret.getWindow().getAttributes().windowAnimations = R.style.FadeDialogAnimation;
+		return ret;
+	}
+	
+	@SuppressWarnings("unused")
+	private void maybeShowSeafarers(View seafarersButton, MapFragment mapFragment) {
 		if (Consts.TEST || mapFragment.getShowSeafarers()) {
 			seafarersButton.setVisibility(View.VISIBLE);
 			seafarersButton.setOnClickListener(new OnClickListener() {
@@ -74,23 +96,5 @@ public class MapsDialogFragment extends DialogFragment {
 			
 			seafarersButton.setVisibility(View.GONE);
 		}
-		
-		ImageView moreButton = (ImageView) layout.findViewById(R.id.more_item);
-		moreButton.setOnClickListener(new OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				FragmentTransaction ft = getActivity().getSupportFragmentManager().beginTransaction();
-			    ft.addToBackStack(null);
-			    
-				MenuDialogFragment.newInstance().show(ft, "MenuDialogFragment");
-				((MainActivity) getActivity()).getAnalytics().trackPageView(Consts.ANALYTICS_VIEW_MORE);
-			}
-		});
-
-		AlertDialog ret = new AlertDialog.Builder(getActivity())
-			.create();
-		ret.setView(layout, 0, 0, 0, 5); // Remove top padding
-		ret.getWindow().getAttributes().windowAnimations = R.style.FadeDialogAnimation;
-		return ret;
 	}
 }

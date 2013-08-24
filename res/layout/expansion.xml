@@ -1,32 +1,26 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/expansion_root"
-    android:layout_width="fill_parent"
-    android:layout_height="fill_parent">
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/expansion_container"
+    android:layout_width="@dimen/menu_list_width"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:layout_gravity="center" >
     
-  <LinearLayout android:id="@+id/expansion_container"
-      android:layout_width="wrap_content"
-      android:layout_height="wrap_content"
-      android:orientation="horizontal"
-      android:layout_gravity="center">
     <ImageView android:id="@+id/expansion_small_item"
-      android:layout_height="wrap_content"
-      android:layout_width="wrap_content"
-      android:src="@drawable/expansion_small_button"
-      android:layout_marginTop="10dp"
-      android:layout_marginBottom="10dp"
-      android:layout_marginLeft="10dp"
-      android:layout_marginRight="5dp"
-      android:layout_gravity="center"/>
+        android:layout_height="@dimen/menu_item_height"
+        android:layout_width="@dimen/expansion_item_width"
+        android:src="@drawable/expansion_small_button"
+        android:layout_marginTop="16dp"
+        android:layout_marginBottom="16dp"
+        android:layout_marginLeft="16dp"
+        android:layout_marginRight="16dp" />
+
     <ImageView android:id="@+id/expansion_large_item"
-      android:layout_height="wrap_content"
-      android:layout_width="wrap_content"
-      android:src="@drawable/expansion_large_button"
-      android:layout_marginTop="10dp"
-      android:layout_marginBottom="10dp"
-      android:layout_marginLeft="5dp"
-      android:layout_marginRight="10dp"
-      android:layout_gravity="center"/>
-  </LinearLayout>
-  
-</ScrollView>
+        android:layout_height="@dimen/menu_item_height"
+        android:layout_width="@dimen/expansion_item_width"
+        android:src="@drawable/expansion_large_button"
+        android:layout_marginTop="16dp"
+        android:layout_marginBottom="16dp"
+        android:layout_marginRight="16dp" />
+
+</LinearLayout>

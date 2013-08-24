@@ -19,11 +19,9 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.text.TextUtils;
-import android.util.Log;
 
 import com.nut.bettersettlers.iab.IabConsts.PurchaseState;
-import com.nut.bettersettlers.iab.util.Base64;
-import com.nut.bettersettlers.iab.util.Base64DecoderException;
+import com.nut.bettersettlers.util.BetterLog;
 
 /**
  * Security-related methods. For a secure implementation, all of this code
@@ -35,8 +33,6 @@ import com.nut.bettersettlers.iab.util.Base64DecoderException;
  * purchases as verified.
  */
 public class Security {
-    private static final String TAG = "BetterSettlers";
-
     private static final String KEY_FACTORY_ALGORITHM = "RSA";
     private static final String SIGNATURE_ALGORITHM = "SHA1withRSA";
     private static final SecureRandom RANDOM = new SecureRandom();
@@ -103,11 +99,8 @@ public class Security {
      */
     public static ArrayList<VerifiedPurchase> verifyPurchase(String signedData, String signature) {
         if (signedData == null) {
-            Log.e(TAG, "data is null");
+            BetterLog.e("data is null");
             return null;
-        }
-        if (IabConsts.DEBUG) {
-            //Log.i(TAG, "signedData: " + signedData);
         }
         boolean verified = false;
         if (!TextUtils.isEmpty(signature)) {
@@ -127,7 +120,7 @@ public class Security {
             PublicKey key = Security.generatePublicKey(get());
             verified = Security.verify(key, signedData, signature);
             if (!verified) {
-                //Log.w(TAG, "signature does not match data.");
+                BetterLog.w("signature does not match data.");
                 return null;
             }
         }
@@ -150,7 +143,7 @@ public class Security {
         }
 
         if (!Security.isNonceKnown(nonce)) {
-            //Log.w(TAG, "Nonce not found: " + nonce);
+            BetterLog.w("Nonce not found: " + nonce);
             return null;
         }
 
@@ -161,7 +154,6 @@ public class Security {
                 int response = jElement.getInt("purchaseState");
                 PurchaseState purchaseState = PurchaseState.valueOf(response);
                 String productId = jElement.getString("productId");
-                String packageName = jElement.getString("packageName");
                 long purchaseTime = jElement.getLong("purchaseTime");
                 String orderId = jElement.optString("orderId", "");
                 String notifyId = null;
@@ -179,7 +171,7 @@ public class Security {
                         orderId, purchaseTime, developerPayload));
             }
         } catch (JSONException e) {
-            //Log.e(TAG, "JSON exception: ", e);
+        	BetterLog.e("JSON exception: ", e);
             return null;
         }
         removeNonce(nonce);
@@ -201,10 +193,10 @@ public class Security {
         } catch (NoSuchAlgorithmException e) {
             throw new RuntimeException(e);
         } catch (InvalidKeySpecException e) {
-            //Log.e(TAG, "Invalid key specification.");
+        	BetterLog.e("Invalid key specification.");
             throw new IllegalArgumentException(e);
         } catch (Base64DecoderException e) {
-            //Log.e(TAG, "Base64 decoding failed.");
+        	BetterLog.e("Base64 decoding failed.");
             throw new IllegalArgumentException(e);
         }
     }
@@ -219,27 +211,24 @@ public class Security {
      * @return true if the data and signature match
      */
     public static boolean verify(PublicKey publicKey, String signedData, String signature) {
-        if (IabConsts.DEBUG) {
-            //Log.i(TAG, "signature: " + signature);
-        }
         Signature sig;
         try {
             sig = Signature.getInstance(SIGNATURE_ALGORITHM);
             sig.initVerify(publicKey);
             sig.update(signedData.getBytes());
             if (!sig.verify(Base64.decode(signature))) {
-                //Log.e(TAG, "Signature verification failed.");
+            	BetterLog.e("Signature verification failed.");
                 return false;
             }
             return true;
         } catch (NoSuchAlgorithmException e) {
-            //Log.e(TAG, "NoSuchAlgorithmException.");
+        	BetterLog.e("NoSuchAlgorithmException.");
         } catch (InvalidKeyException e) {
-            //Log.e(TAG, "Invalid key specification.");
+        	BetterLog.e("Invalid key specification.");
         } catch (SignatureException e) {
-            //Log.e(TAG, "Signature exception.");
+        	BetterLog.e("Signature exception.");
         } catch (Base64DecoderException e) {
-            //Log.e(TAG, "Base64 decoding failed.");
+        	BetterLog.e("Base64 decoding failed.");
         }
         return false;
     }
