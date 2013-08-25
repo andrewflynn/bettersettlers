@@ -1,18 +1,21 @@
 package com.nut.bettersettlers.logic;
 
-import static com.nut.bettersettlers.data.MapConsts.PROBABILITY_MAPPING;
+import static com.nut.bettersettlers.util.Consts.PROBABILITY_MAPPING;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import android.util.Pair;
+import android.util.SparseArray;
+import android.util.SparseIntArray;
+
 import com.nut.bettersettlers.data.CatanMap;
-import com.nut.bettersettlers.data.MapConsts.Harbor;
-import com.nut.bettersettlers.data.MapConsts.Resource;
+import com.nut.bettersettlers.data.Harbor;
+import com.nut.bettersettlers.data.Resource;
+import com.nut.bettersettlers.data.Trait;
 
 
 /**
@@ -28,185 +31,144 @@ import com.nut.bettersettlers.data.MapConsts.Resource;
  * 1. Two or three of the same good resource and on or near a 2:1 harbor
  * 2. Good representation of all resources
  */
-public class PlacementLogic {
+public final class PlacementLogic {
 	// Prevent instantiation
 	private PlacementLogic() {}
 
-	private enum Trait {
-		RICH("Wealthy - High probabilities"),
-		RARE("Monopoly - Rare resource(s)"),
-		FACTORY("Factory - 2:1 resource harbor"),
-		TRADER("Trader - 3:1 harbor"),
-		ROAD_BUILDER("Road Builder - Wood/Brick"),
-		CITY_BUILDER("City Builder - Rock/Grain"),
-		DEV_CARD_BUILDER("Dev Cards - Sheep/Rock/Grain"),
-		NINJA("Ninja - Avoid the robber (no 6/8)"),
-		VARIETY("Variety - 3 different resources");
-		//NEAR_FACTORY("Good probability and a 2:1 harbor nearby for a resource"),
-		//RENAISSANCE_MAN("Good representation of all 5 resources");
-
-		private final String description;
-
-		private Trait(String description) {
-			this.description = description;
-		}
-
-		public String getDescription() {
-			return description;
-		}
-	}
-
-	private static void addValueToMap(Map<Integer, Integer> map, int key, int more) {
-		if (map.get(key) == null) {
-			map.put(key, more);
-		} else {
-			map.put(key, map.get(key) + more);
-		}
-	}
-
-	private static int removeMax(Map<Integer, Integer> sums) {
-		int maxIndex = -1;
-		for (Map.Entry<Integer, Integer> entry : sums.entrySet()) {
-			if (maxIndex == -1) {
-				maxIndex = entry.getKey();
-			} else if (entry.getValue() > sums.get(maxIndex)) {
-				maxIndex = entry.getKey();
+	private static int removeMax(SparseIntArray sums) {
+		int maxIndex = 0;
+		for (int i = 1; i < sums.size(); i++) {
+			if (sums.valueAt(i) > sums.valueAt(maxIndex)) {
+				maxIndex = i;
 			}
 		}
-		sums.remove(maxIndex);
-		return maxIndex;
+		int ret = sums.keyAt(maxIndex);
+		sums.removeAt(maxIndex);
+		return ret;
+	}
+
+	private static void addValue(SparseIntArray array, int key, int more) {
+		array.put(key, array.get(key) + more);
 	}
 
 	/**
 	 * Overall function returning the aggregate of all "best" placements.
 	 * 
 	 * @param currentMap Size of the map
-	 * @param n What size list to return (pass in zero to get all returned)
 	 * @param resources The list of ordered resources.
 	 * @param probs The list of ordered probabilities.
 	 * @param harbors The list of ordered harbors.
 	 * @return A list of best intersections
 	 */	
-	public static LinkedHashMap<Integer, List<String>> getBestPlacements(CatanMap currentMap, int n,
+	public static Pair<ArrayList<Integer>, SparseArray<ArrayList<String>>> getBestPlacements(CatanMap currentMap,
 			ArrayList<Resource> resources, ArrayList<Integer> probs, ArrayList<Harbor> harbors) {
-		LinkedHashMap<Integer, List<String>> initial =
-			getAllBestPlacements(currentMap, resources, probs, harbors);
-		LinkedHashMap<Integer, List<String>> set = new LinkedHashMap<Integer, List<String>>();
-
-		// Check for zero passed in meaning they want all of them
-		if (n == 0) {
-			return initial;
-		}
-		for (Map.Entry<Integer, List<String>> entry : initial.entrySet()) {
-			set.put(entry.getKey(), entry.getValue());
-		}
-
-		return set;
-	}
-
-	private static LinkedHashMap<Integer, List<String>> getAllBestPlacements(CatanMap currentMap,
-			ArrayList<Resource> resources, ArrayList<Integer> probs, ArrayList<Harbor> harbors) {
-		LinkedHashMap<Integer, List<String>> set = new LinkedHashMap<Integer, List<String>>();
-		Map<Integer, Integer> sums = new HashMap<Integer, Integer>();
+		ArrayList<Integer> order = new ArrayList<Integer>();
+		SparseArray<ArrayList<String>> set = new SparseArray<ArrayList<String>>();
+		SparseIntArray sums = new SparseIntArray();
 
 		// 5pts x # of resources
-		Map<Integer, Integer> highProbs = PlacementLogic.getHighProbabilities(currentMap, 0, probs, false);
-		for (Map.Entry<Integer, Integer> entry : highProbs.entrySet()) {
-			addValueToMap(sums, entry.getKey(), 5 * entry.getValue());
+		SparseIntArray highProbs = PlacementLogic.getHighProbabilities(currentMap, 0, probs, false);
+		for (int i = 0; i < highProbs.size(); i++) {
+			addValue(sums, highProbs.keyAt(i), 5 * highProbs.valueAt(i));
 		}
 
 		// 2 pts 25-50%, 4 pts 50-75%, 8 pts 75+%
-		Map<Integer, Integer> rareResources = PlacementLogic.getRareResources(currentMap, 50, probs, resources);
-		for (Map.Entry<Integer, Integer> entry : rareResources.entrySet()) {
-			if (entry.getValue() > 25 && entry.getValue() < 50) {
-				addValueToMap(sums, entry.getKey(), 2);
-			} else if (entry.getValue() > 50 && entry.getValue() < 75) {
-				addValueToMap(sums, entry.getKey(), 4);
+		SparseIntArray rareResources = PlacementLogic.getRareResources(currentMap, 50, probs, resources);
+		for (int i = 0; i < rareResources.size(); i++) {
+			int key = rareResources.keyAt(i);
+			int value = rareResources.valueAt(i);
+			
+			if (value > 25 && value < 50) {
+				addValue(sums, key, 2);
+			} else if (value > 50 && value < 75) {
+				addValue(sums, key, 4);
 			} else {
-				addValueToMap(sums, entry.getKey(), 8);
+				addValue(sums, key, 8);
 			}
 		}
 
 		// 1 pt x resource for a factory
-		Map<Integer, Integer> factories = PlacementLogic.getFactoryPlacements(currentMap, 0, probs, resources, harbors);
-		for (Map.Entry<Integer, Integer> entry : factories.entrySet()) {
-			addValueToMap(sums, entry.getKey(), entry.getValue());
+		SparseIntArray factories = PlacementLogic.getFactoryPlacements(currentMap, 0, probs, resources, harbors);
+		for (int i = 0; i < factories.size(); i++) {
+			addValue(sums, factories.keyAt(i), factories.valueAt(i));
 		}
 
 		// 3 pts for a trader
-		Map<Integer, Integer> traders = PlacementLogic.getTraderPlacements(currentMap, 5, probs, resources, harbors);
-		for (Map.Entry<Integer, Integer> entry : traders.entrySet()) {
-			addValueToMap(sums, entry.getKey(), 4);
+		SparseIntArray traders = PlacementLogic.getTraderPlacements(currentMap, 5, probs, resources, harbors);
+		for (int i = 0; i < traders.size(); i++) {
+			addValue(sums, traders.keyAt(i), 4);
 		}
 
 		// 1 pt x resource for a road
-		Map<Integer, Integer> roads = PlacementLogic.getRoadBuilder(currentMap, 3, probs, resources);
-		for (Map.Entry<Integer, Integer> entry : roads.entrySet()) {
-			addValueToMap(sums, entry.getKey(), entry.getValue());
+		SparseIntArray roads = PlacementLogic.getRoadBuilder(currentMap, 3, probs, resources);
+		for (int i = 0; i < roads.size(); i++) {
+			addValue(sums, roads.keyAt(i), roads.valueAt(i));
 		}
 
 		// 1 pt x resource for a city
-		Map<Integer, Integer> cities = PlacementLogic.getCityBuilder(currentMap, 3, probs, resources);
-		for (Map.Entry<Integer, Integer> entry : cities.entrySet()) {
-			addValueToMap(sums, entry.getKey(), entry.getValue());
+		SparseIntArray cities = PlacementLogic.getCityBuilder(currentMap, 3, probs, resources);
+		for (int i = 0; i < cities.size(); i++) {
+			addValue(sums, cities.keyAt(i), cities.valueAt(i));
 		}
 
 		// 1/2 pt x resource for a dev card
-		Map<Integer, Integer> devCards = PlacementLogic.getDevCardBuilder(currentMap, 3, probs, resources);
-		for (Map.Entry<Integer, Integer> entry : devCards.entrySet()) {
-			addValueToMap(sums, entry.getKey(), entry.getValue() / 2);
+		SparseIntArray devCards = PlacementLogic.getDevCardBuilder(currentMap, 3, probs, resources);
+		for (int i = 0; i < devCards.size(); i++) {
+			addValue(sums, devCards.keyAt(i), devCards.valueAt(i) / 2);
 		}
 
 		// 3 pts for a ninja spot
-		Map<Integer, Integer> ninjas = PlacementLogic.getHighProbabilities(currentMap, 10, probs, true);
-		for (Map.Entry<Integer, Integer> entry : ninjas.entrySet()) {
-			addValueToMap(sums, entry.getKey(), 3);
+		SparseIntArray ninjas = PlacementLogic.getHighProbabilities(currentMap, 10, probs, true);
+		for (int i = 0; i < ninjas.size(); i++) {
+			addValue(sums, ninjas.keyAt(i), 3);
 		}
 
 		// 2x the lowest probability of the variety
-		Map<Integer, Integer> varieties = PlacementLogic.getVarietyIndexes(currentMap, resources, probs);
-		for (Map.Entry<Integer, Integer> entry : varieties.entrySet()) {
-			addValueToMap(sums, entry.getKey(), 2 * entry.getValue());
+		SparseIntArray varieties = PlacementLogic.getVarietyIndexes(currentMap, resources, probs);
+		for (int i = 0; i < varieties.size(); i++) {
+			addValue(sums, varieties.keyAt(i), 2 * varieties.valueAt(i));
 		}
 
 		// Add reasons
-		Map<Integer, List<String>> reasons = new HashMap<Integer, List<String>>();
-		for (int key : sums.keySet()) {
+		SparseArray<ArrayList<String>> reasons = new SparseArray<ArrayList<String>>();
+		for (int i = 0; i < sums.size(); i++) {
+			int key = sums.keyAt(i);
 			reasons.put(key, new ArrayList<String>());
-			if (highProbs.containsKey(key)) { reasons.get(key).add(Trait.RICH.getDescription()); }
-			if (rareResources.containsKey(key)) { reasons.get(key).add(Trait.RARE.getDescription()); }
-			if (factories.containsKey(key)) { reasons.get(key).add(Trait.FACTORY.getDescription()); }
-			if (traders.containsKey(key)) { reasons.get(key).add(Trait.TRADER.getDescription()); }
-			if (roads.containsKey(key)) { reasons.get(key).add(Trait.ROAD_BUILDER.getDescription()); }
-			if (cities.containsKey(key)) { reasons.get(key).add(Trait.CITY_BUILDER.getDescription()); }
-			if (devCards.containsKey(key)) { reasons.get(key).add(Trait.DEV_CARD_BUILDER.getDescription()); }
-			if (ninjas.containsKey(key)) { reasons.get(key).add(Trait.NINJA.getDescription()); }
-			if (varieties.containsKey(key)) { reasons.get(key).add(Trait.VARIETY.getDescription()); }
+			if (highProbs.get(key) != 0) { reasons.get(key).add(Trait.RICH); }
+			if (rareResources.get(key) != 0) { reasons.get(key).add(Trait.RARE); }
+			if (factories.get(key) != 0) { reasons.get(key).add(Trait.FACTORY); }
+			if (traders.get(key) != 0) { reasons.get(key).add(Trait.TRADER); }
+			if (roads.get(key) != 0) { reasons.get(key).add(Trait.ROAD_BUILDER); }
+			if (cities.get(key) != 0) { reasons.get(key).add(Trait.CITY_BUILDER); }
+			if (devCards.get(key) != 0) { reasons.get(key).add(Trait.DEV_CARD_BUILDER); }
+			if (ninjas.get(key) != 0) { reasons.get(key).add(Trait.NINJA); }
+			if (varieties.get(key) != 0) { reasons.get(key).add(Trait.VARIETY); }
 		}
 
-		//Log.i("BS", "   RICH    : " + highProbs);
-		//Log.i("BS", "   RARE    : " + rareResources);
-		//Log.i("BS", "   FACTORY : " + factories);
-		//Log.i("BS", "   TRADER  : " + traders);
-		//Log.i("BS", "   ROAD    : " + roads);
-		//Log.i("BS", "   CITY    : " + cities);
-		//Log.i("BS", "   DEV CARD: " + devCards);
-		//Log.i("BS", "   NINJA   : " + ninjas);
-		//Log.i("BS", "   VARIETY : " + varieties);
+		//BetterLog.i("   RICH    : " + highProbs);
+		//BetterLog.i("   RARE    : " + rareResources);
+		//BetterLog.i("   FACTORY : " + factories);
+		//BetterLog.i("   TRADER  : " + traders);
+		//BetterLog.i("   ROAD    : " + roads);
+		//BetterLog.i("   CITY    : " + cities);
+		//BetterLog.i("   DEV CARD: " + devCards);
+		//BetterLog.i("   NINJA   : " + ninjas);
+		//BetterLog.i("   VARIETY : " + varieties);
 
-		//Log.i("BS", "Map: " + sums);
+		//BetterLog.i("Map: " + sums);
 		int sumSize = sums.size();
 		for (int i = 0; i < sumSize; i++) {
 			int index = removeMax(sums);
 			// Don't count single resource hexes
-			if (currentMap.getLandIntersections()[index].length >= 2) {
+			if (currentMap.landIntersections[index].length >= 2) {
+				order.add(index);
 				set.put(index, reasons.get(index));
 			}
 		}
 
-		//Log.i("BS", "List: " + set);
+		//BetterLog.i("List: " + set);
 
-		return set;
+		return Pair.create(order, set);
 	}
 
 	/**
@@ -218,16 +180,16 @@ public class PlacementLogic {
 	 * @param probs The list of ordered probabilities
 	 * @return A list of indexes mapped to the resource with the least probability
 	 */
-	private static Map<Integer, Integer> getVarietyIndexes(CatanMap currentMap,
+	private static SparseIntArray getVarietyIndexes(CatanMap currentMap,
 			ArrayList<Resource> resources,	ArrayList<Integer> probs) {
-		Map<Integer, Integer> set = new HashMap<Integer, Integer>();
+		SparseIntArray set = new SparseIntArray();
 
-		for (int i = 0; i < currentMap.getLandIntersections().length; i++) {
-			if (currentMap.getPlacementIndexes()[i] == null || currentMap.getPlacementIndexes()[i].length == 0) {
+		for (int i = 0; i < currentMap.landIntersections.length; i++) {
+			if (currentMap.placementIndexes[i] == null || currentMap.placementIndexes[i].length == 0) {
 				continue;
 			}
 			
-			int[] triplet = currentMap.getLandIntersections()[i];
+			int[] triplet = currentMap.landIntersections[i];
 			// Don't count shoreline
 			if (triplet.length < 3) {
 				continue;
@@ -265,7 +227,7 @@ public class PlacementLogic {
 		return set;
 	}
 
-	private static Map<Integer, Integer> getRoadBuilder(CatanMap currentMap, int n,
+	private static SparseIntArray getRoadBuilder(CatanMap currentMap, int n,
 			ArrayList<Integer> probs, ArrayList<Resource> resources) {
 		ArrayList<Resource> goal = new ArrayList<Resource>();
 		goal.add(Resource.WOOD);
@@ -274,7 +236,7 @@ public class PlacementLogic {
 		return getGoodCombinationProbabilities(currentMap, n, probs, resources, goal);
 	}
 
-	private static Map<Integer, Integer> getCityBuilder(CatanMap currentMap, int n,
+	private static SparseIntArray getCityBuilder(CatanMap currentMap, int n,
 			ArrayList<Integer> probs, ArrayList<Resource> resources) {
 		ArrayList<Resource> goal = new ArrayList<Resource>();
 		goal.add(Resource.ROCK);
@@ -283,7 +245,7 @@ public class PlacementLogic {
 		return getGoodCombinationProbabilities(currentMap, n, probs, resources, goal);
 	}
 
-	private static Map<Integer, Integer> getDevCardBuilder(CatanMap currentMap, int n,
+	private static SparseIntArray getDevCardBuilder(CatanMap currentMap, int n,
 			ArrayList<Integer> probs, ArrayList<Resource> resources) {
 		ArrayList<Resource> goal = new ArrayList<Resource>();
 		goal.add(Resource.ROCK);
@@ -305,17 +267,17 @@ public class PlacementLogic {
 	 * @param goal The resources needed for this good combination.
 	 * @return A list of indexes to the sum of those resources
 	 */
-	private static Map<Integer, Integer> getGoodCombinationProbabilities(CatanMap currentMap, int n,
+	private static SparseIntArray getGoodCombinationProbabilities(CatanMap currentMap, int n,
 			ArrayList<Integer> probs, ArrayList<Resource> resources, ArrayList<Resource> goal) {
-		Map<Integer, Integer> set = new HashMap<Integer, Integer>();
+		SparseIntArray set = new SparseIntArray();
 
-		for (int i = 0; i < currentMap.getLandIntersections().length; i++) {
-			if (currentMap.getPlacementIndexes()[i] == null || currentMap.getPlacementIndexes()[i].length == 0) {
+		for (int i = 0; i < currentMap.landIntersections.length; i++) {
+			if (currentMap.placementIndexes[i] == null || currentMap.placementIndexes[i].length == 0) {
 				continue;
 			}
 			
 			int totalSum = 0;
-			int[] triplet = currentMap.getLandIntersections()[i];
+			int[] triplet = currentMap.landIntersections[i];
 
 			Map<Resource, Integer> resourceSums = new HashMap<Resource, Integer>();
 			for (Resource res : goal) {
@@ -361,16 +323,16 @@ public class PlacementLogic {
 	 * @param ninja Option as to whether to ignore intersections with 6/8s.
 	 * @return A map of indexes to their sum of dots
 	 */
-	private static Map<Integer, Integer> getHighProbabilities(CatanMap currentMap, int n,
+	private static SparseIntArray getHighProbabilities(CatanMap currentMap, int n,
 			ArrayList<Integer> probs, boolean ninja) {
-		Map<Integer, Integer> set = new HashMap<Integer, Integer>();
+		SparseIntArray set = new SparseIntArray();
 
-		for (int i = 0; i < currentMap.getLandIntersections().length; i++) {
-			if (currentMap.getPlacementIndexes()[i] == null || currentMap.getPlacementIndexes()[i].length == 0) {
+		for (int i = 0; i < currentMap.landIntersections.length; i++) {
+			if (currentMap.placementIndexes[i] == null || currentMap.placementIndexes[i].length == 0) {
 				continue;
 			}
 			
-			int[] triplet = currentMap.getLandIntersections()[i];
+			int[] triplet = currentMap.landIntersections[i];
 			if (ninja) {
 				boolean validTarget = true;
 				for (int trip : triplet) {
@@ -412,18 +374,18 @@ public class PlacementLogic {
 	 * @param harbors The list of ordered harbors
 	 * @return A map of indexes to their number of dots
 	 */
-	private static Map<Integer, Integer> getTraderPlacements(CatanMap currentMap, int n,
+	private static SparseIntArray getTraderPlacements(CatanMap currentMap, int n,
 			ArrayList<Integer> probs, ArrayList<Resource> resources, ArrayList<Harbor> harbors) {
-		Map<Integer, Integer> set = new HashMap<Integer, Integer>();
+		SparseIntArray set = new SparseIntArray();
 
 		// Find out how many land only intersections first
 		int landOnly = 0;		
-		for (int i = 0; i < currentMap.getLandIntersections().length; i++) {
-			if (currentMap.getPlacementIndexes()[i] == null || currentMap.getPlacementIndexes()[i].length == 0) {
+		for (int i = 0; i < currentMap.landIntersections.length; i++) {
+			if (currentMap.placementIndexes[i] == null || currentMap.placementIndexes[i].length == 0) {
 				continue;
 			}
 			
-			int[] landIntersections = currentMap.getLandIntersections()[i];
+			int[] landIntersections = currentMap.landIntersections[i];
 			if (landIntersections.length == 3) {
 				landOnly = i + 1; // 0 indexing
 				continue;
@@ -434,12 +396,12 @@ public class PlacementLogic {
 				continue;
 			}
 
-			Resource harborResource = harbors.get(i - landOnly).getResource();
+			Resource harborResource = harbors.get(i - landOnly).resource;
 			if (harborResource != Resource.DESERT) {
 				continue; // Only 3:1 harbors
 			}
 			int landSum = 0;
-			int[] landIndexes = currentMap.getWaterNeighbors()[i - landOnly];
+			int[] landIndexes = currentMap.waterNeighbors[i - landOnly];
 			//if (landIndexes.length < 2) {
 			//	continue; // We only want harbors with two resources
 			//}
@@ -469,18 +431,18 @@ public class PlacementLogic {
 	 * @param harbors The list of ordered harbors
 	 * @return A map of indexes to their number of dots
 	 */
-	private static Map<Integer, Integer> getFactoryPlacements(CatanMap currentMap, int n,
+	private static SparseIntArray getFactoryPlacements(CatanMap currentMap, int n,
 			ArrayList<Integer> probs, ArrayList<Resource> resources, ArrayList<Harbor> harbors) {
-		Map<Integer, Integer> set = new HashMap<Integer, Integer>();
+		SparseIntArray set = new SparseIntArray();
 
 		// Find out how many land only intersections first
 		int landOnly = 0;		
-		for (int i = 0; i < currentMap.getLandIntersections().length; i++) {
-			if (currentMap.getPlacementIndexes()[i] == null || currentMap.getPlacementIndexes()[i].length == 0) {
+		for (int i = 0; i < currentMap.landIntersections.length; i++) {
+			if (currentMap.placementIndexes[i] == null || currentMap.placementIndexes[i].length == 0) {
 				continue;
 			}
 			
-			int[] landIntersections = currentMap.getLandIntersections()[i];
+			int[] landIntersections = currentMap.landIntersections[i];
 			if (landIntersections.length == 3) {
 				landOnly = i + 1; // 0 indexing
 				continue;
@@ -491,12 +453,12 @@ public class PlacementLogic {
 				continue;
 			}
 			
-			Resource harborResource = harbors.get(i - landOnly).getResource();
+			Resource harborResource = harbors.get(i - landOnly).resource;
 			if (harborResource == Resource.DESERT || harborResource == Resource.WATER) {
 				continue; // Only harbors
 			}
 			int landSum = 0;
-			int[] landIndexes = currentMap.getWaterNeighbors()[i - landOnly];
+			int[] landIndexes = currentMap.waterNeighbors[i - landOnly];
 			//if (landIndexes.length < 2) {
 			//	continue; // We only want harbors with two resources
 			//}
@@ -531,9 +493,9 @@ public class PlacementLogic {
 	 * @param resources The list of ordered resources
 	 * @return A map of indexes to their percentage
 	 */
-	private static Map<Integer, Integer> getRareResources(CatanMap currentMap, int n,
+	private static SparseIntArray getRareResources(CatanMap currentMap, int n,
 			ArrayList<Integer> probs, ArrayList<Resource> resources) {
-		Map<Integer, Integer> set = new HashMap<Integer, Integer>();
+		SparseIntArray set = new SparseIntArray();
 
 		Map<Resource, Integer> sums = new HashMap<Resource, Integer>();
 		for (int i = 0; i < probs.size(); i++) {
@@ -564,8 +526,8 @@ public class PlacementLogic {
 
 			int percent = prob * 100 / sums.get(res);
 			if (percent >= n) {
-				for (int tripletIndex : currentMap.getLandIntersectionIndexes()[i]) {
-					if (currentMap.getPlacementIndexes()[tripletIndex] != null && currentMap.getPlacementIndexes()[tripletIndex].length != 0) {
+				for (int tripletIndex : currentMap.landIntersectionIndexes[i]) {
+					if (currentMap.placementIndexes[tripletIndex] != null && currentMap.placementIndexes[tripletIndex].length != 0) {
 						set.put(tripletIndex, percent);
 					}
 				}

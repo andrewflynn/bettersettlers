@@ -1,4 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <dimen name="seafarers_menu_width">420dp</dimen>
+    <dimen name="main_button">92dip</dimen>
+    <dimen name="main_button_plus">108dip</dimen>
+    
+    <dimen name="menu_list_width">420dip</dimen>
+    <dimen name="menu_item_width">404dip</dimen>
+    <dimen name="menu_item_height">125dip</dimen>
+    
+    <dimen name="buy_all_width">192dip</dimen>
+    <dimen name="buy_all_height">83dip</dimen>
+    
+    <dimen name="seafarers_buy_text">20sp</dimen>
 </resources>

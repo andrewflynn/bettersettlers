@@ -1,7 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <dimen name="actionbar_compat_height">45dp</dimen>
-    <dimen name="actionbar_compat_progress">27dp</dimen>
-    <dimen name="menu_text_size">18sp</dimen>
-    <dimen name="seafarers_menu_width">280dp</dimen>
+    <dimen name="main_button">48dip</dimen>
+    <dimen name="main_button_plus">64dip</dimen>
+    
+    <dimen name="menu_list_width">280dip</dimen>
+    <dimen name="menu_item_width">264dip</dimen>
+    <dimen name="menu_item_height">82dip</dimen>
+    
+    <dimen name="expansion_item_width">197dip</dimen>
+    
+    <dimen name="buy_all_width">128dip</dimen>
+    <dimen name="buy_all_height">55dip</dimen>
+    
+    <dimen name="seafarers_buy_text">16sp</dimen>
 </resources>

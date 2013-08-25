@@ -18,9 +18,9 @@ import android.widget.ImageView;
 import com.nut.bettersettlers.R;
 import com.nut.bettersettlers.activity.MainActivity;
 import com.nut.bettersettlers.data.CatanMap;
-import com.nut.bettersettlers.data.MapConsts.MapType;
+import com.nut.bettersettlers.data.MapType;
 import com.nut.bettersettlers.fragment.MapFragment;
-import com.nut.bettersettlers.misc.Consts;
+import com.nut.bettersettlers.util.Consts;
 
 public class MenuDialogFragment extends DialogFragment {
 	private static final String SHARED_PREFS_NAME = "Graph";
@@ -51,17 +51,17 @@ public class MenuDialogFragment extends DialogFragment {
 
 		MapFragment mapFragment = ((MainActivity) getActivity()).getMapFragment();
 		switch (mapFragment.getMapType()) {
-		case FAIR:
+		case MapType.FAIR:
 			betterSettlersButton.setVisibility(View.VISIBLE);
 			traditionalButton.setVisibility(View.GONE);
 			randomButton.setVisibility(View.GONE);
 			break;
-		case TRADITIONAL:
+		case MapType.TRADITIONAL:
 			betterSettlersButton.setVisibility(View.GONE);
 			traditionalButton.setVisibility(View.VISIBLE);
 			randomButton.setVisibility(View.GONE);
 			break;
-		case RANDOM:
+		case MapType.RANDOM:
 			betterSettlersButton.setVisibility(View.GONE);
 			traditionalButton.setVisibility(View.GONE);
 			randomButton.setVisibility(View.VISIBLE);
@@ -123,8 +123,8 @@ public class MenuDialogFragment extends DialogFragment {
 		@Override
 		public void onClick(View v) {
 			MapFragment mapFragment = ((MainActivity) getActivity()).getMapFragment();
-			MapType type = mapFragment.getMapType();
-			CatanMap size = mapFragment.getMapSize();
+			int type = mapFragment.getMapType();
+			CatanMap size = mapFragment.getCatanMap();
 			
 			Animation fadeIn = AnimationUtils.loadAnimation(getActivity(), android.R.anim.fade_in);
 			Animation fadeOut = AnimationUtils.loadAnimation(getActivity(), android.R.anim.fade_out);
@@ -133,13 +133,13 @@ public class MenuDialogFragment extends DialogFragment {
 			ImageView inButton = null;
 			
 			switch (type) {
-			case FAIR:
+			case MapType.FAIR:
 				outButton = betterSettlersButton;
 				
 				// Traditional only for settlers boards
-				if (size.getName().equals("standard")
-						|| size.getName().equals("large")
-						|| size.getName().equals("xlarge")) {
+				if (size.name.equals("standard")
+						|| size.name.equals("large")
+						|| size.name.equals("xlarge")) {
 					inButton = traditionalButton;
 					mapFragment.traditionalChoice();
 				} else {
@@ -147,13 +147,13 @@ public class MenuDialogFragment extends DialogFragment {
 					mapFragment.randomChoice();
 				}
 				break;
-			case TRADITIONAL:
+			case MapType.TRADITIONAL:
 				outButton = traditionalButton;
 				
 				inButton = randomButton;
 				mapFragment.randomChoice();
 				break;
-			case RANDOM:
+			case MapType.RANDOM:
 				outButton = randomButton;
 				
 				inButton = betterSettlersButton;

@@ -2,8 +2,6 @@ package com.nut.bettersettlers.fragment;
 
 import java.util.ArrayList;
 
-import android.content.Context;
-import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
@@ -11,23 +9,16 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.View.OnLongClickListener;
 import android.view.ViewGroup;
-import android.view.WindowManager;
 import android.widget.ImageView;
 
 import com.nut.bettersettlers.R;
-import com.nut.bettersettlers.fragment.dialog.GraphHelpDialogFragment;
 import com.nut.bettersettlers.fragment.dialog.ResetDialogFragment;
-import com.nut.bettersettlers.fragment.dialog.WelcomeDialogFragment;
 import com.nut.bettersettlers.ui.GraphView;
 
 public class GraphFragment extends Fragment {
-	private static final String X = "BetterSettlers";
-
 	private static final String STATE_PROBS = "STATE_PROBS";
 	private static final String STATE_ROBBER_PROBS = "STATE_ROBBER_PROBS";
 	private static final String STATE_PROBS_STACK = "STATE_PROBS_STACK";
-
-	private int dRollButtonPadding;
 
 	private GraphView mGraphView;
 
@@ -71,13 +62,13 @@ public class GraphFragment extends Fragment {
 		}
 		
 		if (savedState != null) {
-			if (savedState.getIntArray(STATE_PROBS) != null) {
+			if (savedState.containsKey(STATE_PROBS)) {
 				mProbs = savedState.getIntArray(STATE_PROBS);
 			}
-			if (savedState.getIntArray(STATE_ROBBER_PROBS) != null) {
+			if (savedState.containsKey(STATE_ROBBER_PROBS)) {
 				mRobberProbs = savedState.getIntArray(STATE_ROBBER_PROBS);
 			}
-			if (savedState.getSerializable(STATE_PROBS_STACK) != null) {
+			if (savedState.containsKey(STATE_PROBS_STACK)) {
 				mProbsList = savedState.getIntegerArrayList(STATE_PROBS_STACK);
 			}
 		}
@@ -110,14 +101,6 @@ public class GraphFragment extends Fragment {
 	@Override
 	public void onStart() {
 		super.onStart();
-		
-		float width = ((WindowManager) getActivity().getSystemService(Context.WINDOW_SERVICE)).getDefaultDisplay().getWidth();
-		float height = ((WindowManager) getActivity().getSystemService(Context.WINDOW_SERVICE)).getDefaultDisplay().getHeight();
-		if (width > height) {
-			initDimens(((WindowManager) getActivity().getSystemService(Context.WINDOW_SERVICE)).getDefaultDisplay().getHeight());
-		} else {
-			initDimens(((WindowManager) getActivity().getSystemService(Context.WINDOW_SERVICE)).getDefaultDisplay().getWidth());
-		}
 
 		setAndInvalidate();
 	}
@@ -173,88 +156,6 @@ public class GraphFragment extends Fragment {
 				return true;
 			}
 		});
-	}
-	
-	private void initDimens(int size) {
-		int padding = (int) getResources().getDimension(R.dimen.graph_button_padding);
-		dRollButtonPadding = (int) getResources().getDimension(R.dimen.graph_button_buffer);
-		int width = size - (2 * padding) - (5 * dRollButtonPadding);
-	}
-	
-	private void increment(View v) {
-		switch (v.getId()) {
-		case R.id.two_button:
-			incrementGraph(2, false);
-			break;
-		case R.id.three_button:
-			incrementGraph(3, false);
-			break;
-		case R.id.four_button:
-			incrementGraph(4, false);
-			break;
-		case R.id.five_button:
-			incrementGraph(5, false);
-			break;
-		case R.id.six_button:
-			incrementGraph(6, false);
-			break;
-		case R.id.seven_button:
-			incrementGraph(7, false);
-			break;
-		case R.id.eight_button:
-			incrementGraph(8, false);
-			break;
-		case R.id.nine_button:
-			incrementGraph(9, false);
-			break;
-		case R.id.ten_button:
-			incrementGraph(10, false);
-			break;
-		case R.id.eleven_button:
-			incrementGraph(11, false);
-			break;
-		case R.id.twelve_button:
-			incrementGraph(12, false);
-			break;
-		}
-	}
-	
-	private void longIncrement(View v) {
-		switch (v.getId()) {
-		case R.id.two_button:
-			incrementGraph(2, true);
-			break;
-		case R.id.three_button:
-			incrementGraph(3, true);
-			break;
-		case R.id.four_button:
-			incrementGraph(4, true);
-			break;
-		case R.id.five_button:
-			incrementGraph(5, true);
-			break;
-		case R.id.six_button:
-			incrementGraph(6, true);
-			break;
-		case R.id.seven_button:
-			incrementGraph(7, true);
-			break;
-		case R.id.eight_button:
-			incrementGraph(8, true);
-			break;
-		case R.id.nine_button:
-			incrementGraph(9, true);
-			break;
-		case R.id.ten_button:
-			incrementGraph(10, true);
-			break;
-		case R.id.eleven_button:
-			incrementGraph(11, true);
-			break;
-		case R.id.twelve_button:
-			incrementGraph(12, true);
-			break;
-		}
 	}
 
 	private void incrementGraph(int n, boolean longClick) {

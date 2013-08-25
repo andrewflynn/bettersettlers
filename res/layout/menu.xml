@@ -2,65 +2,76 @@
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/menu_root"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
-    
-  <LinearLayout android:id="@+id/menu_container"
-      android:layout_width="fill_parent"
-      android:layout_height="fill_parent"
-      android:orientation="vertical">
-    <RelativeLayout android:id="@+id/algorithm_container"
-        android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:paddingLeft="16dip"
+    android:paddingRight="16dip" >
+
+    <LinearLayout
+        android:id="@+id/menu_container"
+        android:layout_width="@dimen/menu_list_width"
         android:layout_height="wrap_content"
-        android:layout_margin="10dp"
-        android:gravity="center" >
-      <ImageView android:id="@+id/algorithm_item"
-        android:layout_width="wrap_content"
-        android:layout_height="match_parent"
-        android:src="@drawable/menu_algorithm"
-        android:layout_alignParentTop="true"/>
-      <ImageView android:id="@+id/better_settlers_overlay"
-        android:layout_width="wrap_content"
-        android:layout_height="match_parent"
-        android:layout_alignParentTop="true"
-        android:src="@drawable/menu_better_settlers_button"
-        android:visibility="gone" />
-      <ImageView android:id="@+id/traditional_overlay"
-        android:layout_width="wrap_content"
-        android:layout_height="match_parent"
-        android:layout_alignParentTop="true"
-        android:src="@drawable/menu_traditional_button"
-        android:visibility="gone"/>
-      <ImageView android:id="@+id/random_overlay"
-        android:layout_width="wrap_content"
-        android:layout_height="match_parent"
-        android:layout_alignParentTop="true"
-        android:src="@drawable/menu_random_button"
-        android:visibility="gone"/>
-    </RelativeLayout>
-    <ImageView android:id="@+id/roll_tracker_item"
-      android:layout_height="wrap_content"
-      android:layout_width="match_parent"
-      android:src="@drawable/menu_roll_tracker_button"
-      android:layout_marginLeft="10dp"
-      android:layout_marginRight="10dp"
-      android:layout_marginBottom="10dp"
-      android:gravity="center"/>
-    <ImageView android:id="@+id/shuffle_probs_item"
-      android:layout_height="wrap_content"
-      android:layout_width="match_parent"
-      android:src="@drawable/menu_shuffle_probabilities_button"
-      android:layout_marginLeft="10dp"
-      android:layout_marginRight="10dp"
-      android:layout_marginBottom="10dp"
-      android:gravity="center"/>
-    <ImageView android:id="@+id/shuffle_harbors_item"
-      android:layout_height="wrap_content"
-      android:layout_width="match_parent"
-      android:src="@drawable/menu_shuffle_harbors_button"
-      android:layout_marginLeft="10dp"
-      android:layout_marginRight="10dp"
-      android:layout_marginBottom="10dp"
-      android:gravity="center"/>
-  </LinearLayout>
-  
+        android:orientation="vertical" >
+
+        <FrameLayout
+            android:id="@+id/algorithm_container"
+            android:layout_width="@dimen/menu_item_width"
+            android:layout_height="@dimen/menu_item_height"
+            android:layout_gravity="center"
+            android:layout_marginBottom="8dp"
+            android:layout_marginTop="16dp" >
+
+            <ImageView
+                android:id="@+id/algorithm_item"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:src="@drawable/menu_algorithm" />
+
+            <ImageView
+                android:id="@+id/better_settlers_overlay"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:src="@drawable/menu_better_settlers_button"
+                android:visibility="gone" />
+
+            <ImageView
+                android:id="@+id/traditional_overlay"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:src="@drawable/menu_traditional_button"
+                android:visibility="gone" />
+
+            <ImageView
+                android:id="@+id/random_overlay"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:src="@drawable/menu_random_button"
+                android:visibility="gone" />
+
+        </FrameLayout>
+
+        <ImageView
+            android:id="@+id/roll_tracker_item"
+            android:layout_width="@dimen/menu_item_width"
+            android:layout_height="@dimen/menu_item_height"
+            android:layout_marginBottom="8dp"
+            android:layout_gravity="center"
+            android:src="@drawable/menu_roll_tracker_button" />
+
+        <ImageView
+            android:id="@+id/shuffle_probs_item"
+            android:layout_width="@dimen/menu_item_width"
+            android:layout_height="@dimen/menu_item_height"
+            android:layout_marginBottom="8dp"
+            android:layout_gravity="center"
+            android:src="@drawable/menu_shuffle_probabilities_button" />
+
+        <ImageView
+            android:id="@+id/shuffle_harbors_item"
+            android:layout_width="@dimen/menu_item_width"
+            android:layout_height="@dimen/menu_item_height"
+            android:layout_marginBottom="16dp"
+            android:layout_gravity="center"
+            android:src="@drawable/menu_shuffle_harbors_button" />
+    </LinearLayout>
+
 </ScrollView>

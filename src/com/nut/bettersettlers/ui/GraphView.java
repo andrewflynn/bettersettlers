@@ -1,19 +1,18 @@
 package com.nut.bettersettlers.ui;
 
-import com.nut.bettersettlers.R;
-
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.RectF;
 import android.graphics.Typeface;
 import android.util.AttributeSet;
-import android.view.Display;
 import android.view.View;
-import android.view.WindowManager;
+
+import com.nut.bettersettlers.R;
 
 public class GraphView extends View {
 	private static final int[] EXPECTED_FACTOR;
+	private static final RectF RECT;
 	static {
 		EXPECTED_FACTOR = new int[13];
 		EXPECTED_FACTOR[0] = -1;
@@ -29,6 +28,31 @@ public class GraphView extends View {
 		EXPECTED_FACTOR[10] = 3;
 		EXPECTED_FACTOR[11] = 2;
 		EXPECTED_FACTOR[12] = 1;
+		
+		RECT = new RectF();
+	}
+
+	private static final Paint GRAY_PAINT;
+	private static final Paint RED_PAINT;
+	private static final Paint BLACK_PAINT;
+	private static final Paint BACKGROUND_PAINT;
+	static {
+		GRAY_PAINT = new Paint();
+		GRAY_PAINT.setColor(0xFFAAAAAA);
+		GRAY_PAINT.setAlpha(100);
+
+		RED_PAINT = new Paint();
+		RED_PAINT.setColor(0xFFFF0000);
+
+		BLACK_PAINT = new Paint();
+		BLACK_PAINT.setColor(0xFF000000);
+		BLACK_PAINT.setAntiAlias(true);
+		BLACK_PAINT.setTextAlign(Paint.Align.CENTER);
+		BLACK_PAINT.setTypeface(Typeface.DEFAULT_BOLD);
+		BLACK_PAINT.setStrokeWidth(2);
+
+		BACKGROUND_PAINT = new Paint();
+		BACKGROUND_PAINT.setColor(0xFFFFFFFF);
 	}
 
 	private int[] mProbs;
@@ -58,6 +82,7 @@ public class GraphView extends View {
 	private void initialize(Context context) {
 		mProbs = new int[13];
 		mRobberProbs = new int[13];
+		
 		for (int i = 0; i <= 1; i++) {
 			// There are no 0 or 1 dice rolls
 			mProbs[i] = -1;
@@ -97,29 +122,15 @@ public class GraphView extends View {
 	@Override
 	public void onDraw(Canvas canvas) {
 		initNewDimens();
+
+		BLACK_PAINT.setTextSize(dTextSize);
 		
-		Paint grayPaint = new Paint();
-		grayPaint.setColor(0xFFAAAAAA);
-
-		Paint redPaint = new Paint();
-		redPaint.setColor(0xFFFF0000);
-
-		Paint blackPaint = new Paint();
-		blackPaint.setColor(0xFF000000);
-		blackPaint.setTextSize(dTextSize);
-		blackPaint.setAntiAlias(true);
-		blackPaint.setTextAlign(Paint.Align.CENTER);
-		blackPaint.setTypeface(Typeface.DEFAULT_BOLD);
-		blackPaint.setStrokeWidth(2);
-
-		Paint backgroundPaint = new Paint();
-		backgroundPaint.setColor(0xFFFFFFFF);
-		canvas.drawPaint(backgroundPaint);
+		canvas.drawPaint(BACKGROUND_PAINT);
 
 		float x = dBaseX + (dShadowBarWidth / 2); // Text at bottom is centered
 		float y = dBaseY;
 		for (int i = 2; i <= 12; i++) {
-			canvas.drawText(Integer.toString(i), x, y, blackPaint);
+			canvas.drawText(Integer.toString(i), x, y, BLACK_PAINT);
 			x += dShadowBarWidth + dBarBufferWidth;
 		}
 
@@ -129,7 +140,8 @@ public class GraphView extends View {
 		for (int num : EXPECTED_FACTOR) {
 			if (num != -1) {
 				float yHeight = (dBaseY - dPadding) / (6f / num);
-				canvas.drawRoundRect(new RectF(x, y - yHeight, x + dShadowBarWidth, y), 5.0f, 5.0f, grayPaint);
+				RECT.set(x, y - yHeight, x + dShadowBarWidth, y);
+				canvas.drawRoundRect(RECT, 5.0f, 5.0f, GRAY_PAINT);
 				x += dShadowBarWidth + dBarBufferWidth;
 			}
 		}
@@ -155,15 +167,21 @@ public class GraphView extends View {
 				// In order to have rounded only on the bottom for one and top for other if we have both,
 				// we overlap each one just short (5 pixels) of the point where they connect
 				if (robberNum > 0 && num > 0) {
-					canvas.drawRoundRect(new RectF(x, y - (robberNum * multiplier) + 5, x + dBarWidth, y), 5.0f, 5.0f, redPaint);
-					canvas.drawRect(new RectF(x, y - (robberNum * multiplier), x + dBarWidth, y - 5), redPaint);
-					canvas.drawRoundRect(new RectF(x, y - (both * multiplier), x + dBarWidth, y - (robberNum * multiplier) - 5), 5.0f, 5.0f, blackPaint);
-					canvas.drawRect(new RectF(x, y - (both * multiplier) + 5, x + dBarWidth, y - (robberNum * multiplier)), blackPaint);
-					canvas.drawText(Integer.toString(both), x + (dShadowBarWidth / 2), y - (both * multiplier) - dBarBufferWidth, blackPaint);
+					RECT.set(x, y - (robberNum * multiplier) + 5, x + dBarWidth, y);
+					canvas.drawRoundRect(RECT, 5.0f, 5.0f, RED_PAINT);
+					RECT.set(x, y - (robberNum * multiplier), x + dBarWidth, y - 5);
+					canvas.drawRect(RECT, RED_PAINT);
+					RECT.set(x, y - (both * multiplier), x + dBarWidth, y - (robberNum * multiplier) - 5);
+					canvas.drawRoundRect(RECT, 5.0f, 5.0f, BLACK_PAINT);
+					RECT.set(x, y - (both * multiplier) + 5, x + dBarWidth, y - (robberNum * multiplier));
+					canvas.drawRect(RECT, BLACK_PAINT);
+					canvas.drawText(Integer.toString(both), x + (dShadowBarWidth / 2), y - (both * multiplier) - dBarBufferWidth, BLACK_PAINT);
 				} else {
-					canvas.drawRoundRect(new RectF(x, y - (robberNum * multiplier), x + dBarWidth, y), 5.0f, 5.0f, redPaint);
-					canvas.drawRoundRect(new RectF(x, y - (both * multiplier), x + dBarWidth, y - (robberNum * multiplier)), 5.0f, 5.0f, blackPaint);
-					canvas.drawText(Integer.toString(both), x + (dShadowBarWidth / 2), y - (both * multiplier) - dBarBufferWidth, blackPaint);
+					RECT.set(x, y - (robberNum * multiplier), x + dBarWidth, y);
+					canvas.drawRoundRect(RECT, 5.0f, 5.0f, RED_PAINT);
+					RECT.set(x, y - (both * multiplier), x + dBarWidth, y - (robberNum * multiplier));
+					canvas.drawRoundRect(RECT, 5.0f, 5.0f, BLACK_PAINT);
+					canvas.drawText(Integer.toString(both), x + (dShadowBarWidth / 2), y - (both * multiplier) - dBarBufferWidth, BLACK_PAINT);
 				}
 				x += dShadowBarWidth + dBarBufferWidth;
 			}

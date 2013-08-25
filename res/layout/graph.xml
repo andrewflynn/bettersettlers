@@ -1,118 +1,127 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-	android:orientation="vertical"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
     android:background="#FFFFFFFF" >
     
-    <ImageView android:id="@+id/del_button"
-    	android:layout_width="wrap_content"
-    	android:layout_height="wrap_content"
-    	android:layout_marginBottom="13dp"
-    	android:layout_marginRight="13dp"
-    	android:layout_alignParentBottom="true"
-    	android:layout_alignParentRight="true"
-    	android:src="@drawable/num_del_button" />
-    <ImageView android:id="@+id/twelve_button"
-    	android:layout_width="wrap_content"
-    	android:layout_height="wrap_content"
-    	android:layout_marginBottom="13dp"
-    	android:layout_marginRight="1dp"
-    	android:layout_alignParentBottom="true"
-    	android:layout_toLeftOf="@id/del_button"
-    	android:src="@drawable/num_twelve_button" />
-    <ImageView android:id="@+id/eleven_button"
-    	android:layout_width="wrap_content"
-    	android:layout_height="wrap_content"
-    	android:layout_marginBottom="13dp"
-    	android:layout_marginRight="1dp"
-    	android:layout_alignParentBottom="true"
-    	android:layout_toLeftOf="@id/twelve_button"
-    	android:src="@drawable/num_eleven_button" />
-    <ImageView android:id="@+id/ten_button"
-    	android:layout_width="wrap_content"
-    	android:layout_height="wrap_content"
-    	android:layout_marginBottom="13dp"
-    	android:layout_marginRight="1dp"
-    	android:layout_alignParentBottom="true"
-    	android:layout_toLeftOf="@id/eleven_button"
-    	android:src="@drawable/num_ten_button" />
-    <ImageView android:id="@+id/nine_button"
-    	android:layout_width="wrap_content"
-    	android:layout_height="wrap_content"
-    	android:layout_marginBottom="13dp"
-    	android:layout_marginRight="1dp"
-    	android:layout_alignParentBottom="true"
-    	android:layout_toLeftOf="@id/ten_button"
-    	android:src="@drawable/num_nine_button" />
-    <ImageView android:id="@+id/eight_button"
-    	android:layout_width="wrap_content"
-    	android:layout_height="wrap_content"
-    	android:layout_marginBottom="13dp"
-    	android:layout_marginRight="1dp"
-    	android:layout_alignParentBottom="true"
-    	android:layout_toLeftOf="@id/nine_button"
-    	android:src="@drawable/num_eight_button" />
+    <LinearLayout
+        android:id="@+id/bottom_button_row"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="13dp"
+        android:orientation="horizontal" >
+
+        <ImageView
+            android:id="@+id/eight_button"
+            android:layout_width="@dimen/main_button"
+            android:layout_height="@dimen/main_button"
+            android:layout_weight="1"
+            android:paddingRight="1dp"
+            android:src="@drawable/num_eight_button" />
+
+        <ImageView
+            android:id="@+id/nine_button"
+            android:layout_width="@dimen/main_button"
+            android:layout_height="@dimen/main_button"
+            android:layout_weight="1"
+            android:paddingRight="1dp"
+            android:src="@drawable/num_nine_button" />
+
+        <ImageView
+            android:id="@+id/ten_button"
+            android:layout_width="@dimen/main_button"
+            android:layout_height="@dimen/main_button"
+            android:layout_weight="1"
+            android:paddingRight="1dp"
+            android:src="@drawable/num_ten_button" />
+
+        <ImageView
+            android:id="@+id/eleven_button"
+            android:layout_width="@dimen/main_button"
+            android:layout_height="@dimen/main_button"
+            android:layout_weight="1"
+            android:paddingRight="1dp"
+            android:src="@drawable/num_eleven_button" />
+
+        <ImageView
+            android:id="@+id/twelve_button"
+            android:layout_width="@dimen/main_button"
+            android:layout_height="@dimen/main_button"
+            android:layout_weight="1"
+            android:paddingRight="1dp"
+            android:src="@drawable/num_twelve_button" />
+        
+        <ImageView
+            android:id="@+id/del_button"
+            android:layout_width="@dimen/main_button"
+            android:layout_height="@dimen/main_button"
+            android:layout_weight="1"
+            android:src="@drawable/num_del_button" />
+    </LinearLayout>
     
-    <ImageView android:id="@+id/seven_button"
-    	android:layout_width="wrap_content"
-    	android:layout_height="wrap_content"
-    	android:layout_marginBottom="1dp"
-    	android:layout_marginRight="13dp"
-    	android:layout_above="@id/del_button"
-    	android:layout_alignParentRight="true"
-    	android:src="@drawable/num_seven_button" />
-    <ImageView android:id="@+id/six_button"
-    	android:layout_width="wrap_content"
-    	android:layout_height="wrap_content"
-    	android:layout_marginBottom="1dp"
-    	android:layout_marginRight="1dp"
-    	android:layout_above="@id/twelve_button"
-    	android:layout_toLeftOf="@id/seven_button"
-    	android:src="@drawable/num_six_button" />
-    <ImageView android:id="@+id/five_button"
-    	android:layout_width="wrap_content"
-    	android:layout_height="wrap_content"
-    	android:layout_marginBottom="1dp"
-    	android:layout_marginRight="1dp"
-    	android:layout_above="@id/eleven_button"
-    	android:layout_toLeftOf="@id/six_button"
-    	android:src="@drawable/num_five_button" />
-    <ImageView android:id="@+id/four_button"
-    	android:layout_width="wrap_content"
-    	android:layout_height="wrap_content"
-    	android:layout_marginBottom="1dp"
-    	android:layout_marginRight="1dp"
-    	android:layout_above="@id/ten_button"
-    	android:layout_toLeftOf="@id/five_button"
-    	android:src="@drawable/num_four_button" />
-    <ImageView android:id="@+id/three_button"
-    	android:layout_width="wrap_content"
-    	android:layout_height="wrap_content"
-    	android:layout_marginBottom="1dp"
-    	android:layout_marginRight="1dp"
-    	android:layout_above="@id/nine_button"
-    	android:layout_toLeftOf="@id/four_button"
-    	android:src="@drawable/num_three_button" />
-    <ImageView android:id="@+id/two_button"
-    	android:layout_width="wrap_content"
-    	android:layout_height="wrap_content"
-    	android:layout_marginBottom="1dp"
-    	android:layout_marginRight="1dp"
-    	android:layout_above="@id/eight_button"
-    	android:layout_toLeftOf="@id/three_button"
-    	android:src="@drawable/num_two_button" />
-    <FrameLayout android:id="@+id/title_buffer"
-    	android:layout_height="wrap_content"
-    	android:layout_width="fill_parent"
-    	android:layout_marginTop="13dp"
-    	android:visibility="invisible"
-    	android:layout_alignParentTop="true"
-    	android:background="@drawable/title_settlers"/>
+    <LinearLayout
+        android:id="@+id/top_button_row"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@id/bottom_button_row"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="1dp"
+        android:orientation="horizontal" >
+
+        <ImageView
+            android:id="@+id/two_button"
+            android:layout_width="@dimen/main_button"
+            android:layout_height="@dimen/main_button"
+            android:layout_weight="1"
+            android:paddingRight="1dp"
+            android:src="@drawable/num_two_button" />
+
+        <ImageView
+            android:id="@+id/three_button"
+            android:layout_width="@dimen/main_button"
+            android:layout_height="@dimen/main_button"
+            android:layout_weight="1"
+            android:paddingRight="1dp"
+            android:src="@drawable/num_three_button" />
+
+        <ImageView
+            android:id="@+id/four_button"
+            android:layout_width="@dimen/main_button"
+            android:layout_height="@dimen/main_button"
+            android:layout_weight="1"
+            android:paddingRight="1dp"
+            android:src="@drawable/num_four_button" />
+
+        <ImageView
+            android:id="@+id/five_button"
+            android:layout_width="@dimen/main_button"
+            android:layout_height="@dimen/main_button"
+            android:layout_weight="1"
+            android:paddingRight="1dp"
+            android:src="@drawable/num_five_button" />
+
+        <ImageView
+            android:id="@+id/six_button"
+            android:layout_width="@dimen/main_button"
+            android:layout_height="@dimen/main_button"
+            android:layout_weight="1"
+            android:paddingRight="1dp"
+            android:src="@drawable/num_six_button" />
+        
+        <ImageView
+            android:id="@+id/seven_button"
+            android:layout_width="@dimen/main_button"
+            android:layout_height="@dimen/main_button"
+            android:layout_weight="1"
+            android:src="@drawable/num_seven_button" />
+
+    </LinearLayout>
     	
     <com.nut.bettersettlers.ui.GraphView android:id="@+id/graph_view"
     	android:layout_width="fill_parent"
     	android:layout_height="fill_parent"
-		android:layout_above="@id/seven_button"
-		android:layout_below="@id/title_buffer" />
+		android:layout_above="@id/top_button_row"
+		android:layout_marginTop="@dimen/main_button_plus" />
 </RelativeLayout>

@@ -1,49 +1,114 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/seafarers_root"
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    android:gravity="center_horizontal" >
-  
-  <FrameLayout android:id="@+id/buy_all_container"
-      android:layout_width="@dimen/seafarers_menu_width"
-      android:layout_height="wrap_content"
-      android:layout_alignParentBottom="true"
-      android:layout_centerHorizontal="true">
-    <ImageView android:id="@+id/buy_all_button"
-        android:layout_width="wrap_content"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:gravity="center_horizontal"
+    android:padding="16dip" >
+
+    <FrameLayout
+        android:id="@+id/buy_all_container"
+        android:layout_width="@dimen/menu_list_width"
         android:layout_height="wrap_content"
-        android:src="@drawable/sea_buy_all_button"
-        android:paddingRight="10dp"
-        android:paddingBottom="5dp"
-        android:paddingTop="5dp"
-        android:layout_gravity="right"/>
-  </FrameLayout>
-    
-  <ScrollView android:id="@+id/seafarers_scroll"
-      android:layout_width="420dp"
-      android:layout_height="wrap_content"
-      android:layout_above="@id/buy_all_container"
-      android:layout_alignRight="@id/buy_all_container">
-  <LinearLayout android:id="@+id/seafarers_container"
-      android:layout_width="wrap_content"
-      android:layout_height="wrap_content"
-      android:orientation="vertical"
-      android:gravity="center">
-    <TextView android:id="@+id/seafarers_intro"
-      android:text="Get the new Seafarers of Catan maps! We're giving you the Heading for New Shores as a free map. Buy each other map for $.99 each or buy all 9 for just $2.99"
-      android:layout_width="wrap_content"
-      android:layout_height="wrap_content"
-      android:paddingLeft="13dp"
-      android:paddingRight="13dp"
-      android:paddingTop="6dp"
-      android:paddingBottom="6dp" />
-    <ImageView android:id="@+id/heading_for_new_shores_item"
-      android:layout_height="wrap_content"
-      android:layout_width="wrap_content"
-      android:paddingLeft="13dp"
-      android:paddingRight="13dp"
-      android:paddingBottom="6dp"/>
-  </LinearLayout>
-  </ScrollView>
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true" >
+
+        <ImageView
+            android:id="@+id/buy_all_button"
+            android:layout_width="@dimen/buy_all_width"
+            android:layout_height="@dimen/buy_all_height"
+            android:layout_gravity="right"
+            android:layout_marginTop="8dp"
+            android:src="@drawable/sea_buy_all_button" />
+    </FrameLayout>
+
+    <ScrollView
+        android:id="@+id/seafarers_scroll"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_above="@id/buy_all_container"
+        android:layout_alignRight="@id/buy_all_container" >
+
+        <LinearLayout
+            android:id="@+id/seafarers_container"
+            android:layout_width="@dimen/menu_list_width"
+            android:layout_height="wrap_content"
+            android:orientation="vertical" >
+
+            <TextView
+                android:id="@+id/seafarers_intro"
+                android:layout_width="@dimen/menu_item_width"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="8dip"
+                android:fontFamily="sans-serif-light"
+                android:gravity="center"
+                android:text="@string/seafarers_intro"
+                android:textSize="@dimen/seafarers_buy_text"
+                android:textStyle="bold" />
+
+            <ImageView
+                android:id="@+id/heading_for_new_shores_item"
+                android:layout_width="@dimen/menu_item_width"
+                android:layout_height="@dimen/menu_item_height"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginBottom="8dip" />
+
+            <ImageView
+                android:id="@+id/the_four_islands_item"
+                android:layout_width="@dimen/menu_item_width"
+                android:layout_height="@dimen/menu_item_height"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginBottom="8dip" />
+
+            <ImageView
+                android:id="@+id/the_fog_island_item"
+                android:layout_width="@dimen/menu_item_width"
+                android:layout_height="@dimen/menu_item_height"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginBottom="8dip" />
+
+            <ImageView
+                android:id="@+id/through_the_desert_item"
+                android:layout_width="@dimen/menu_item_width"
+                android:layout_height="@dimen/menu_item_height"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginBottom="8dip" />
+
+            <ImageView
+                android:id="@+id/the_forgotten_tribe_item"
+                android:layout_width="@dimen/menu_item_width"
+                android:layout_height="@dimen/menu_item_height"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginBottom="8dip" />
+
+            <ImageView
+                android:id="@+id/cloth_for_catan_item"
+                android:layout_width="@dimen/menu_item_width"
+                android:layout_height="@dimen/menu_item_height"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginBottom="8dip" />
+
+            <ImageView
+                android:id="@+id/the_pirate_islands_item"
+                android:layout_width="@dimen/menu_item_width"
+                android:layout_height="@dimen/menu_item_height"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginBottom="8dip" />
+
+            <ImageView
+                android:id="@+id/the_wonders_of_catan_item"
+                android:layout_width="@dimen/menu_item_width"
+                android:layout_height="@dimen/menu_item_height"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginBottom="8dip" />
+
+            <ImageView
+                android:id="@+id/new_world_item"
+                android:layout_width="@dimen/menu_item_width"
+                android:layout_height="@dimen/menu_item_height"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginBottom="8dip" />
+        </LinearLayout>
+    </ScrollView>
+
 </RelativeLayout>

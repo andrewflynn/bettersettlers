@@ -1,38 +1,41 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-	android:id="@+id/main_fragment_container"
-	android:layout_width="fill_parent"
-	android:layout_height="fill_parent">
-	<fragment android:id="@+id/map_fragment"
-		android:name="com.nut.bettersettlers.fragment.MapFragment"
-		android:layout_width="match_parent"
-		android:layout_height="match_parent"
-        android:layout_weight="1" />
-	<fragment android:id="@+id/graph_fragment"
-		android:name="com.nut.bettersettlers.fragment.GraphFragment"
-		android:layout_width="match_parent"
-		android:layout_height="match_parent"
-        android:layout_weight="1" />
-    	
+    android:id="@+id/main_fragment_container"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent" >
+
+    <fragment
+        android:id="@+id/map_fragment"
+        android:name="com.nut.bettersettlers.fragment.MapFragment"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+
+    <fragment
+        android:id="@+id/graph_fragment"
+        android:name="com.nut.bettersettlers.fragment.GraphFragment"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+
     <!-- TITLE -->
     <ImageView
-        android:id="@+id/title_button"
+        android:id="@+id/title_text"
         android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="@dimen/main_button"
         android:layout_alignParentTop="true"
-        android:layout_marginLeft="13dp"
-        android:layout_marginRight="13dp"
-        android:layout_marginTop="13dp"
+        android:layout_marginLeft="16dp"
+        android:layout_marginRight="16dp"
+        android:layout_marginTop="16dp"
+        android:layout_gravity="center_horizontal"
         android:background="@drawable/title_settlers" />
+
     <ImageView
         android:id="@+id/info_button"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentTop="true"
+        android:layout_width="@dimen/main_button"
+        android:layout_height="@dimen/main_button"
         android:layout_alignParentRight="true"
-        android:layout_marginRight="13dp"
-        android:layout_marginTop="13dp"
+        android:layout_alignParentTop="true"
+        android:layout_marginRight="16dp"
+        android:layout_marginTop="16dp"
         android:background="@drawable/title_info_button" />
-        
 
 </RelativeLayout>
