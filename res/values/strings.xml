@@ -2,5 +2,6 @@
 <resources>
 	<string name="better_settlers">Better Settlers</string>
 	<string name="seafarers_intro">Get the new Seafarers of Catan maps! We\'re giving you the Heading for New Shores as a free map. Buy each other map for $.99 each or buy all 9 for just $2.99</string>
-	<string name="expansion_intro">Which size?</string>
+	<!-- Arg 1: single price, Arg 2: buy all price -->
+	<string name="seafarers_intro_format">Get the new Seafarers of Catan maps! We\'re giving you the Heading for New Shores as a free map. Buy each other map for %1$s each or buy all 9 for just %2$s</string>
 </resources>

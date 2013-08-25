@@ -23,7 +23,10 @@ public class WelcomeDialogFragment extends DialogFragment {
 				+ "and simpler, the generator creates gameplay that is more evenly "
 				+ "challenging and engaging. The result is a better game of Settlers.\n\n"
 				+ "What's new in this version:\n"
-				+ "- 5-6 player Seafarers maps!\n")
+				+ "- User interface cleanup\n"
+				+ "- Performance improvements\n"
+				+ "- Smaller app size\n"
+				+ "- Bug fixes\n")
 				.setPositiveButton("About", new OnClickListener() {
 					@Override
 					public void onClick(DialogInterface dialog, int which) {

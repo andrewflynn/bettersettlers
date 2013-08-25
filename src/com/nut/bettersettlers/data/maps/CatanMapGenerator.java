@@ -329,29 +329,24 @@ public final class CatanMapGenerator {
 
 				boolean added = false;
 
-				//System.out.println(getName() + " 0000 " + String.format("(%d,%d)", tuple[0], tuple[1]));
 				int[] placement = new int[2];
 				if (land1.y == land2.y) {
 					if (land1.x > land2.x) {
 						if (water.y > land1.y && water.y > land2.y) {
-							//System.out.println(getName() + " 1111aaaa");
 							placement[0] = realTuple[1];
 							placement[1] = 3;
 							added = true;
 						} else if (water.y < land1.y && water.y < land2.y) {
-							//System.out.println(getName() + " 2222aaaa");
 							placement[0] = realTuple[1];
 							placement[1] = 2;
 							added = true;
 						}
 					} else if (land1.x < land2.x){
 						if (water.y > land1.y && water.y > land2.y) {
-							//System.out.println(getName() + " 1111bbbb");
 							placement[0] = realTuple[0];
 							placement[1] = 3;
 							added = true;
 						} else if (water.y < land1.y && water.y < land2.y) {
-							//System.out.println(getName() + " 2222bbbb");
 							placement[0] = realTuple[0];
 							placement[1] = 2;
 							added = true;
@@ -360,24 +355,20 @@ public final class CatanMapGenerator {
 				} else if (land1.y < land2.y) {
 					if (water.y == land1.y) {
 						if (water.x < land1.x && water.x < land2.x) {
-							//System.out.println(getName() + " 3333");
 							placement[0] = realTuple[0];
 							placement[1] = 5;
 							added = true;
 						} else if (water.x > land1.x && water.x > land1.x) {
-							//System.out.println(getName() + " 4444");
 							placement[0] = realTuple[0];
 							placement[1] = 3;
 							added = true;
 						}
 					} else if (water.y == land2.y) {
 						if (water.x < land1.x && water.x < land2.x) {
-							//System.out.println(getName() + " 5555");
 							placement[0] = realTuple[0];
 							placement[1] = 4;
 							added = true;
 						} else if (water.x > land1.x && water.x > land1.x) {
-							//System.out.println(getName() + " 6666");
 							placement[0] = realTuple[0];
 							placement[1] = 4;
 							added = true;
@@ -386,24 +377,20 @@ public final class CatanMapGenerator {
 				} else if (land1.y > land2.y) {
 					if (water.y == land1.y) {
 						if (water.x < land1.x && water.x < land2.x) {
-							//System.out.println(getName() + " 7777");
 							placement[0] = realTuple[0];
 							placement[1] = 2;
 							added = true;
 						} else if (water.x > land1.x && water.x > land1.x) {
-							//System.out.println(getName() + " 8888");
 							placement[0] = realTuple[0];
 							placement[1] = 0;
 							added = true;
 						}
 					} else if (water.y == land2.y) {
 						if (water.x < land1.x && water.x < land2.x) {
-							//System.out.println(getName() + " 9999");
 							placement[0] = realTuple[0];
 							placement[1] = 1;
 							added = true;
 						} else if (water.x > land1.x && water.x > land1.x) {
-							//System.out.println(getName() + " AAAA");
 							placement[0] = realTuple[0];
 							placement[1] = 1;
 							added = true;

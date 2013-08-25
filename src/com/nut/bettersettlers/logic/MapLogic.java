@@ -77,7 +77,7 @@ public class MapLogic {
 		while (!avail.isEmpty()) {
 			// If we have an assigned prob, use it
 			if (currentMap.landGridProbabilities[set.size()] != Integer.MAX_VALUE) {
-				//System.out.println(" pulling special " + counter);
+				//BetterLog.i(" pulling special " + counter);
 				int nextProb = currentMap.landGridProbabilities[set.size()];
 				avail.remove((Integer) nextProb);
 				set.add(nextProb);
@@ -108,7 +108,7 @@ public class MapLogic {
 		while (!avail.isEmpty()) {
 			// If we have an assigned prob, use it
 			if (currentMap.landGridProbabilities[counter] != Integer.MAX_VALUE) {
-				//System.out.println(" pulling special " + counter);
+				//BetterLog.i(" pulling special " + counter);
 				int nextProb = currentMap.landGridProbabilities[counter];
 				avail.remove((Integer) nextProb);
 				set.add(nextProb);
@@ -119,7 +119,7 @@ public class MapLogic {
 					set.add(avail.remove(RAND.nextInt(avail.size())));
 				}
 			}
-			//System.out.println("Check " + counter + ", set " + set.get(counter));
+			//BetterLog.i("Check " + counter + ", set " + set.get(counter));
 			counter++;
 		}
 		
@@ -148,15 +148,15 @@ public class MapLogic {
 			}
 			// Game over: avail is empty and we still have un-set probabilities. Start over.
 			if (avail.isEmpty()) {
-				//System.out.println("Restart: " + set);
+				//BetterLog.i("Restart: " + set);
 				set.clear();
 				tried.clear();
 				avail = initProbabilities(currentMap);
 				placedRecently = false;
 			} else {
-				//System.out.println("  Set      : " + set);
-				//System.out.println("  Tried    : " + tried);
-				//System.out.println("  Avail    : " + avail);
+				//BetterLog.i("  Set      : " + set);
+				//BetterLog.i("  Tried    : " + tried);
+				//BetterLog.i("  Avail    : " + avail);
 				
 				String whitelistName = currentMap.landGridWhitelists[set.size()];
 				
@@ -185,7 +185,7 @@ public class MapLogic {
 					nextProb = avail.remove(RAND.nextInt(avail.size()));
 				}
 
-				//System.out.println("  Consuming: " + nextProb);
+				//BetterLog.i("  Consuming: " + nextProb);
 				boolean canPlaceHere = true;
 				
 				// If it's a desert (picking a 0), make sure the whitelist (if it has one) has desert
@@ -248,7 +248,7 @@ public class MapLogic {
 			}
 		}
 
-		//System.out.println("Finished: " + set);
+		//BetterLog.i("Finished: " + set);
 		return set;
 	}
 	
@@ -271,7 +271,7 @@ public class MapLogic {
 			}
 			// Game over: avail is empty and we still have un-set probabilities. Start over.
 			if (avail.isEmpty()) {
-				//System.out.println("Restart: " + set);
+				//BetterLog.i("Restart: " + set);
 				resourceMap = initResourceMap(currentMap);
 				set.clear();
 				tried.clear();
@@ -313,10 +313,10 @@ public class MapLogic {
 					nextProb = avail.remove(RAND.nextInt(avail.size()));
 				}
 				
-				//System.out.println("  Set: " + set);
-				//System.out.println("  Avail: " + avail);
-				//System.out.println("  Tried: " + tried);
-				//System.out.println("  Consuming: " + nextResource);
+				//BetterLog.i("  Set: " + set);
+				//BetterLog.i("  Avail: " + avail);
+				//BetterLog.i("  Tried: " + tried);
+				//BetterLog.i("  Consuming: " + nextResource);
 				boolean canPlaceHere = true;
 				
 				// If it's a desert (picking a 0), make sure the whitelist (if it has one) has desert
@@ -414,7 +414,7 @@ public class MapLogic {
 			set.add(0);
 		}
 
-		//System.out.println("Finished: " + set);
+		//BetterLog.i("Finished: " + set);
 		return set;
 	}
 	
@@ -567,7 +567,7 @@ public class MapLogic {
 					nextResource = avail.remove(RAND.nextInt(avail.size()));
 				}
 				
-				//System.out.println("Consuming: " + nextResource);
+				//BetterLog.i("Consuming: " + nextResource);
 				boolean canPlaceHere = true;
 				
 				// Check to see if there's a whitelist

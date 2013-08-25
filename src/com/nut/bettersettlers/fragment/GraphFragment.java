@@ -12,8 +12,10 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 
 import com.nut.bettersettlers.R;
+import com.nut.bettersettlers.activity.MainActivity;
 import com.nut.bettersettlers.fragment.dialog.ResetDialogFragment;
 import com.nut.bettersettlers.ui.GraphView;
+import com.nut.bettersettlers.util.Analytics;
 
 public class GraphFragment extends Fragment {
 	private static final String STATE_PROBS = "STATE_PROBS";
@@ -43,7 +45,6 @@ public class GraphFragment extends Fragment {
 	///////////////////////////////
 	// Fragment method overrides //
 	///////////////////////////////
-	/** Called when the activity is first created. */
 	@Override
 	public void onCreate(Bundle savedState) {
 		super.onCreate(savedState);
@@ -131,12 +132,14 @@ public class GraphFragment extends Fragment {
 			@Override
 			public void onClick(View v) {
 				undo();
+				((MainActivity) getActivity()).trackEvent(Analytics.CATEGORY_ROLL_TRACKER,
+						Analytics.ACTION_BUTTON, Analytics.DELETE);
 			}
 		});
 		mDelButton.setOnLongClickListener(new OnLongClickListener() {
 			@Override
 			public boolean onLongClick(View v) {
-				areYouSureReset();
+				ResetDialogFragment.newInstance().show(getFragmentManager(), "ResetFragmentDialog");
 				return true;
 			}
 		});
@@ -147,12 +150,17 @@ public class GraphFragment extends Fragment {
 			@Override
 			public void onClick(View v) {
 				incrementGraph(n, false);
+				((MainActivity) getActivity()).trackEvent(Analytics.CATEGORY_ROLL_TRACKER,
+						Analytics.ACTION_BUTTON, "" + n);
 			}
 		});
 		button.setOnLongClickListener(new OnLongClickListener() {
 			@Override
 			public boolean onLongClick(View v) {
 				incrementGraph(n, true);
+				((MainActivity) getActivity()).trackEvent(Analytics.CATEGORY_ROLL_TRACKER,
+						Analytics.ACTION_LONG_PRESS_BUTTON, "" + n);
+				
 				return true;
 			}
 		});
@@ -184,10 +192,6 @@ public class GraphFragment extends Fragment {
 			}
 		}
 		setAndInvalidate();
-	}
-	
-	private void areYouSureReset() {
-		ResetDialogFragment.newInstance().show(getFragmentManager(), "ResetFragmentDialog");
 	}
 
 	public void reset() {
