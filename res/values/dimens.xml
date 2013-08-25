@@ -2,6 +2,7 @@
 <resources>
     <dimen name="main_button">48dip</dimen>
     <dimen name="main_button_plus">64dip</dimen>
+    <dimen name="main_button_padding">12dip</dimen>
     
     <dimen name="menu_list_width">280dip</dimen>
     <dimen name="menu_item_width">264dip</dimen>

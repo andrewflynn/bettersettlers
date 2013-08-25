@@ -12,7 +12,31 @@ public enum MapSizePair implements Parcelable {
 	
 	HEADING_FOR_NEW_SHORES(MapSize.HEADING_FOR_NEW_SHORES,
 			MapSize.HEADING_FOR_NEW_SHORES_EXP,
-			R.drawable.sea_heading_for_new_shores);
+			R.drawable.sea_heading_for_new_shores),
+	THE_FOUR_ISLANDS(MapSize.THE_FOUR_ISLANDS,
+			MapSize.THE_FOUR_ISLANDS_EXP,
+			R.drawable.sea_the_four_islands_button, R.drawable.sea_the_four_islands_bw_button),
+	THE_FOG_ISLAND(MapSize.THE_FOG_ISLAND,
+			MapSize.THE_FOG_ISLAND_EXP,
+			R.drawable.sea_the_fog_island_button, R.drawable.sea_the_fog_island_bw_button),
+	THROUGH_THE_DESERT(MapSize.THROUGH_THE_DESERT,
+			MapSize.THROUGH_THE_DESERT_EXP,
+			R.drawable.sea_through_the_desert_button, R.drawable.sea_through_the_desert_bw_button),
+	THE_FORGOTTEN_TRIBE(MapSize.THE_FORGOTTEN_TRIBE,
+			MapSize.THE_FORGOTTEN_TRIBE_EXP,
+			R.drawable.sea_the_forgotten_tribe_button, R.drawable.sea_the_forgotten_tribe_bw_button),
+	CLOTH_FOR_CATAN(MapSize.CLOTH_FOR_CATAN,
+			MapSize.CLOTH_FOR_CATAN_EXP,
+			R.drawable.sea_cloth_for_catan_button, R.drawable.sea_cloth_for_catan_bw_button),
+	THE_PIRATE_ISLANDS(MapSize.THE_PIRATE_ISLANDS,
+			MapSize.THE_PIRATE_ISLANDS_EXP,
+			R.drawable.sea_the_pirate_islands_button, R.drawable.sea_the_pirate_islands_bw_button),
+	THE_WONDERS_OF_CATAN(MapSize.THE_WONDERS_OF_CATAN,
+			MapSize.THE_WONDERS_OF_CATAN_EXP,
+			R.drawable.sea_the_wonders_of_catan_button, R.drawable.sea_the_wonders_of_catan_bw_button),
+	NEW_WORLD(MapSize.NEW_WORLD,
+			MapSize.NEW_WORLD_EXP,
+			R.drawable.sea_new_world_button, R.drawable.sea_new_world_bw_button);
 	
 	public final MapSize reg;
 	public final MapSize exp;

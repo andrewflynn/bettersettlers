@@ -88,6 +88,15 @@ public class SeafarersDialogFragment extends DialogFragment {
 			}
 		});
 		
+		setupButton((ImageView) view.findViewById(R.id.the_four_islands_item), MapContainer.THE_FOUR_ISLANDS);
+		setupButton((ImageView) view.findViewById(R.id.the_fog_island_item), MapContainer.THE_FOG_ISLAND);
+		setupButton((ImageView) view.findViewById(R.id.through_the_desert_item), MapContainer.THROUGH_THE_DESERT);
+		setupButton((ImageView) view.findViewById(R.id.the_forgotten_tribe_item), MapContainer.THE_FORGOTTEN_TRIBE);
+		setupButton((ImageView) view.findViewById(R.id.cloth_for_catan_item), MapContainer.CLOTH_FOR_CATAN);
+		setupButton((ImageView) view.findViewById(R.id.the_pirate_islands_item), MapContainer.THE_PIRATE_ISLANDS);
+		setupButton((ImageView) view.findViewById(R.id.the_wonders_of_catan_item), MapContainer.THE_WONDERS_OF_CATAN);
+		setupButton((ImageView) view.findViewById(R.id.new_world_item), MapContainer.NEW_WORLD);
+		
 		TextView text = (TextView) view.findViewById(R.id.seafarers_intro);
 		FrameLayout buyAllContainer = (FrameLayout) view.findViewById(R.id.buy_all_container);
 		ImageView buyAllButton = (ImageView) buyAllContainer.findViewById(R.id.buy_all_button);

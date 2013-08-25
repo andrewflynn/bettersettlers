@@ -2,4 +2,5 @@
 <resources>
     <dimen name="main_button">54dip</dimen>
     <dimen name="main_button_plus">70dip</dimen>
+    <dimen name="main_button_padding">16dip</dimen>
 </resources>

@@ -52,7 +52,7 @@ public class MainActivity extends FragmentActivity {
 	private static final Bundle GET_PRICES_BUNDLE;
 	static {
 		ArrayList<String> priceItems = new ArrayList<String>();
-		priceItems.add("new_world"); // Any normal map should do
+		priceItems.add(MapContainer.NEW_WORLD.id); // Any normal map should do
 		priceItems.add(IabConsts.BUY_ALL);
 		
 		GET_PRICES_BUNDLE = new Bundle();
@@ -220,6 +220,13 @@ public class MainActivity extends FragmentActivity {
 			// Else show the map they chose, and maybe Fog Island help
 			if (getMapFragment() != null && !itemId.equals(IabConsts.BUY_ALL)) {
 				getMapFragment().sizeChoice(MapSize.getMapSizeByProductId(itemId));
+			}
+			
+			// Show Fog Island if we need to (and we're not restoring all maps)
+			// Note the comment on mShowFogIsland (we need to wait until after onStart() before
+			// showing the fragment
+			if (MapContainer.THE_FOG_ISLAND.id.equals(itemId)) {
+				mShowFogIsland = true;
 			}
     	}
 	}

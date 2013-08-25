@@ -1,6 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<resources>
-  <dimen name="font_size">7sp</dimen>
-  <dimen name="reason_font_size">11sp</dimen>
-  <dimen name="placement_reason_box_width">225dp</dimen>
-</resources>

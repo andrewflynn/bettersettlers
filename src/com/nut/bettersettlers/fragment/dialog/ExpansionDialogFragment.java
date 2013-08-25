@@ -76,10 +76,25 @@ public class ExpansionDialogFragment extends DialogFragment {
 		final MainActivity mainActivity = (MainActivity) getActivity();
 		final MapFragment mapFragment = mainActivity.getMapFragment();
 		
+		if (size == MapSize.THE_FOG_ISLAND || size == MapSize.THE_FOG_ISLAND_EXP) {
+			maybeShowFogIslandExplanation();
+		}
+		
 		mapFragment.sizeChoice(size);
 
 		mainActivity.getSupportFragmentManager().popBackStack();
 		mainActivity.getSupportFragmentManager().popBackStack();
 		mainActivity.getSupportFragmentManager().popBackStack();
+	}
+	
+	private void maybeShowFogIslandExplanation() {
+		SharedPreferences prefs = getActivity().getSharedPreferences(Consts.SHARED_PREFS_NAME, Context.MODE_PRIVATE);
+		boolean shownWhatsNew = prefs.getBoolean(Consts.SHARED_PREFS_KEY_FOG_ISLAND_HELP, false);
+		if (!shownWhatsNew) {
+			FogIslandHelpDialogFragment.newInstance().show(getFragmentManager(), "TheFogIslandHelpDialog");
+			SharedPreferences.Editor prefsEditor = prefs.edit();
+			prefsEditor.putBoolean(Consts.SHARED_PREFS_KEY_FOG_ISLAND_HELP, true);
+			prefsEditor.commit();
+		}
 	}
 }
