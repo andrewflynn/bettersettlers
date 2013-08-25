@@ -98,6 +98,7 @@ public class MapView extends View {
 	
 	private float dFontSize;
 	private float dReasonFontSize;
+	private float dReasonFontBufferMultiplier;
 	private float dViewBuffer;
 	private float dPlacementReasonBoxWidth;
 	private float dPlacementReasonBoxLineHeight;
@@ -131,6 +132,7 @@ public class MapView extends View {
 	private ScaleGestureDetector mScaleDetector;
 	private GestureDetector mTapDetector;
 	private float mScaleFactor;
+	private float mTextScaleFactor;
 	private float mDiffX;
 	private float mDiffY;
     private float mLastTouchX;
@@ -181,6 +183,8 @@ public class MapView extends View {
 
 		mScaleDetector = new ScaleGestureDetector(context, new ScaleListener());
 		mTapDetector = new GestureDetector(context, new TapListener());
+		
+		mTextScaleFactor = 1.0f;
 	}
 	
 	private void initDimens(Context context) {
@@ -188,6 +192,7 @@ public class MapView extends View {
 
 		dFontSize = (float) res.getDimension(R.dimen.font_size);
 		dReasonFontSize = (float) res.getDimension(R.dimen.reason_font_size);
+		dReasonFontBufferMultiplier = (float) res.getDimension(R.dimen.reason_font_buffer_multiplier);
 		dViewBuffer = (float) res.getDimension(R.dimen.view_buffer);
 		dPlacementReasonBoxWidth = (float) res.getDimension(R.dimen.placement_reason_box_width);
 		dPlacementReasonBoxLineHeight = (float) res.getDimension(R.dimen.placement_reason_box_line_height);
@@ -204,6 +209,7 @@ public class MapView extends View {
 		private int[][] uPiecesY;
 		private int[][] uPiecesColor;
 		private float scaleFactor;
+		private float textScaleFactor;
 		private MapSize mapSize;
 		private int[][] probs;
 		private int[][] uProbs;
@@ -230,10 +236,14 @@ public class MapView extends View {
             uPiecesY = (int[][]) in.readSerializable();
             uPiecesColor = (int[][]) in.readSerializable();
             scaleFactor = in.readFloat();
+            textScaleFactor = in.readFloat();
             mapSize = in.readParcelable(MapView.class.getClassLoader());
             probs = (int[][]) in.readSerializable();
             uProbs = (int[][]) in.readSerializable();
             uVisibility = (boolean[][]) in.readSerializable();
+            if (harbors == null) {
+            	harbors = new ArrayList<Harbor>();
+            }
             in.readTypedList(harbors, Harbor.CREATOR);
             placementBookmark = in.readInt();
             placements = Util.bundleToSparseArrayArrayList(in.readBundle());
@@ -253,6 +263,7 @@ public class MapView extends View {
             out.writeSerializable(uPiecesY);
             out.writeSerializable(uPiecesColor);
             out.writeFloat(scaleFactor);
+            out.writeFloat(textScaleFactor);
             out.writeParcelable(mapSize, 0);
             out.writeSerializable(probs);
             out.writeSerializable(uProbs);
@@ -292,6 +303,7 @@ public class MapView extends View {
 		ss.uPiecesY = mUPiecesY;
 		ss.uPiecesColor = mUPiecesColor;
 		ss.scaleFactor = mScaleFactor;
+		ss.textScaleFactor = mTextScaleFactor;
 		ss.mapSize = mMapSize;
 		ss.probs = mProbs;
 		ss.uProbs = mUProbs;
@@ -307,32 +319,33 @@ public class MapView extends View {
 	@Override
 	protected void onRestoreInstanceState (Parcelable state) {
 		BetterLog.i("MapView.onRestoreInstanceState");
-	    if(!(state instanceof SavedState)) {
-	        super.onRestoreInstanceState(state);
-	        return;
-	      }
+		if (!(state instanceof SavedState)) {
+			super.onRestoreInstanceState(state);
+			return;
+		}
 
-	      SavedState ss = (SavedState)state;
-	      super.onRestoreInstanceState(ss.getSuperState());
-	      
-	      mReady = ss.ready;
-	      mMaxX = ss.maxX;
-	      mMaxY = ss.maxY;
-	      mPiecesX = ss.piecesX;
-	      mPiecesY = ss.piecesY;
-	      mPiecesColor = ss.piecesColor;
-	      mUPiecesX = ss.uPiecesX;
-	      mUPiecesY = ss.uPiecesY;
-	      mUPiecesColor = ss.uPiecesColor;
-	      mScaleFactor = ss.scaleFactor;
-	      mMapSize = ss.mapSize;
-	      mProbs = ss.probs;
-	      mUProbs = ss.uProbs;
-	      mUVisibility = ss.uVisibility;
-	      mHarbors = ss.harbors;
-	      mPlacementBookmark = ss.placementBookmark;
-	      mPlacements = ss.placements;
-	      mOrderedPlacements = ss.orderedPlacements;
+		SavedState ss = (SavedState) state;
+		super.onRestoreInstanceState(ss.getSuperState());
+
+		mReady = ss.ready;
+		mMaxX = ss.maxX;
+		mMaxY = ss.maxY;
+		mPiecesX = ss.piecesX;
+		mPiecesY = ss.piecesY;
+		mPiecesColor = ss.piecesColor;
+		mUPiecesX = ss.uPiecesX;
+		mUPiecesY = ss.uPiecesY;
+		mUPiecesColor = ss.uPiecesColor;
+		mScaleFactor = ss.scaleFactor;
+		mTextScaleFactor = ss.textScaleFactor;
+		mMapSize = ss.mapSize;
+		mProbs = ss.probs;
+		mUProbs = ss.uProbs;
+		mUVisibility = ss.uVisibility;
+		mHarbors = ss.harbors;
+		mPlacementBookmark = ss.placementBookmark;
+		mPlacements = ss.placements;
+		mOrderedPlacements = ss.orderedPlacements;
 	}
 	
 	public void setReady() {
@@ -481,15 +494,26 @@ public class MapView extends View {
 	private class ScaleListener extends ScaleGestureDetector.SimpleOnScaleGestureListener {
 		@Override
 		public boolean onScale(ScaleGestureDetector detector) {
-			mScaleFactor *= detector.getScaleFactor();
+			float newScaleFactor = mScaleFactor * detector.getScaleFactor();
+			if (newScaleFactor <= 10.0f && newScaleFactor >= 0.1f) {
+				mScaleFactor = newScaleFactor;
+				mTextScaleFactor *= detector.getScaleFactor();
+				
+				invalidate();
+			}
+			
+			/*
+			mTextScaleFactor *= detector.getScaleFactor();
 
 			// Don't let the object get too small or too large.
 			mScaleFactor = Math.max(0.1f, Math.min(mScaleFactor, 10.0f));
+			mTextScaleFactor = Math.max(0.1f, Math.min(mTextScaleFactor, 10.0f));
+			*/
 
 			//BetterLog.i("MiddleX: " + dMiddleX);
 			//BetterLog.i("MiddleY: " + dMiddleY);
 			//BetterLog.i("Factor: " + mScaleFactor);
-			invalidate();
+			//invalidate();
 			return true;
 		}
 	}
@@ -693,7 +717,7 @@ public class MapView extends View {
 		}
 		
 		GENERAL_PAINT.setStrokeWidth(2 * mScaleFactor);
-		GENERAL_PAINT.setTextSize(dFontSize * mScaleFactor);
+		GENERAL_PAINT.setTextSize(dFontSize * mTextScaleFactor);
 
 		HexShape hexShape = (HexShape) mHexShapeDrawable.getShape();
 		hexShape.setPath(XR * mScaleFactor,
@@ -876,7 +900,7 @@ public class MapView extends View {
 
 		yLevel -= reasons.size() * dPlacementReasonBoxLineHeight;
 		for (String reason : reasons) {
-			canvas.drawText(reason, x - dPlacementReasonBoxWidth / 3 + 3 * XR, yLevel, TEXT_PAINT);
+			canvas.drawText(reason, x - dPlacementReasonBoxWidth / 3 + dReasonFontBufferMultiplier * XR, yLevel, TEXT_PAINT);
 			yLevel += dPlacementReasonBoxLineHeight;
 		}
 	}

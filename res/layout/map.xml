@@ -32,7 +32,7 @@
             android:id="@+id/placements_button"
             android:layout_width="@dimen/main_button"
             android:layout_height="@dimen/main_button"
-            android:layout_marginLeft="16dp"
+            android:layout_marginLeft="@dimen/main_button_padding"
             android:layout_toRightOf="@id/settings_button"
             android:src="@drawable/main_placements" />
 
@@ -40,7 +40,7 @@
             android:id="@+id/placements_container"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginLeft="16dp"
+            android:layout_marginLeft="@dimen/main_button_padding"
             android:layout_toRightOf="@id/placements_button"
             android:orientation="horizontal" >
 
@@ -54,7 +54,7 @@
                 android:id="@+id/placements_right_button"
                 android:layout_width="@dimen/main_button"
                 android:layout_height="@dimen/main_button"
-                android:layout_marginLeft="16dp"
+                android:layout_marginLeft="@dimen/main_button_padding"
                 android:src="@drawable/main_right_button" />
         </LinearLayout>
 
