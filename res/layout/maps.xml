@@ -2,36 +2,41 @@
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/maps_root"
     android:layout_width="fill_parent"
-    android:layout_height="fill_parent">
-    
-  <LinearLayout android:id="@+id/maps_container"
-      android:layout_width="wrap_content"
-      android:layout_height="wrap_content"
-      android:orientation="vertical"
-      android:layout_gravity="center">
-    <ImageView android:id="@+id/settlers_item"
-      android:layout_height="wrap_content"
-      android:layout_width="wrap_content"
-      android:src="@drawable/maps_settlers_button"
-      android:layout_alignParentTop="true"
-      android:layout_margin="10dp"
-      android:layout_gravity="center"/>
-    <ImageView android:id="@+id/seafarers_item"
-      android:layout_height="wrap_content"
-      android:layout_width="wrap_content"
-      android:src="@drawable/maps_seafarers_button"
-      android:layout_marginLeft="10dp"
-      android:layout_marginRight="10dp"
-      android:layout_marginBottom="10dp"
-      android:layout_gravity="center"/>
-    <ImageView android:id="@+id/more_item"
-      android:layout_height="wrap_content"
-      android:layout_width="wrap_content"
-      android:src="@drawable/maps_more_button"
-      android:layout_marginLeft="10dp"
-      android:layout_marginRight="10dp"
-      android:layout_marginBottom="10dp"
-      android:layout_gravity="center"/>
-  </LinearLayout>
-  
+    android:layout_height="fill_parent"
+    android:paddingLeft="16dip"
+    android:paddingRight="16dip" >
+
+    <LinearLayout
+        android:id="@+id/maps_container"
+        android:layout_width="@dimen/menu_list_width"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:orientation="vertical" >
+
+        <ImageView
+            android:id="@+id/settlers_item"
+            android:layout_width="@dimen/menu_item_width"
+            android:layout_height="@dimen/menu_item_height"
+            android:layout_gravity="center"
+            android:layout_marginTop="16dp"
+            android:layout_marginBottom="8dp"
+            android:src="@drawable/maps_settlers_button" />
+
+        <ImageView
+            android:id="@+id/seafarers_item"
+            android:layout_width="@dimen/menu_item_width"
+            android:layout_height="@dimen/menu_item_height"
+            android:layout_gravity="center"
+            android:layout_marginBottom="8dp"
+            android:src="@drawable/maps_seafarers_button" />
+
+        <ImageView
+            android:id="@+id/more_item"
+            android:layout_width="@dimen/menu_item_width"
+            android:layout_height="@dimen/menu_item_height"
+            android:layout_gravity="center"
+            android:layout_marginBottom="16dp"
+            android:src="@drawable/maps_more_button" />
+    </LinearLayout>
+
 </ScrollView>

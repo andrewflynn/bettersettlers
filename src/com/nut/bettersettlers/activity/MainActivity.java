@@ -1,65 +1,57 @@
 package com.nut.bettersettlers.activity;
 
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
-import android.app.AlertDialog;
-import android.app.Dialog;
+import android.app.PendingIntent;
+import android.content.ComponentName;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.IntentSender.SendIntentException;
+import android.content.ServiceConnection;
 import android.content.SharedPreferences;
-import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
-import android.os.Handler;
+import android.os.IBinder;
 import android.os.PowerManager;
 import android.os.PowerManager.WakeLock;
-import android.provider.Settings.Secure;
+import android.os.RemoteException;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentTransaction;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.ImageView;
 
+import com.android.vending.billing.IInAppBillingService;
 import com.google.android.apps.analytics.GoogleAnalyticsTracker;
 import com.nut.bettersettlers.R;
-import com.nut.bettersettlers.data.MapProvider;
-import com.nut.bettersettlers.data.MapProvider.MapSize;
+import com.nut.bettersettlers.data.MapSize;
 import com.nut.bettersettlers.fragment.GraphFragment;
 import com.nut.bettersettlers.fragment.MapFragment;
 import com.nut.bettersettlers.fragment.dialog.AboutDialogFragment;
-import com.nut.bettersettlers.fragment.dialog.FakePurchaseDialogFragment;
 import com.nut.bettersettlers.fragment.dialog.FogIslandHelpDialogFragment;
-import com.nut.bettersettlers.iab.BillingService;
-import com.nut.bettersettlers.iab.BillingService.RequestPurchase;
-import com.nut.bettersettlers.iab.BillingService.RestoreTransactions;
 import com.nut.bettersettlers.iab.IabConsts;
-import com.nut.bettersettlers.iab.IabConsts.MapContainer;
-import com.nut.bettersettlers.iab.IabConsts.PurchaseState;
-import com.nut.bettersettlers.iab.IabConsts.ResponseCode;
-import com.nut.bettersettlers.iab.Obfuscate;
-import com.nut.bettersettlers.iab.PurchaseObserver;
-import com.nut.bettersettlers.iab.ResponseHandler;
-import com.nut.bettersettlers.iab.util.Base64;
-import com.nut.bettersettlers.misc.Consts;
+import com.nut.bettersettlers.iab.MapContainer;
+import com.nut.bettersettlers.iab.Security;
+import com.nut.bettersettlers.util.BetterLog;
+import com.nut.bettersettlers.util.Consts;
 
 public class MainActivity extends FragmentActivity {
-	private static final String X = "BetterSettlers";
-	
 	private static final String STATE_SHOW_GRAPH = "STATE_SHOW_GRAPH";
 	private static final String STATE_SHOW_PLACEMENTS = "STATE_SHOW_PLACEMENTS";
 	private static final String STATE_THEFT_ORDER = "STATE_THEFT_ORDER";
 	private static final String STATE_EXP_THEFT_ORDER = "STATE_EXP_THEFT_ORDER";
 	private static final String STATE_TITLE_ID = "STATE_TITLE_ID";
 	
-	private static final String SHARED_PREFS_IAB_STATE_CURRENT = "SHARED_PREFS_STATE_CURRENT";
 	private static final String SHARED_PREFS_THE_FOG_ISLAND_NAME = "Seafarers";
 	private static final String SHARED_PREFS_SHOWN_THE_FOG_ISLAND_HELP = "TheFogIsland";
-	private static final int DIALOG_IAB_NOT_SUPPORTED = 1;
+
+	public static final int BUY_INTENT_REQUEST_CODE = 101;
 	
 	private MapFragment mMapFragment;
 	private GraphFragment mGraphFragment;
-	private MapProvider mMapProvider;
 
 	private ImageView mTitle;
 	private int mTitleId;
@@ -68,104 +60,89 @@ public class MainActivity extends FragmentActivity {
 	private WakeLock mWakeLock;
 	private GoogleAnalyticsTracker mAnalytics;
 	
-	private Handler mIabHandler;
-	private IabPurchaseObserver mPurchaseObserver;
-	private BillingService mIabService;
-	private boolean mIabSupported = false;
 	private Set<String> mOwnedMaps = new HashSet<String>();
 	
-	private class IabPurchaseObserver extends PurchaseObserver {
-		public IabPurchaseObserver(Handler handler) {
-			super(MainActivity.this, handler);
+	IInAppBillingService mService;
+	private ServiceConnection mServiceConn = new ServiceConnection() {
+		@Override
+		public void onServiceDisconnected(ComponentName name) {
+			mService = null;
 		}
 		
 		@Override
-		public void onBillingSupported(boolean supported) {
-			//Log.i(X, "onBillingSupported: " + supported);
-			if (supported) {
-				restoreIabState();
-				mIabSupported = true;
-				mMapFragment.setShowSeafarers(mIabSupported);
-			}
-		}
-		
-		@Override
-		public void onPurchaseStateChange(PurchaseState purchaseState, String itemId,
-				String developerPayload) {
-			//Log.i(X, "onPurcaseStateChange: ");
-			//Log.i(X, "  purchaseState: " + purchaseState);
-			//Log.i(X, "  itemId: " + itemId);
-			//Log.i(X, "  developerPayload: " + developerPayload);
-			
-			if (purchaseState == PurchaseState.PURCHASED) {
-				mOwnedMaps.add(itemId);
-				if (getMapFragment() != null && !itemId.equals(IabConsts.BUY_ALL)) {
-					getMapFragment().sizeChoice(getMapProvider().getMapSizeByProductId(itemId));
-				}
-				
-				if ("seafarers.the_fog_island".equals(itemId)) {
-					SharedPreferences prefs = getSharedPreferences(SHARED_PREFS_THE_FOG_ISLAND_NAME, Context.MODE_PRIVATE);
-					boolean shownWhatsNew = prefs.getBoolean(SHARED_PREFS_SHOWN_THE_FOG_ISLAND_HELP, false);
-					if (!shownWhatsNew) {
-						FogIslandHelpDialogFragment.newInstance().show(getSupportFragmentManager(), "TheFogIslandHelpDialog");
-						SharedPreferences.Editor prefsEditor = prefs.edit();
-						prefsEditor.putBoolean(SHARED_PREFS_SHOWN_THE_FOG_ISLAND_HELP, true);
-						prefsEditor.commit();
-					}
-				}
-			}
-		}
-
-        @Override
-        public void onRequestPurchaseResponse(RequestPurchase request,
-                ResponseCode responseCode) {
-			//Log.i(X, "onRequestPurchaseResponse: ");
-			//Log.i(X, "  request: " + request);
-			//Log.i(X, "  responseCode: " + responseCode);
-        }
-
-        @Override
-        public void onRestoreTransactionsResponse(RestoreTransactions request,
-                ResponseCode responseCode) {
-			//Log.i(X, "onRestoreTransactionsResponse: ");
-			//Log.i(X, "  request: " + request);
-			//Log.i(X, "  responseCode: " + responseCode);
-            if (responseCode == ResponseCode.RESULT_OK) {
-                //Log.d(X, "completed RestoreTransactions request");
-                // Update the shared preferences so that we don't perform
-                // a RestoreTransactions again.
-                SharedPreferences prefs = getPreferences(Context.MODE_PRIVATE);
-                SharedPreferences.Editor edit = prefs.edit();
-                edit.putBoolean(SHARED_PREFS_IAB_STATE_CURRENT, true);
-                edit.commit();
-            } else {
-                //Log.d(X, "RestoreTransactions error: " + responseCode);
+		public void onServiceConnected(ComponentName name, IBinder service) {
+			mService = IInAppBillingService.Stub.asInterface(service);
+            try {
+                int response = mService.isBillingSupported(Consts.IAB_API_VERSION, getPackageName(), IabConsts.ITEM_TYPE_INAPP);
+                if (response == IabConsts.BILLING_RESPONSE_RESULT_OK) {
+    				mMapFragment.setShowSeafarers(true);
+                	new InitIabTask().execute();
+                } else {
+                	BetterLog.w("IAB v" + Consts.IAB_API_VERSION + " not supported");
+    				mMapFragment.setShowSeafarers(false);
+                }
+            } catch (RemoteException e) {
+            	BetterLog.i("Exception while querying for IABv3 support.");
             }
-        }
-	}
-
-	///////////////////////////////
-	// Activity method overrides //
-	///////////////////////////////
-	@Override
-	protected Dialog onCreateDialog(int id) {
-		if (id == DIALOG_IAB_NOT_SUPPORTED) {
-	        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-	        builder.setTitle(R.string.iab_not_supported_title)
-	            .setIcon(android.R.drawable.stat_sys_warning)
-	            .setMessage(R.string.iab_not_supported_title)
-	            .setCancelable(false)
-	            .setPositiveButton(android.R.string.ok, null)
-	            .setNegativeButton(R.string.learn_more, new DialogInterface.OnClickListener() {
-	                public void onClick(DialogInterface dialog, int which) {
-	                    Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(getString(R.string.iab_help_url)));
-	                    startActivity(intent);
-	                }
-	            });
-	        return builder.create();
-		} else {
-			return super.onCreateDialog(id);
 		}
+	};
+	
+	private class InitIabTask extends AsyncTask<Void, Void, Void> {
+		@Override
+		protected Void doInBackground(Void... params) {
+			try {
+				restoreTransactions();
+			} catch (RemoteException e) {
+				BetterLog.w("RemoteException ", e);
+			}
+			
+			return null;
+		}
+		
+		private void restoreTransactions() throws RemoteException {
+	    	Bundle ownedItems = mService.getPurchases(Consts.IAB_API_VERSION, getPackageName(), IabConsts.ITEM_TYPE_INAPP, null);
+	        
+	        int response = ownedItems.getInt(IabConsts.RESPONSE_CODE);
+	        BetterLog.d("Owned items response: " + String.valueOf(response));
+	        if (response != IabConsts.BILLING_RESPONSE_RESULT_OK
+	                || !ownedItems.containsKey(IabConsts.RESPONSE_INAPP_ITEM_LIST)
+	                || !ownedItems.containsKey(IabConsts.RESPONSE_INAPP_PURCHASE_DATA_LIST)
+	                || !ownedItems.containsKey(IabConsts.RESPONSE_INAPP_SIGNATURE_LIST)) {
+	        	BetterLog.w("Error querying owned items. Response: " + response);
+	        	return;
+	        }
+
+	        List<String> purchaseDataList = ownedItems.getStringArrayList(IabConsts.RESPONSE_INAPP_PURCHASE_DATA_LIST);
+	        List<String> signatureList = ownedItems.getStringArrayList(IabConsts.RESPONSE_INAPP_SIGNATURE_LIST);
+	        
+	        for (int i = 0; i < purchaseDataList.size(); i++) {
+	        	verifyAndAddPurchase(purchaseDataList.get(i), signatureList.get(i));
+	        }
+		}
+	}
+	
+	private void verifyAndAddPurchase(String purchaseData, String signature) {
+    	ArrayList<Security.VerifiedPurchase> verifiedPurchaseDataList =
+    		Security.verifyPurchase(purchaseData, signature);
+    	for (Security.VerifiedPurchase verifiedPurchaseData : verifiedPurchaseDataList) {
+    		String itemId = verifiedPurchaseData.productId;
+    		
+			mOwnedMaps.add(itemId);
+			if (getMapFragment() != null && !itemId.equals(IabConsts.BUY_ALL)) {
+				getMapFragment().sizeChoice(MapSize.getMapSizeByProductId(itemId));
+			}
+			
+			if ("seafarers.the_fog_island".equals(itemId)) {
+				SharedPreferences prefs = getSharedPreferences(SHARED_PREFS_THE_FOG_ISLAND_NAME, Context.MODE_PRIVATE);
+				boolean shownWhatsNew = prefs.getBoolean(SHARED_PREFS_SHOWN_THE_FOG_ISLAND_HELP, false);
+				if (!shownWhatsNew) {
+					FogIslandHelpDialogFragment.newInstance().show(getSupportFragmentManager(), "TheFogIslandHelpDialog");
+					SharedPreferences.Editor prefsEditor = prefs.edit();
+					prefsEditor.putBoolean(SHARED_PREFS_SHOWN_THE_FOG_ISLAND_HELP, true);
+					prefsEditor.commit();
+				}
+			}
+    	}
 	}
 
 	/** Called when the activity is going to disappear. */
@@ -181,6 +158,16 @@ public class MainActivity extends FragmentActivity {
 			}
 		}
 		
+		if (mMapFragment != null && mMapFragment.getCatanMap().theftOrder != null
+				&& !mMapFragment.getCatanMap().theftOrder.isEmpty()) {
+			if (mMapFragment.getCatanMap().name.equals("new_world")) {
+				outState.putIntegerArrayList(STATE_THEFT_ORDER, mMapFragment.getCatanMap().theftOrder);
+			}
+			if (mMapFragment.getCatanMap().name.equals("new_world_exp")) {
+				outState.putIntegerArrayList(STATE_EXP_THEFT_ORDER, mMapFragment.getCatanMap().theftOrder);
+			}
+		}
+		
 		outState.putInt(STATE_TITLE_ID, mTitleId);
 	}
 	
@@ -191,18 +178,10 @@ public class MainActivity extends FragmentActivity {
 		
 		setContentView(R.layout.main);
 		
-		if (savedInstanceState != null && (savedInstanceState.getStringArrayList(STATE_THEFT_ORDER) != null
-				|| savedInstanceState.getStringArrayList(STATE_EXP_THEFT_ORDER) != null)) {
-			mMapProvider = new MapProvider(this, savedInstanceState.getIntegerArrayList(STATE_THEFT_ORDER),
-					savedInstanceState.getIntegerArrayList(STATE_EXP_THEFT_ORDER));
-		} else {
-			mMapProvider = new MapProvider(this);
-		}
-		
 		mMapFragment = (MapFragment) getSupportFragmentManager().findFragmentById(R.id.map_fragment);
 		mGraphFragment = (GraphFragment) getSupportFragmentManager().findFragmentById(R.id.graph_fragment);
 
-		mTitle = (ImageView) findViewById(R.id.title_button);
+		mTitle = (ImageView) findViewById(R.id.title_text);
 		if (savedInstanceState != null && savedInstanceState.getInt(STATE_TITLE_ID) != 0) {
 			setTitleButtonText(savedInstanceState.getInt(STATE_TITLE_ID));
 		} else {
@@ -242,32 +221,28 @@ public class MainActivity extends FragmentActivity {
 			}
 		}
 		
-		// IAB
-		mIabHandler = new Handler();
-		mPurchaseObserver = new IabPurchaseObserver(mIabHandler);
-		ResponseHandler.register(mPurchaseObserver);
-		
-		mIabService = new BillingService();
-		mIabService.setContext(this);
-		
 		mOwnedMaps.add(MapContainer.HEADING_FOR_NEW_SHORES.id);
+	}
+	
+	@Override
+	public void onStart() {
+		super.onStart();
+
+		// IAB
+		bindService(new Intent("com.android.vending.billing.InAppBillingService.BIND"),
+				mServiceConn, Context.BIND_AUTO_CREATE);
+	}
+	
+	@Override
+	public void onStop() {
+		super.onStop();
 		
-		if (!mIabService.checkBillingSupported()) {
-			//Log.i(X, "Could not connect to Market client");
-			// No action as it should default to not showing Seafarers maps
+		// IAB
+		if (mService != null) {
+			unbindService(mServiceConn);
+			mService = null;
 		}
 	}
-    @Override
-    protected void onStart() {
-        super.onStart();
-        ResponseHandler.register(mPurchaseObserver);
-        initializeOwnedItems();
-    }
-    @Override
-    protected void onStop() {
-        super.onStop();
-        ResponseHandler.unregister(mPurchaseObserver);
-    }
 	
 	@Override
 	public void onResume() {
@@ -285,73 +260,69 @@ public class MainActivity extends FragmentActivity {
 	public void onDestroy() {
 		super.onDestroy();
 		mAnalytics.stop();
-		mIabService.unbind();
-	}
-	
-	private void restoreIabState() {
-		SharedPreferences prefs = getPreferences(MODE_PRIVATE);
-		boolean current = prefs.getBoolean(SHARED_PREFS_IAB_STATE_CURRENT, false);
-		if (!current) {
-			mIabService.restoreTransactions();
-		}
-	}
-	
-	private void initializeOwnedItems() {
-		new Thread(new Runnable() {
-			@Override
-			public void run() {
-				doInitializeOwnedItems();
-			}
-		}).start();
-	}
-	
-	private void doInitializeOwnedItems() {
-    	String id = Secure.getString(getContentResolver(), Secure.ANDROID_ID);
-		SharedPreferences prefs = getSharedPreferences(Consts.SHARED_PREFS_SEAFARERS_KEY, Context.MODE_PRIVATE);
-        
-		for (MapContainer mapContainer : MapContainer.values()) {
-			String ret = prefs.getString(Base64.encode(mapContainer.id.getBytes()), null);
-			
-			if (ret != null) {
-				String attempt = Obfuscate.decode(id, ret);
-				if (attempt != null && attempt.equals(mapContainer.id)) {
-					mOwnedMaps.add(attempt);
-				}
-			}
-		}
-		
-		String buyAllRet = prefs.getString(Base64.encode(IabConsts.BUY_ALL.getBytes()), null);
-		
-		if (buyAllRet != null) {
-			String attempt = Obfuscate.decode(id, buyAllRet);
-			if (attempt != null && attempt.equals(IabConsts.BUY_ALL)) {
-				mOwnedMaps.add(attempt);
-			}
-		}
 	}
 	
 	public void purchaseItem(MapContainer map) {
-		//Log.i(X, "Buying " + map.id);
-		/*
-		 * if (!mIabService.requestPurchase(IabConsts.FAKE_PRODUCT_ID, null)) {
-			showDialog(DIALOG_IAB_NOT_SUPPORTED);
-		}
-		*/
-		if (Consts.TEST) {
-			FakePurchaseDialogFragment.newInstance(map.id).show(getSupportFragmentManager(), "FakePurchase");
-		} else if (!mIabService.requestPurchase(map.id, null)) {
-            showDialog(DIALOG_IAB_NOT_SUPPORTED);
-		}
+		purchaseItem(map.id);
 	}
 	
 	public void purchaseItem(String id) {
-		//Log.i(X, "Buying " + id);
+		BetterLog.i("Buying " + id);
 		if (Consts.TEST){
-			FakePurchaseDialogFragment.newInstance(id).show(getSupportFragmentManager(), "FakePurchase");
-		} else if (!mIabService.requestPurchase(id, null)) {
-            showDialog(DIALOG_IAB_NOT_SUPPORTED);
+			mOwnedMaps.add(id);
+			// TODO(flynn): Fake purchase
+        } else {
+        	Bundle buyIntentBundle;
+        	try {
+				buyIntentBundle = mService.getBuyIntent(Consts.IAB_API_VERSION, getPackageName(), id,
+						IabConsts.ITEM_TYPE_INAPP, null);
+			} catch (RemoteException e) {
+				BetterLog.w("RemoteException", e);
+				return;
+			}
+			
+			long response = buyIntentBundle.getLong(IabConsts.RESPONSE_CODE);
+			if (response != IabConsts.BILLING_RESPONSE_RESULT_OK) {
+				BetterLog.e("Bad response: " + response);
+				return;
+			}
+			
+			PendingIntent buyIntent = buyIntentBundle.getParcelable(IabConsts.RESPONSE_BUY_INTENT);
+			try {
+				startIntentSenderForResult(buyIntent.getIntentSender(), BUY_INTENT_REQUEST_CODE,
+						new Intent(), 0, 0, 0);
+			} catch (SendIntentException e) {
+				BetterLog.e("Error sending intent", e);
+				return;
+			}
         }
 	}
+	
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+    	switch (requestCode) {
+    	case BUY_INTENT_REQUEST_CODE:
+    		// Verify/consume the purchase
+    		if (data == null) {
+    			BetterLog.w("Null data. Returning");
+    			return;
+    		}
+        	
+            String purchaseData = data.getStringExtra(IabConsts.RESPONSE_INAPP_PURCHASE_DATA);
+            String dataSignature = data.getStringExtra(IabConsts.RESPONSE_INAPP_SIGNATURE);
+            
+            if (resultCode == RESULT_OK) {
+            	BetterLog.d("Successful return code from purchase activity.");
+            	verifyAndAddPurchase(purchaseData, dataSignature);
+            } else if (resultCode == RESULT_CANCELED) {
+            	BetterLog.w("Purchase canceled");
+            } else {
+            	BetterLog.w("Purchase failed");
+            }
+    		break;
+    	}
+    }
     
     public GoogleAnalyticsTracker getAnalytics() {
     	return mAnalytics;
@@ -364,14 +335,6 @@ public class MainActivity extends FragmentActivity {
     
     public Set<String> getOwnedMaps() {
     	return mOwnedMaps;
-    }
-    
-    public void addOwnedMap(String map) {
-    	mOwnedMaps.add(map);
-    }
-    
-    public MapProvider getMapProvider() {
-    	return mMapProvider;
     }
     
     public MapFragment getMapFragment() {

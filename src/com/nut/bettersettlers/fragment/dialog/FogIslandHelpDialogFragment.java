@@ -18,7 +18,7 @@ public class FogIslandHelpDialogFragment extends DialogFragment {
 		return new AlertDialog.Builder(getActivity())
 			.setIcon(R.drawable.icon)
 			.setTitle("The Fog Island")
-			.setMessage("Tap the gray hexes to see what resources and probabilities are hidden under the fog.")
+			.setMessage("Touch the gray hexes to see what resources and probabilities are hidden under the fog.")
 			.setPositiveButton("Dismiss", new DialogInterface.OnClickListener() {
 				public void onClick(DialogInterface dialog, int id) {
 					dialog.cancel();

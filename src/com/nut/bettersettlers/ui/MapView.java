@@ -1,73 +1,132 @@
 package com.nut.bettersettlers.ui;
 
-import static com.nut.bettersettlers.data.MapConsts.BOARD_RANGE_HALF_X;
-import static com.nut.bettersettlers.data.MapConsts.BOARD_RANGE_HALF_Y;
-import static com.nut.bettersettlers.data.MapConsts.BOARD_RANGE_X;
-import static com.nut.bettersettlers.data.MapConsts.BOARD_RANGE_Y;
-import static com.nut.bettersettlers.data.MapConsts.PROBABILITY_MAPPING;
+import static com.nut.bettersettlers.util.Consts.BOARD_RANGE_X;
+import static com.nut.bettersettlers.util.Consts.BOARD_RANGE_Y;
+import static com.nut.bettersettlers.util.Consts.PROBABILITY_MAPPING;
 
 import java.util.ArrayList;
-import java.util.LinkedHashMap;
 import java.util.List;
 
 import android.content.Context;
+import android.content.res.Resources;
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.Paint;
+import android.graphics.Paint.Style;
 import android.graphics.Path;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.Typeface;
 import android.graphics.drawable.ShapeDrawable;
+import android.os.Bundle;
+import android.os.Parcel;
+import android.os.Parcelable;
 import android.util.AttributeSet;
 import android.util.Pair;
-import android.view.Display;
+import android.util.SparseArray;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.ScaleGestureDetector;
 import android.view.View;
-import android.view.WindowManager;
 
 import com.nut.bettersettlers.R;
 import com.nut.bettersettlers.data.CatanMap;
-import com.nut.bettersettlers.data.MapConsts.Harbor;
-import com.nut.bettersettlers.data.MapConsts.Piece;
-import com.nut.bettersettlers.data.MapConsts.Resource;
-import com.nut.bettersettlers.fragment.MapFragment;
+import com.nut.bettersettlers.data.Harbor;
+import com.nut.bettersettlers.data.MapSize;
+import com.nut.bettersettlers.data.Resource;
 import com.nut.bettersettlers.logic.MapLogic;
-import com.nut.bettersettlers.misc.Consts;
+import com.nut.bettersettlers.util.BetterLog;
+import com.nut.bettersettlers.util.Consts;
+import com.nut.bettersettlers.util.Util;
 
 public class MapView extends View {
-	private static final String X = "BetterSettlers";
-	
 	private static final int INVALID_POINTER_ID = -1;
 	
-	private float dXR;
-	private float dXR_2;
-	private float dYR1;
-	private float dYR2;
-	private float dYR2_2;
-	private float dHexR;
-	private float dBorder;
-	private float dFontSize;
-	private float dProbDotR;
-	private float dPlacementDotR;
-	private float dPlacementTriangleHeight;
-	private float dPlacementReasonBoxWidth;
-	private float dProbTopBuffer;
-	private float dHarborCircle;
-	private float dMiddleX;
-	private float dMiddleY;
+	private static final Paint RED_PAINT;
+	private static final Paint GENERAL_PAINT;
+	private static final Paint PROB_DOTS_PAINT;
+	private static final Paint REASON_PAINT;
+	private static final Path BUBBLE_PATH;
+	private static final Paint TEXT_PAINT;
+	private static final Paint TEST_PAINT;
+	static {
+		RED_PAINT = new Paint();
+		RED_PAINT.setColor(Color.RED);
+		RED_PAINT.setStyle(Style.STROKE);
+
+		GENERAL_PAINT = new Paint();
+		GENERAL_PAINT.setTextAlign(Paint.Align.CENTER);
+		GENERAL_PAINT.setTypeface(Typeface.DEFAULT_BOLD);
+		GENERAL_PAINT.setAntiAlias(true);
+
+		PROB_DOTS_PAINT = new Paint();
+		PROB_DOTS_PAINT.setColor(0xFF000000);
+		PROB_DOTS_PAINT.setAlpha(200);
+		PROB_DOTS_PAINT.setAntiAlias(true);
+
+		REASON_PAINT = new Paint();
+		REASON_PAINT.setColor(0xFF000000);
+		REASON_PAINT.setAlpha(175);
+		REASON_PAINT.setAntiAlias(true);
+		
+		BUBBLE_PATH = new Path();
+		
+		TEXT_PAINT = new Paint();
+		TEXT_PAINT.setTextAlign(Paint.Align.LEFT);
+		TEXT_PAINT.setStrokeWidth(1);
+		TEXT_PAINT.setAntiAlias(true);
+		TEXT_PAINT.setColor(0xFFFFFFFF);
+		
+		TEST_PAINT = new Paint();
+		TEST_PAINT.setTextAlign(Paint.Align.CENTER);
+		TEST_PAINT.setTypeface(Typeface.DEFAULT_BOLD);
+		TEST_PAINT.setAntiAlias(true);
+	}
+
+	private static final float XR = 17f;
+	private static final float XR_2 = 9f;
+	private static final float YR1 = 18f;
+	private static final float YR2 = 11f;
+	private static final float YR2_2 = 6f;
+	private static final float HEX_R = 15.59f;
+	private static final float BORDER_WIDTH = 2f;
+	private static final float PROBABILITY_DOT_RADIUS = 1.5f;
+	private static final float PLACEMENT_DOT_RADIUS = 5f;
+	private static final float PLACEMENT_TRIANGLE_HEIGHT = 25f;
+	private static final float PROBABILITY_TOP_BUFFER = -2f;
+	private static final float HARBOR_CIRCLE_RADIUS = 10f;
 	
-	private Piece[][] mPieces;
-	private Piece[][] mUPieces;
+	private float dFontSize;
+	private float dReasonFontSize;
+	private float dViewBuffer;
+	private float dPlacementReasonBoxWidth;
+	private float dPlacementReasonBoxLineHeight;
+	
+	private int mMaxX;
+	private int mMaxY;
+	
+	private boolean mReady;
+	
+	private int[][] mPiecesX;
+	private int[][] mPiecesY;
+	private int[][] mPiecesColor;
+	private int[][] mUPiecesX;
+	private int[][] mUPiecesY;
+	private int[][] mUPiecesColor;
+
+	private ShapeDrawable mHexShapeDrawable;
+	private Rect mDrawRect;
+	private Rect mDotsRect;
+	private RectF mReasonsRectF;
+	
 	private boolean[][] mUVisibility;
 	private int[][] mProbs;
 	private int[][] mUProbs;
-	private List<Harbor> mHarbors;
-	private CatanMap mCurrentMap;
+	private ArrayList<Harbor> mHarbors;
+	private MapSize mMapSize;
 	private int mPlacementBookmark;
-	private LinkedHashMap<Integer, List<String>> mPlacements;
+	private SparseArray<ArrayList<String>> mPlacements;
 	private ArrayList<Integer> mOrderedPlacements;
 
 	private ScaleGestureDetector mScaleDetector;
@@ -79,8 +138,6 @@ public class MapView extends View {
     private float mLastTouchY;
     // The ‘active pointer’ is the one currently moving our object.
     private int mActivePointerId = INVALID_POINTER_ID;
-    
-    private MapFragment mMapFragment;
 	
 	public MapView(Context context) {
 		super(context);
@@ -95,92 +152,252 @@ public class MapView extends View {
 	}
 
 	private void init(Context context) {
+		BetterLog.i("INIT");
 		initDimens(context);
 		
-		// XXX mCurrentMap = MapSize.STANDARD; // Default to standard
-		mPieces = new Piece[BOARD_RANGE_X + 1][BOARD_RANGE_Y + 1];
-		mUPieces = new Piece[BOARD_RANGE_X + 1][BOARD_RANGE_Y + 1];
+		BetterLog.i("mReady=false");
+		mReady = false;
+
+		mPiecesX = new int[BOARD_RANGE_X + 1][BOARD_RANGE_Y + 1];
+		mPiecesY = new int[BOARD_RANGE_X + 1][BOARD_RANGE_Y + 1];
+		mPiecesColor = new int[BOARD_RANGE_X + 1][BOARD_RANGE_Y + 1];
+		
+		mUPiecesX = new int[BOARD_RANGE_X + 1][BOARD_RANGE_Y + 1];
+		mUPiecesY = new int[BOARD_RANGE_X + 1][BOARD_RANGE_Y + 1];
+		mUPiecesColor = new int[BOARD_RANGE_X + 1][BOARD_RANGE_Y + 1];
+
+		mUVisibility = new boolean[BOARD_RANGE_X + 1][BOARD_RANGE_Y + 1];
+		
+		mHexShapeDrawable = new ShapeDrawable(new HexShape());
+		mDrawRect = new Rect();
+		mDotsRect = new Rect();
+		mReasonsRectF = new RectF();
+		
 		mProbs = new int[BOARD_RANGE_X + 1][BOARD_RANGE_Y + 1];
 		mUProbs = new int[BOARD_RANGE_X + 1][BOARD_RANGE_Y + 1];
 		mHarbors = new ArrayList<Harbor>();
 		mPlacementBookmark = -1; // No placements initially
-		mPlacements = new LinkedHashMap<Integer, List<String>>();
+		mPlacements = new SparseArray<ArrayList<String>>();
 		mOrderedPlacements = new ArrayList<Integer>();
 
 		mScaleDetector = new ScaleGestureDetector(context, new ScaleListener());
 		mTapDetector = new GestureDetector(context, new TapListener());
 	}
 	
-	private void initDimens(Context context) {		
-		dXR = (float) getResources().getDimension(R.dimen.x_r);
-		dXR_2 = (float) getResources().getDimension(R.dimen.x_r_2);
-		dYR1 = (float) getResources().getDimension(R.dimen.y_r1);
-		dYR2 = (float) getResources().getDimension(R.dimen.y_r2);
-		dYR2_2 = (float) getResources().getDimension(R.dimen.y_r2_2);
-		dHexR = (float) getResources().getDimension(R.dimen.hex_r);
-		dBorder = (float) getResources().getDimension(R.dimen.border);
-		dFontSize = (float) getResources().getDimension(R.dimen.font_size);
-		dProbDotR = (float) getResources().getDimension(R.dimen.prob_dot_r);
-		dPlacementDotR = (float) getResources().getDimension(R.dimen.placement_dot_r);
-		dPlacementTriangleHeight = (float) getResources().getDimension(R.dimen.placement_triangle_height);
-		dPlacementReasonBoxWidth = (float) getResources().getDimension(R.dimen.placement_reason_box_width);
-		dProbTopBuffer = (float) getResources().getDimension(R.dimen.prob_top_buffer);
-		dHarborCircle = (float) getResources().getDimension(R.dimen.harbor_circle);
-		
-		// Adjust scale for size of screen
-		Display display = ((WindowManager) context.getSystemService(Context.WINDOW_SERVICE)).getDefaultDisplay();
-		float midWidth = display.getWidth() / 2f;
-		float midHeight = display.getHeight() / 2f;
-		dMiddleX = midWidth + 1.5f * getResources().getDimension(R.dimen.x_r); // hack to get it to the middle of the screen
-		dMiddleY = midHeight;
-		float oldWidth = (dXR + dBorder) * BOARD_RANGE_X / 2f;
-		float newScaleByWidth = midWidth / oldWidth;
-		float oldHeight = (dYR1 + dYR2 + dBorder) * BOARD_RANGE_Y / 2f;
-		float newScaleByHeight = midHeight / oldHeight;
-		
-		//Log.i(X, "newScaleByWidth: " + newScaleByWidth);
-		//Log.i(X, "newScaleByHeight: " + newScaleByHeight);
-		if (newScaleByWidth < newScaleByHeight) {
-			mScaleFactor = newScaleByWidth;
-		} else {
-			mScaleFactor = newScaleByHeight;
-		}
-		
-		mDiffX = 0f;
-		mDiffY = 0f;
-		
-		//Log.i(X, "dMiddleX: " + dMiddleX);
-		//Log.i(X, "dMiddleY: " + dMiddleY);
-		//Log.i(X, "mScaleFactor: " + mScaleFactor);
+	private void initDimens(Context context) {
+		Resources res = getResources();
+
+		dFontSize = (float) res.getDimension(R.dimen.font_size);
+		dReasonFontSize = (float) res.getDimension(R.dimen.reason_font_size);
+		dViewBuffer = (float) res.getDimension(R.dimen.view_buffer);
+		dPlacementReasonBoxWidth = (float) res.getDimension(R.dimen.placement_reason_box_width);
+		dPlacementReasonBoxLineHeight = (float) res.getDimension(R.dimen.placement_reason_box_line_height);
 	}
 	
-	public void setMapFragment(MapFragment mapFragment) {
-		mMapFragment = mapFragment;
+	private static class SavedState extends BaseSavedState {
+		private boolean ready;
+		private int maxX;
+		private int maxY;
+		private int[][] piecesX;
+		private int[][] piecesY;
+		private int[][] piecesColor;
+		private int[][] uPiecesX;
+		private int[][] uPiecesY;
+		private int[][] uPiecesColor;
+		private float scaleFactor;
+		private MapSize mapSize;
+		private int[][] probs;
+		private int[][] uProbs;
+		private boolean[][] uVisibility;
+		private ArrayList<Harbor> harbors;
+		private int placementBookmark;
+		private SparseArray<ArrayList<String>> placements;
+		private ArrayList<Integer> orderedPlacements;
+
+        private SavedState(Parcelable superState) {
+            super(superState);
+        }
+        
+		private SavedState(Parcel in) {
+            super(in);
+            ready = in.readByte() == 1;
+            maxX = in.readInt();
+            maxY = in.readInt();
+            piecesX = (int[][]) in.readSerializable();
+            piecesY = (int[][]) in.readSerializable();
+            piecesColor = (int[][]) in.readSerializable();
+            uPiecesX = (int[][]) in.readSerializable();
+            uPiecesY = (int[][]) in.readSerializable();
+            uPiecesColor = (int[][]) in.readSerializable();
+            scaleFactor = in.readFloat();
+            mapSize = in.readParcelable(MapView.class.getClassLoader());
+            probs = (int[][]) in.readSerializable();
+            uProbs = (int[][]) in.readSerializable();
+            uVisibility = (boolean[][]) in.readSerializable();
+            in.readTypedList(harbors, Harbor.CREATOR);
+            placementBookmark = in.readInt();
+            placements = Util.bundleToSparseArrayArrayList(in.readBundle());
+            orderedPlacements = (ArrayList<Integer>) in.readSerializable();
+        }
+
+        @Override
+        public void writeToParcel(Parcel out, int flags) {
+            super.writeToParcel(out, flags);
+            out.writeByte((byte) (ready ? 1 : 0));
+            out.writeInt(maxX);
+            out.writeInt(maxY);
+            out.writeSerializable(piecesX);
+            out.writeSerializable(piecesY);
+            out.writeSerializable(piecesColor);
+            out.writeSerializable(uPiecesX);
+            out.writeSerializable(uPiecesY);
+            out.writeSerializable(uPiecesColor);
+            out.writeFloat(scaleFactor);
+            out.writeParcelable(mapSize, 0);
+            out.writeSerializable(probs);
+            out.writeSerializable(uProbs);
+            out.writeSerializable(uVisibility);
+            out.writeTypedList(harbors);
+            out.writeInt(placementBookmark);
+            out.writeBundle(Util.sparseArrayArrayListToBundle(placements));
+            out.writeSerializable(orderedPlacements);
+        }
+
+        public static final Parcelable.Creator<SavedState> CREATOR
+                = new Parcelable.Creator<SavedState>() {
+            public SavedState createFromParcel(Parcel in) {
+                return new SavedState(in);
+            }
+
+            public SavedState[] newArray(int size) {
+                return new SavedState[size];
+            }
+        };
+	}
+	
+	@Override
+	protected Parcelable onSaveInstanceState () {
+		BetterLog.i("MapView.onSaveInstanceState");
+		Parcelable savedState = super.onSaveInstanceState();
+		
+		SavedState ss = new SavedState(savedState);
+		ss.ready = mReady;
+		ss.maxX = mMaxX;
+		ss.maxY = mMaxY;
+		ss.piecesX = mPiecesX;
+		ss.piecesY = mPiecesY;
+		ss.piecesColor = mPiecesColor;
+		ss.uPiecesX = mUPiecesX;
+		ss.uPiecesY = mUPiecesY;
+		ss.uPiecesColor = mUPiecesColor;
+		ss.scaleFactor = mScaleFactor;
+		ss.mapSize = mMapSize;
+		ss.probs = mProbs;
+		ss.uProbs = mUProbs;
+		ss.uVisibility = mUVisibility;
+		ss.harbors = mHarbors;
+		ss.placementBookmark = mPlacementBookmark;
+		ss.placements = mPlacements;
+		ss.orderedPlacements = mOrderedPlacements;
+		
+		return ss;
+	}
+	
+	@Override
+	protected void onRestoreInstanceState (Parcelable state) {
+		BetterLog.i("MapView.onRestoreInstanceState");
+	    if(!(state instanceof SavedState)) {
+	        super.onRestoreInstanceState(state);
+	        return;
+	      }
+
+	      SavedState ss = (SavedState)state;
+	      super.onRestoreInstanceState(ss.getSuperState());
+	      
+	      mReady = ss.ready;
+	      mMaxX = ss.maxX;
+	      mMaxY = ss.maxY;
+	      mPiecesX = ss.piecesX;
+	      mPiecesY = ss.piecesY;
+	      mPiecesColor = ss.piecesColor;
+	      mUPiecesX = ss.uPiecesX;
+	      mUPiecesY = ss.uPiecesY;
+	      mUPiecesColor = ss.uPiecesColor;
+	      mScaleFactor = ss.scaleFactor;
+	      mMapSize = ss.mapSize;
+	      mProbs = ss.probs;
+	      mUProbs = ss.uProbs;
+	      mUVisibility = ss.uVisibility;
+	      mHarbors = ss.harbors;
+	      mPlacementBookmark = ss.placementBookmark;
+	      mPlacements = ss.placements;
+	      mOrderedPlacements = ss.orderedPlacements;
+	}
+	
+	public void setReady() {
+		BetterLog.i("ready=true");
+		mReady = true;
 	}
 
-	public void setMapSize(CatanMap currentMap) {
-		mCurrentMap = currentMap;
+	public void setMapSize(MapSize currentMap) {
+		BetterLog.i("setMapSize: " + currentMap);
+		mMapSize = currentMap;
 	}
 
 	public void setLandAndWaterResources(Resource[][] land, Harbor[][] water, Resource[][] unknowns) {
+		BetterLog.i("setLAWR");
+		mMaxX = 0;
+		mMaxY = 0;
+		
 		for (int i = 0; i < BOARD_RANGE_Y; i++) {
 			for (int j = (i % 2); j < BOARD_RANGE_X; j += 2) {
 				if (land != null && land[j][i] != null) {
-					mPieces[j][i] = new Piece(j, i, land[j][i].getColor());
+					if (j > mMaxX) {
+						mMaxX = j;
+					}
+					if (i > mMaxY) {
+						mMaxY = i;
+					}
+					mPiecesX[j][i] = j;
+					mPiecesY[j][i] = i;
+					mPiecesColor[j][i] = land[j][i].color;
 				} else if (water != null && water[j][i] != null) {
-					mPieces[j][i] = new Piece(j, i, 0xFF1959DF);
+					if (j > mMaxX) {
+						mMaxX = j;
+					}
+					if (i > mMaxY) {
+						mMaxY = i;
+					}
+					mPiecesX[j][i] = j;
+					mPiecesY[j][i] = i;
+					mPiecesColor[j][i] = 0xFF1959DF;
 				} else {
-					mPieces[j][i] = new Piece(j, i, 0xFFFFFFFF);
-					//mPieces[j][i] = new Piece(j, i, 0xFFCCCCCC);
+					mPiecesX[j][i] = j;
+					mPiecesY[j][i] = i;
+					mPiecesColor[j][i] = 0xFFFFFFFF;
+					//mPiecesColor[j][i] = 0xFFCCCCCC;
 				}
-				
+
 				if (unknowns != null && unknowns[j][i] != null) {
-					mUPieces[j][i] = new Piece(j, i, unknowns[j][i].getColor());
+					if (j > mMaxX) {
+						mMaxX = j;
+					}
+					if (i > mMaxY) {
+						mMaxY = i;
+					}
+					mUPiecesX[j][i] = j;
+					mUPiecesY[j][i] = i;
+					mUPiecesColor[j][i] = unknowns[j][i].color;
 				} else {
-					mUPieces[j][i] = null;
+					mUPiecesX[j][i] = 0;
+					mUPiecesY[j][i] = 0;
+					mUPiecesColor[j][i] = 0;
 				}
 			}
 		}
+		//BetterLog.i(String.format("Max (%s,%s)", mMaxX, mMaxY));
+		// Force the re-draw after finding the max X/Y
+		invalidate();
 	}
 
 	public void setProbabilities(int[][] probs, int[][] unknownProbs) {
@@ -188,11 +405,15 @@ public class MapView extends View {
 		mUProbs = unknownProbs;
 	}
 	
-	public void setVisibility(boolean[][] visibles) {
+	public boolean[][] getUVisibility() {
+		return mUVisibility;
+	}
+	
+	public void setUVisibility(boolean[][] visibles) {
 		mUVisibility = visibles;
 	}
 
-	public void setHarbors(List<Harbor> harbors) {
+	public void setHarbors(ArrayList<Harbor> harbors) {
 		mHarbors = harbors;
 	}
 	
@@ -200,7 +421,7 @@ public class MapView extends View {
 		mPlacementBookmark = placementBookmark;
 	}
 
-	public void setPlacements(LinkedHashMap<Integer, List<String>> placements) {
+	public void setPlacements(SparseArray<ArrayList<String>> placements) {
 		mPlacements = placements;
 	}
 
@@ -216,8 +437,44 @@ public class MapView extends View {
 		mScaleFactor = scale;
 	}
 	
-	public void setScale() {
-		
+	private double dist(float x1, float y1, float x2, float y2) {
+		return Math.sqrt(Math.pow(x1 - x2, 2) + Math.pow(y1 - y2, 2));
+	}
+	
+	private Pair<Integer, Integer> getTouchedPiece(float x, float y) {
+		for (int i = 0; i < mPiecesX.length; i++) {
+			for (int j = 0; j < mPiecesX[i].length; j++) {
+				if (mPiecesX != null && mPiecesY != null) {
+					adjustDrawRect(mPiecesX[i][j], mPiecesY[i][j]);
+					
+					if (dist(x, y, mDrawRect.exactCenterX(),
+							mDrawRect.exactCenterY()) <= HEX_R * mScaleFactor) {
+						return new Pair<Integer, Integer>(i, j);
+					}
+				}
+			}
+		}
+		return null;
+	}
+	
+	private Pair<Integer, Integer> getTouchedUnknownPiece(float x, float y) {
+		for (int i = 0; i < mUPiecesX.length; i++) {
+			for (int j = 0; j < mUPiecesX[i].length; j++) {
+				if (mUPiecesX != null && mUPiecesY != null) {
+					adjustDrawRect(mUPiecesX[i][j], mUPiecesY[i][j]);
+					
+					if (dist(x, y, mDrawRect.exactCenterX(),
+							mDrawRect.exactCenterY()) <= HEX_R * mScaleFactor) {
+						return new Pair<Integer, Integer>(i, j);
+					}
+				}
+			}
+		}
+		return null;
+	}
+
+	public CatanMap getCatanMap() {
+		return mMapSize.mapProvider.get();
 	}
 
 	private class ScaleListener extends ScaleGestureDetector.SimpleOnScaleGestureListener {
@@ -228,32 +485,12 @@ public class MapView extends View {
 			// Don't let the object get too small or too large.
 			mScaleFactor = Math.max(0.1f, Math.min(mScaleFactor, 10.0f));
 
-			//Log.i("SCALE", "MiddleX: " + dMiddleX);
-			//Log.i("SCALE", "MiddleY: " + dMiddleY);
-			//Log.i("SCALE", "Factor: " + mScaleFactor);
+			//BetterLog.i("MiddleX: " + dMiddleX);
+			//BetterLog.i("MiddleY: " + dMiddleY);
+			//BetterLog.i("Factor: " + mScaleFactor);
 			invalidate();
 			return true;
 		}
-	}
-	
-	private double dist(float x1, float y1, float x2, float y2) {
-		return Math.sqrt(Math.pow(x1 - x2, 2) + Math.pow(y1 - y2, 2));
-	}
-	
-	private Pair<Integer, Integer> getTouchedPiece(Piece[][] pieces, float x, float y) {
-		for (int i = 0; i < pieces.length; i++) {
-			for (int j = 0; j < pieces[i].length; j++) {
-				if (pieces != null && pieces[i][j] != null) {
-					Piece piece = pieces[i][j];
-					Rect rect = getAdjustedRect(piece);
-					
-					if (dist(x, y, rect.exactCenterX(), rect.exactCenterY()) <= dHexR * mScaleFactor) {
-						return new Pair<Integer, Integer>(i, j);
-					}
-				}
-			}
-		}
-		return null;
 	}
 	
 	private class TapListener extends GestureDetector.SimpleOnGestureListener {
@@ -264,29 +501,30 @@ public class MapView extends View {
 			//Toast.makeText(getContext(), String.format("mScaleFactor: %f", mScaleFactor), Toast.LENGTH_SHORT).show();
 			
 			// Check for touching unknowns
-			Pair<Integer, Integer> pair = getTouchedPiece(mUPieces, ev.getX(), ev.getY());
+			Pair<Integer, Integer> pair = getTouchedUnknownPiece(ev.getX(), ev.getY());
 			if (pair != null) {
 				int i = pair.first;
 				int j = pair.second;
 				
 				if (mUVisibility != null) {
 					mUVisibility[i][j] = !mUVisibility[i][j];
+					
 					invalidate();
 				}
 			}
-			pair = getTouchedPiece(mPieces, ev.getX(), ev.getY());
+			pair = getTouchedPiece(ev.getX(), ev.getY());
 			if (pair != null) {
 				int i = pair.first;
 				int j = pair.second;
 				
 				if (Consts.DEBUG_MAP) {
-					Piece piece = mPieces[i][j];
-					if (piece.getColor() == 0xFF00FF00) {
-						mPieces[i][j] = new Piece(piece.getGridX(), piece.getGridY(), 0xFF0000FF);	
-					} else if (piece.getColor() == 0xFF0000FF) {
-						mPieces[i][j] = new Piece(piece.getGridX(), piece.getGridY(), 0xFFCCCCCC);	
+					int color = mPiecesColor[i][j];
+					if (color == 0xFF00FF00) {
+						mPiecesColor[i][j] = 0xFF0000FF;	
+					} else if (color == 0xFF0000FF) {
+						mPiecesColor[i][j] = 0xFFCCCCCC;	
 					} else {
-						mPieces[i][j] = new Piece(piece.getGridX(), piece.getGridY(), 0xFF00FF00);
+						mPiecesColor[i][j] = 0xFF00FF00;
 					}
 					invalidate();
 				}
@@ -366,35 +604,32 @@ public class MapView extends View {
 	}
 	
 	public void onDrawTest(Canvas canvas) {
-		Paint generalPaint = new Paint();
-		generalPaint.setTextAlign(Paint.Align.CENTER);
-		generalPaint.setTypeface(Typeface.DEFAULT_BOLD);
-		generalPaint.setStrokeWidth(2 * mScaleFactor);
-		//generalPaint.setTextSize(dFontSize * mScaleFactor);
-		generalPaint.setTextSize(8 * mScaleFactor);
-		generalPaint.setAntiAlias(true);
-		for (int i = 0; i < mPieces.length; i++) {
-			for (int j = 0; j < mPieces[i].length; j++) {
-				if (mPieces != null && mPieces[i][j] != null) {
-					Piece piece = mPieces[i][j];
-					Rect rect = getAdjustedRect(piece);
+		TEST_PAINT.setStrokeWidth(2 * mScaleFactor);
+		TEST_PAINT.setTextSize(8 * mScaleFactor);
+		
+		HexShape hexShape = (HexShape) mHexShapeDrawable.getShape();
+		hexShape.setPath(XR * mScaleFactor,
+				YR1 * mScaleFactor,
+				YR2 * mScaleFactor);
+		
+		for (int i = 0; i < mPiecesX.length; i++) {
+			for (int j = 0; j < mPiecesX[i].length; j++) {
+				if (mPiecesX != null && mPiecesY != null) {
+					adjustDrawRect(mPiecesX[i][j], mPiecesY[i][j]);
+					int color = mPiecesColor[i][j];
 					
-					ShapeDrawable shape = new ShapeDrawable(new HexShape(
-							dXR * mScaleFactor,
-							dYR1 * mScaleFactor,
-							dYR2 * mScaleFactor));
-					shape.setBounds(rect);
-					if (piece.getColor() == 0xFF0000FF) {
-						shape.getPaint().setColor(0xFF0000FF);
-					} else if (piece.getColor() == 0xFF00FF00) {
-						shape.getPaint().setColor(0xFF00FF00);
+					mHexShapeDrawable.setBounds(mDrawRect);
+					if (color == 0xFF0000FF) {
+						mHexShapeDrawable.getPaint().setColor(0xFF0000FF);
+					} else if (color == 0xFF00FF00) {
+						mHexShapeDrawable.getPaint().setColor(0xFF00FF00);
 					} else {
-						shape.getPaint().setColor(0xFFCCCCCC);
+						mHexShapeDrawable.getPaint().setColor(0xFFCCCCCC);
 					}
-					shape.draw(canvas);
+					mHexShapeDrawable.draw(canvas);
 					
-					canvas.drawText(String.format("(%d,%d)", i, j), rect.centerX(),
-							rect.centerY() - dProbTopBuffer * mScaleFactor, generalPaint);
+					canvas.drawText(String.format("(%d,%d)", i, j), mDrawRect.centerX(),
+							mDrawRect.centerY() - PROBABILITY_TOP_BUFFER * mScaleFactor, TEST_PAINT);
 					//canvas.drawText("" + rect.top, rect.centerX(), rect.centerY() - dYR1 / 2f * mScaleFactor, generalPaint);
 					//canvas.drawText("" + rect.bottom, rect.centerX(), rect.centerY() + dYR1 / 2f * mScaleFactor, generalPaint);
 					//canvas.drawText("" + rect.left, rect.centerX() - dXR_2 * mScaleFactor, rect.centerY(), generalPaint);
@@ -407,62 +642,79 @@ public class MapView extends View {
 	@Override
 	public void onDraw(Canvas canvas) {
 		super.onDraw(canvas);
-		//Log.i(X, "onDraw: " + mScaleFactor);
+		// Set up initial scale
+		
+		if (mScaleFactor == 0f && mMaxX != 0f && mMaxY != 0f) {
+			// mMaxX gets + 1 because of the overlap of the horizontal counting hexes
+			// we need to count the last half-hex hanging off the right edge
+			float baseWidth = ((XR + BORDER_WIDTH) * (mMaxX + 1)) + (2 * dViewBuffer);
+			float newScaleByWidth = getWidth() / baseWidth;
+			float baseHeight = ((YR1 + YR2 + BORDER_WIDTH) * mMaxY) + (2 * dViewBuffer);
+			float newScaleByHeight = getHeight() / baseHeight;
+			
+			//BetterLog.i("getWidth        : " + getWidth());
+			//BetterLog.i("baseWidth       : " + baseWidth);
+			//BetterLog.i("newScaleByWidth : " + newScaleByWidth);
+
+			//BetterLog.i("getHeight       : " + getHeight());
+			//BetterLog.i("baseHeight      : " + baseHeight);
+			//BetterLog.i("newScaleByHeight: " + newScaleByHeight);
+			if (newScaleByWidth < newScaleByHeight) {
+				mScaleFactor = newScaleByWidth;
+			} else {
+				mScaleFactor = newScaleByHeight;
+			}
+			//BetterLog.i("MapView.onSizeChanged() new scale: " + mScaleFactor);
+		}
 		
 		//canvas.save();
 	    //canvas.translate(mPosX, mPosY);
-		
-		/*
-		DRAW RED AROUND BOUNDING RECT
-		for (int i = 0; i < mPieces.length; i++) {
-			for (int j = 0; j < mPieces[i].length; j++) {
-				if (mPieces != null && mPieces[i][j] != null) {
-					Piece piece = mPieces[i][j];
-					Rect rect = getAdjustedRect(piece);
-					
-					Paint redPaint = new Paint();
-					redPaint.setColor(Color.RED);
-					redPaint.setStyle(Style.STROKE);
-					canvas.drawRect(rect, redPaint);
-				}
-			}
-		}
-		*/
 		
 		if (Consts.DEBUG_MAP) {
 			onDrawTest(canvas);
 			return;
 		}
+		if (Consts.DEBUG_MAP_WITH_RED) {
+			for (int i = 0; i < mPiecesX.length; i++) {
+				for (int j = 0; j < mPiecesX[i].length; j++) {
+					if (mPiecesX != null && mPiecesY != null) {
+						adjustDrawRect(mPiecesX[i][j], mPiecesY[i][j]);
+						
+						canvas.drawRect(mDrawRect, RED_PAINT);
+					}
+				}
+			}	
+		}
 		
-		Paint generalPaint = new Paint();
-		generalPaint.setTextAlign(Paint.Align.CENTER);
-		generalPaint.setTypeface(Typeface.DEFAULT_BOLD);
-		generalPaint.setStrokeWidth(2 * mScaleFactor);
-		generalPaint.setTextSize(dFontSize * mScaleFactor);
-		generalPaint.setAntiAlias(true);
+		if (!mReady) {
+			BetterLog.i("tried to draw before ready. not drawing");
+			return;
+		}
+		
+		GENERAL_PAINT.setStrokeWidth(2 * mScaleFactor);
+		GENERAL_PAINT.setTextSize(dFontSize * mScaleFactor);
+
+		HexShape hexShape = (HexShape) mHexShapeDrawable.getShape();
+		hexShape.setPath(XR * mScaleFactor,
+				YR1 * mScaleFactor,
+				YR2 * mScaleFactor);
 		
 		// First draw the real ones
-		for (int i = 0; i < mPieces.length; i++) {
-			for (int j = 0; j < mPieces[i].length; j++) {
-				if (mPieces != null && mPieces[i][j] != null) {
-					Piece piece = mPieces[i][j];
-					Rect rect = getAdjustedRect(piece);
+		for (int i = 0; i < mPiecesX.length; i++) {
+			for (int j = 0; j < mPiecesX[i].length; j++) {
+				if (mPiecesX != null && mPiecesY != null) {
+					adjustDrawRect(mPiecesX[i][j], mPiecesY[i][j]);
 					
-					ShapeDrawable shape = new ShapeDrawable(new HexShape(
-							dXR * mScaleFactor,
-							dYR1 * mScaleFactor,
-							dYR2 * mScaleFactor));
-					shape.setBounds(rect);
-					shape.getPaint().setColor(piece.getColor());
-					shape.draw(canvas);
+					mHexShapeDrawable.setBounds(mDrawRect);
+					mHexShapeDrawable.getPaint().setColor(mPiecesColor[i][j]);
+					mHexShapeDrawable.draw(canvas);
 				}
 			}
 		}
-		for (int i = 0; i < mPieces.length; i++) {
-			for (int j = 0; j < mPieces[i].length; j++) {
-				if (mPieces != null && mPieces[i][j] != null) {
-					Piece piece = mPieces[i][j];
-					Rect rect = getAdjustedRect(piece);
+		for (int i = 0; i < mPiecesX.length; i++) {
+			for (int j = 0; j < mPiecesX[i].length; j++) {
+				if (mPiecesX != null && mPiecesY != null) {
+					adjustDrawRect(mPiecesX[i][j], mPiecesY[i][j]);
 					
 					if (mProbs != null && mProbs[i][j] != 0 && mProbs[i][j] != -1) {
 						int prob = mProbs[i][j];
@@ -475,40 +727,42 @@ public class MapView extends View {
 							String[] two = Integer.toString(prob).split("7");
 							int oneInt = Integer.parseInt(two[0]);
 							if (oneInt == 6 || oneInt == 8) {
-								generalPaint.setColor(0xFFFF0000);
+								GENERAL_PAINT.setColor(0xFFFF0000);
 							} else {
-								generalPaint.setColor(0xFF000000);
+								GENERAL_PAINT.setColor(0xFF000000);
 							}
-							canvas.drawText(Integer.toString(oneInt), rect.centerX() - dXR_2 * mScaleFactor,
-									rect.centerY() + dYR2_2 * mScaleFactor - dProbTopBuffer * mScaleFactor, generalPaint);
-							Rect newRect = new Rect((int) (rect.left - dXR_2 * mScaleFactor),
-									(int) (rect.top + dYR2_2 * mScaleFactor),
-									(int) (rect.right - dXR_2 * mScaleFactor),
-									(int) (rect.bottom + dYR2_2 * mScaleFactor));
-							drawDots(canvas, generalPaint, oneInt, newRect);
+							canvas.drawText(Integer.toString(oneInt), mDrawRect.centerX() - XR_2 * mScaleFactor,
+									mDrawRect.centerY() + YR2_2 * mScaleFactor - PROBABILITY_TOP_BUFFER * mScaleFactor, GENERAL_PAINT);
+							
+							mDotsRect.set((int) (mDrawRect.left - XR_2 * mScaleFactor),
+									(int) (mDrawRect.top + YR2_2 * mScaleFactor),
+									(int) (mDrawRect.right - XR_2 * mScaleFactor),
+									(int) (mDrawRect.bottom + YR2_2 * mScaleFactor));
+							drawDots(canvas, GENERAL_PAINT, oneInt, mDotsRect);
 
 							int twoInt = Integer.parseInt(two[1]);
 							if (twoInt == 6 || twoInt == 8) {
-								generalPaint.setColor(0xFFFF0000);
+								GENERAL_PAINT.setColor(0xFFFF0000);
 							} else {
-								generalPaint.setColor(0xFF000000);
+								GENERAL_PAINT.setColor(0xFF000000);
 							}
-							canvas.drawText(Integer.toString(twoInt), rect.centerX() + dXR_2 * mScaleFactor,
-									rect.centerY() - dYR2_2 * mScaleFactor - dProbTopBuffer * mScaleFactor, generalPaint);
-							newRect = new Rect((int) (rect.left + dXR_2 * mScaleFactor),
-									(int) (rect.top - dYR2_2 * mScaleFactor),
-									(int) (rect.right + dXR_2 * mScaleFactor),
-									(int) (rect.bottom - dYR2_2 * mScaleFactor));
-							drawDots(canvas, generalPaint, twoInt, newRect);
+							canvas.drawText(Integer.toString(twoInt), mDrawRect.centerX() + XR_2 * mScaleFactor,
+									mDrawRect.centerY() - YR2_2 * mScaleFactor - PROBABILITY_TOP_BUFFER * mScaleFactor, GENERAL_PAINT);
+							
+							mDotsRect.set((int) (mDrawRect.left + XR_2 * mScaleFactor),
+									(int) (mDrawRect.top - YR2_2 * mScaleFactor),
+									(int) (mDrawRect.right + XR_2 * mScaleFactor),
+									(int) (mDrawRect.bottom - YR2_2 * mScaleFactor));
+							drawDots(canvas, GENERAL_PAINT, twoInt, mDotsRect);
 						} else {
 							if (prob == 6 || prob == 8) {
-								generalPaint.setColor(0xFFFF0000);
+								GENERAL_PAINT.setColor(0xFFFF0000);
 							} else {
-								generalPaint.setColor(0xFF000000);
+								GENERAL_PAINT.setColor(0xFF000000);
 							}
-							canvas.drawText(Integer.toString(prob), rect.centerX(),
-									rect.centerY() - dProbTopBuffer * mScaleFactor, generalPaint);
-							drawDots(canvas, generalPaint, prob, rect);
+							canvas.drawText(Integer.toString(prob), mDrawRect.centerX(),
+									mDrawRect.centerY() - PROBABILITY_TOP_BUFFER * mScaleFactor, GENERAL_PAINT);
+							drawDots(canvas, GENERAL_PAINT, prob, mDrawRect);
 						}
 					}
 				}
@@ -516,44 +770,44 @@ public class MapView extends View {
 		}
 		
 		// Next draw unknowns
-		for (int i = 0; i < mUPieces.length; i++) {
-			for (int j = 0; j < mUPieces[i].length; j++) {
-				if (mUPieces != null && mUPieces[i][j] != null) {
-					Piece piece = mUPieces[i][j];
-					Rect rect = getAdjustedRect(piece);
-					
-					ShapeDrawable shape = new ShapeDrawable(new HexShape(
-							dXR * mScaleFactor,
-							dYR1 * mScaleFactor,
-							dYR2 * mScaleFactor));
-					shape.setBounds(rect);
+		for (int i = 0; i < mUPiecesX.length; i++) {
+			for (int j = 0; j < mUPiecesX[i].length; j++) {
+				if (mUPiecesX != null && mUPiecesY != null && mUPiecesX[i][j] > 0) {
+					adjustDrawRect(mUPiecesX[i][j], mUPiecesY[i][j]);
+
+					mHexShapeDrawable.setBounds(mDrawRect);
 					if (mUVisibility != null && !mUVisibility[i][j]) {
-						shape.getPaint().setColor(0xFFCCCCCC);
+						mHexShapeDrawable.getPaint().setColor(0xFFCCCCCC);
 					} else {
-						shape.getPaint().setColor(piece.getColor());
+						mHexShapeDrawable.getPaint().setColor(mUPiecesColor[i][j]);
 					}
-					shape.draw(canvas);
+					mHexShapeDrawable.draw(canvas);
 
 					if (mUVisibility == null || mUVisibility[i][j]) {
 						if (mUProbs != null && mUProbs[i][j] > 0) {
 							if (mUProbs[i][j] == 6 || mUProbs[i][j] == 8) {
-								generalPaint.setColor(0xFFFF0000);
+								GENERAL_PAINT.setColor(0xFFFF0000);
 							} else {
-								generalPaint.setColor(0xFF000000);
+								GENERAL_PAINT.setColor(0xFF000000);
 							}
-							canvas.drawText(Integer.toString(mUProbs[i][j]), rect.centerX(),
-									rect.centerY() - dProbTopBuffer * mScaleFactor, generalPaint);
-							drawDots(canvas, generalPaint, mUProbs[i][j], rect);
+							canvas.drawText(Integer.toString(mUProbs[i][j]), mDrawRect.centerX(),
+									mDrawRect.centerY() - PROBABILITY_TOP_BUFFER * mScaleFactor, GENERAL_PAINT);
+							drawDots(canvas, GENERAL_PAINT, mUProbs[i][j], mDrawRect);
 						}
 					}
 				}
 			}
 		}
 		
+		CatanMap map = mMapSize.mapProvider.get();
+		
 		for (int i = 0; i < mHarbors.size(); i++) {
 			if (mHarbors.get(i) != null) {
-				Point point = mCurrentMap.getWaterGrid()[i];
-				drawHarbor(canvas, generalPaint, mHarbors.get(i), getAdjustedRect(mPieces[point.x][point.y]), i);
+				Point point = getCatanMap().waterGrid[i];
+				
+				adjustDrawRect(mPiecesX[point.x][point.y], mPiecesY[point.x][point.y]);
+				
+				drawHarbor(map, canvas, GENERAL_PAINT, mHarbors.get(i), mDrawRect, i);
 			}
 		}
 
@@ -561,17 +815,17 @@ public class MapView extends View {
 			int placementIndex = mOrderedPlacements.get(mPlacementBookmark);
 
 			// Ignore any places that aren't allowed settlements on the coast
-			if (mCurrentMap.getPlacementIndexes()[placementIndex].length == 2) {
-				int landNeighbor = mCurrentMap.getPlacementIndexes()[placementIndex][0];
-				int landDirection = mCurrentMap.getPlacementIndexes()[placementIndex][1];
+			if (map.placementIndexes[placementIndex].length == 2) {
+				int landNeighbor = map.placementIndexes[placementIndex][0];
+				int landDirection = map.placementIndexes[placementIndex][1];
 
-				Point point = mCurrentMap.getLandGrid()[landNeighbor];
-				Rect rect = getAdjustedRect(mPieces[point.x][point.y]);
-				float x = rect.centerX() + calculatePlacementOffsetX(landDirection);
-				float y = rect.centerY() + calculatePlacementOffsetY(landDirection);
+				Point point = map.landGrid[landNeighbor];
+				adjustDrawRect(mPiecesX[point.x][point.y], mPiecesY[point.x][point.y]);
+				float x = mDrawRect.centerX() + calculatePlacementOffsetX(landDirection);
+				float y = mDrawRect.centerY() + calculatePlacementOffsetY(landDirection);
 
 				// Draw circle
-				drawDotSuggestions(canvas, x, y);
+				canvas.drawCircle(x, y, PLACEMENT_DOT_RADIUS * mScaleFactor, PROB_DOTS_PAINT);
 
 				// Draw reasons box
 				drawReasonsBox(canvas, mPlacementBookmark, mPlacements.get(placementIndex), x, y);
@@ -581,88 +835,71 @@ public class MapView extends View {
 		//canvas.restore();
 	}
 	
-	private Rect getAdjustedRect(Piece piece) {
-		int newGridX = BOARD_RANGE_HALF_X - piece.getGridX();
-		int newGridY = BOARD_RANGE_HALF_Y - piece.getGridY();
-		float startX = dMiddleX - (newGridX * (dXR + dBorder) * mScaleFactor) + mDiffX;
-		float startY = dMiddleY - (newGridY * (dYR1 + dYR2 + dBorder) * mScaleFactor) + mDiffY;
-
-		return new Rect((int) startX, (int) startY,
-				(int) (startX + (2 * dXR * mScaleFactor)),
-				(int) (startY + (((2 * dYR2) + dYR1) * mScaleFactor)));
-	}
-
-	private void drawDotSuggestions(Canvas canvas, float x, float y) {
-		Paint lightPaint = new Paint();
-		lightPaint.setColor(0xFF000000);
-		lightPaint.setAlpha(200);
-		lightPaint.setAntiAlias(true);
-
-		canvas.drawCircle(x, y, dPlacementDotR * mScaleFactor, lightPaint);
+	private void adjustDrawRect(int x, int y) {
+		// mMaxX gets + 1 because of the overlap of the horizontal counting hexes
+		// we need to count the last half-hex hanging off the right edge
+		// not sure why mMaxY needs it too though :P
+		float newGridX = (mMaxX / 2f) + 1 - x;
+		float newGridY = (mMaxY / 2f) + 1 - y;
+		float startX = (getWidth() / 2) - (newGridX * (XR + BORDER_WIDTH)) * mScaleFactor + mDiffX;
+		float startY = (getHeight() / 2) - (newGridY * (YR1 + YR2 + BORDER_WIDTH)) * mScaleFactor + mDiffY;
+		
+		mDrawRect.set((int) startX, (int) startY,
+				(int) (startX + (2 * XR * mScaleFactor)),
+				(int) (startY + (((2 * YR2) + YR1) * mScaleFactor)));
 	}
 
 	private void drawReasonsBox(Canvas canvas, int index, List<String> reasons, float x, float y) {
-		Paint lightPaint = new Paint();
-		lightPaint.setColor(0xFF000000);
-		lightPaint.setAlpha(175);
-		lightPaint.setAntiAlias(true);
-
-		float yLevel = y - dPlacementTriangleHeight;
-		canvas.drawRoundRect(new RectF(
-				x - dPlacementReasonBoxWidth / 3,
-				yLevel - (reasons.size() + 1) * dYR1, // +1 since words are bottom aligned
+		float yLevel = y - PLACEMENT_TRIANGLE_HEIGHT;
+		mReasonsRectF.set(	x - dPlacementReasonBoxWidth / 3,
+				yLevel - (reasons.size() + 1) * dPlacementReasonBoxLineHeight, // +1 since words are bottom aligned
 				x + dPlacementReasonBoxWidth * 2/3,
-				yLevel),
-				5.0f, 5.0f, lightPaint);
+				yLevel);
+		canvas.drawRoundRect(mReasonsRectF, 5.0f, 5.0f, REASON_PAINT);
 
 		// Draw bubble connector
-		Path bubblePath = new Path();
-		bubblePath.moveTo(x, y);
-		bubblePath.lineTo(x - dXR, yLevel);
-		bubblePath.lineTo(x, yLevel);
-		bubblePath.lineTo(x, y);
-		canvas.drawPath(bubblePath, lightPaint);
+		BUBBLE_PATH.reset();
+		BUBBLE_PATH.moveTo(x, y);
+		BUBBLE_PATH.lineTo(x - XR, yLevel);
+		BUBBLE_PATH.lineTo(x, yLevel);
+		BUBBLE_PATH.lineTo(x, y);
+		canvas.drawPath(BUBBLE_PATH, REASON_PAINT);
 
-		Paint textPaint = new Paint();
-		textPaint.setTextAlign(Paint.Align.LEFT);
-		textPaint.setStrokeWidth(1);
-		textPaint.setTextSize(dFontSize);
-		textPaint.setAntiAlias(true);
-		textPaint.setColor(0xFFFFFFFF);
+		TEXT_PAINT.setTextSize(dReasonFontSize + 3);
 
 		// +1 for zero-indexing
 		canvas.drawText("#" + (index + 1),
-				x - dPlacementReasonBoxWidth / 3 + dXR / 2,
-				y - dPlacementTriangleHeight - reasons.size() * dYR1 / 2,
-				textPaint);
+				x - dPlacementReasonBoxWidth / 3 + XR / 2,
+				y - PLACEMENT_TRIANGLE_HEIGHT - reasons.size() * dPlacementReasonBoxLineHeight / 2,
+				TEXT_PAINT);
 
-		yLevel -= reasons.size() * dYR1;
+		yLevel -= reasons.size() * dPlacementReasonBoxLineHeight;
 		for (String reason : reasons) {
-			canvas.drawText(reason, x - dPlacementReasonBoxWidth / 3 + 2 * dXR, yLevel, textPaint);
-			yLevel += dYR1;
+			canvas.drawText(reason, x - dPlacementReasonBoxWidth / 3 + 3 * XR, yLevel, TEXT_PAINT);
+			yLevel += dPlacementReasonBoxLineHeight;
 		}
 	}
 
 	private void drawDots(Canvas canvas, Paint paint, int prob, Rect rect) {
 		float x = rect.centerX();
-		float y = rect.centerY() + dYR1 / 3f * mScaleFactor;
+		float y = rect.centerY() + YR1 / 3f * mScaleFactor;
 		paint.setAntiAlias(false);
 		switch (PROBABILITY_MAPPING[prob]) {
 		case 5:
-			canvas.drawCircle(x - (dXR / 2 * mScaleFactor), y, dProbDotR * mScaleFactor, paint);
-			canvas.drawCircle(x + (dXR / 2 * mScaleFactor), y, dProbDotR * mScaleFactor, paint);
+			canvas.drawCircle(x - (XR / 2 * mScaleFactor), y, PROBABILITY_DOT_RADIUS * mScaleFactor, paint);
+			canvas.drawCircle(x + (XR / 2 * mScaleFactor), y, PROBABILITY_DOT_RADIUS * mScaleFactor, paint);
 		case 3:
-			canvas.drawCircle(x - (dXR / 4 * mScaleFactor), y, dProbDotR * mScaleFactor, paint);
-			canvas.drawCircle(x + (dXR / 4 * mScaleFactor), y, dProbDotR * mScaleFactor, paint);
+			canvas.drawCircle(x - (XR / 4 * mScaleFactor), y, PROBABILITY_DOT_RADIUS * mScaleFactor, paint);
+			canvas.drawCircle(x + (XR / 4 * mScaleFactor), y, PROBABILITY_DOT_RADIUS * mScaleFactor, paint);
 		case 1:
-			canvas.drawCircle(x, y, dProbDotR * mScaleFactor, paint);
+			canvas.drawCircle(x, y, PROBABILITY_DOT_RADIUS * mScaleFactor, paint);
 			break;
 		case 4:
-			canvas.drawCircle(x - (dXR * 3/8 * mScaleFactor), y, dProbDotR * mScaleFactor, paint);
-			canvas.drawCircle(x + (dXR * 3/8 * mScaleFactor), y, dProbDotR * mScaleFactor, paint);
+			canvas.drawCircle(x - (XR * 3/8 * mScaleFactor), y, PROBABILITY_DOT_RADIUS * mScaleFactor, paint);
+			canvas.drawCircle(x + (XR * 3/8 * mScaleFactor), y, PROBABILITY_DOT_RADIUS * mScaleFactor, paint);
 		case 2:
-			canvas.drawCircle(x - (dXR * 1/8 * mScaleFactor), y, dProbDotR * mScaleFactor, paint);
-			canvas.drawCircle(x + (dXR * 1/8 * mScaleFactor), y, dProbDotR * mScaleFactor, paint);
+			canvas.drawCircle(x - (XR * 1/8 * mScaleFactor), y, PROBABILITY_DOT_RADIUS * mScaleFactor, paint);
+			canvas.drawCircle(x + (XR * 1/8 * mScaleFactor), y, PROBABILITY_DOT_RADIUS * mScaleFactor, paint);
 			break;
 		case 0:
 		default:
@@ -670,54 +907,54 @@ public class MapView extends View {
 		paint.setAntiAlias(true);
 	}
 
-	private void drawHarbor(Canvas canvas, Paint paint, Harbor harbor, Rect rect, int i) {
+	private void drawHarbor(CatanMap map, Canvas canvas, Paint paint, Harbor harbor, Rect rect, int i) {
 		float x = rect.centerX();
-		float y = rect.centerY() - (dProbTopBuffer + dBorder) * mScaleFactor;
-		int dir = MapLogic.whichWayHarborFaces(mCurrentMap, harbor);
+		float y = rect.centerY() - (PROBABILITY_TOP_BUFFER + BORDER_WIDTH) * mScaleFactor;
+		int dir = MapLogic.whichWayHarborFaces(map, harbor);
 
-		if (harbor.getResource() == Resource.WATER || dir == -1) {
+		if (harbor.resource == Resource.WATER || dir == -1) {
 			return; // Do nothing
 		}
 		
-		if (harbor.getResource() == Resource.DESERT) {
+		if (harbor.resource == Resource.DESERT) {
 			paint.setColor(0xFFFFFFFF);
-			canvas.drawCircle(x, y, dHarborCircle * mScaleFactor, paint);
-			drawHarborLine(canvas, paint, mCurrentMap.getHarborLines()[i][dir], x, y);
-			drawHarborLine(canvas, paint, mCurrentMap.getHarborLines()[i][dir + 1], x, y);
+			canvas.drawCircle(x, y, HARBOR_CIRCLE_RADIUS * mScaleFactor, paint);
+			drawHarborLine(canvas, paint, map.harborLines[i][dir], x, y);
+			drawHarborLine(canvas, paint, map.harborLines[i][dir + 1], x, y);
 			paint.setColor(0xFF000000);
-			canvas.drawText("3", x, y - 1.5f * dProbTopBuffer * mScaleFactor, paint);
+			canvas.drawText("3", x, y - 1.5f * PROBABILITY_TOP_BUFFER * mScaleFactor, paint);
 		} else {
-			paint.setColor(harbor.getResource().getColor());
-			canvas.drawCircle(x, y, dHarborCircle * mScaleFactor, paint);
-			drawHarborLine(canvas, paint, mCurrentMap.getHarborLines()[i][dir], x, y);
-			drawHarborLine(canvas, paint, mCurrentMap.getHarborLines()[i][dir + 1], x, y);
+			paint.setColor(harbor.resource.color);
+			canvas.drawCircle(x, y, HARBOR_CIRCLE_RADIUS * mScaleFactor, paint);
+			drawHarborLine(canvas, paint, map.harborLines[i][dir], x, y);
+			drawHarborLine(canvas, paint, map.harborLines[i][dir + 1], x, y);
 			paint.setColor(0xFF000000);
-			canvas.drawText("2", x, y - 1.5f * dProbTopBuffer * mScaleFactor, paint);
+			canvas.drawText("2", x, y - 1.5f * PROBABILITY_TOP_BUFFER * mScaleFactor, paint);
 		}
 	}
 
 	private void drawHarborLine(Canvas canvas, Paint paint, int dir, float x, float y) {
 		switch(dir) {
 		case 0:
-			canvas.drawLine(x, y, x - dXR * mScaleFactor, y - (dYR1 / 2) * mScaleFactor, paint);
+			canvas.drawLine(x, y, x - XR * mScaleFactor, y - (YR1 / 2) * mScaleFactor, paint);
 			break;
 		case 1:
-			canvas.drawLine(x, y, x, y - (dYR2 + (dYR1 / 2)) * mScaleFactor, paint);
+			canvas.drawLine(x, y, x, y - (YR2 + (YR1 / 2)) * mScaleFactor, paint);
 			break;
 		case 2:
-			canvas.drawLine(x, y, x + dXR * mScaleFactor, y - (dYR1 / 2) * mScaleFactor, paint);
+			canvas.drawLine(x, y, x + XR * mScaleFactor, y - (YR1 / 2) * mScaleFactor, paint);
 			break;
 		case 3:
-			canvas.drawLine(x, y, x + dXR * mScaleFactor, y + (dYR1 / 2) * mScaleFactor, paint);
+			canvas.drawLine(x, y, x + XR * mScaleFactor, y + (YR1 / 2) * mScaleFactor, paint);
 			break;
 		case 4:
-			canvas.drawLine(x, y, x, y + (dYR2 + (dYR1 / 2)) * mScaleFactor, paint);
+			canvas.drawLine(x, y, x, y + (YR2 + (YR1 / 2)) * mScaleFactor, paint);
 			break;
 		case 5:
-			canvas.drawLine(x, y, x - dXR * mScaleFactor, y + (dYR1 / 2) * mScaleFactor, paint);
+			canvas.drawLine(x, y, x - XR * mScaleFactor, y + (YR1 / 2) * mScaleFactor, paint);
 			break;
 		default:
-			//Log.i(X, "WARNING: Cannot draw this line: "  +  dir);
+			BetterLog.i("WARNING: Cannot draw this line: "  +  dir);
 			break;
 		}
 	}
@@ -726,22 +963,22 @@ public class MapView extends View {
 		float temp;
 		switch (num) {
 		case 0:
-			temp = -(dXR + dBorder);
+			temp = -(XR + BORDER_WIDTH);
 			break;
 		case 1:
 			temp = 0;
 			break;
 		case 2:
-			temp = dXR + dBorder;
+			temp = XR + BORDER_WIDTH;
 			break;
 		case 3:
-			temp = dXR + dBorder;
+			temp = XR + BORDER_WIDTH;
 			break;
 		case 4:
 			temp = 0;
 			break;
 		case 5:
-			temp = -(dXR + dBorder);
+			temp = -(XR + BORDER_WIDTH);
 			break;
 		default:
 			temp = 0;
@@ -754,27 +991,27 @@ public class MapView extends View {
 		float temp;
 		switch (num) {
 		case 0:
-			temp = -dYR1/2;
+			temp = -YR1/2;
 			break;
 		case 1:
-			temp = -(dYR2 + dYR1/2);
+			temp = -(YR2 + YR1/2);
 			break;
 		case 2:
-			temp = -dYR1/2;
+			temp = -YR1/2;
 			break;
 		case 3:
-			temp = dYR1/2;
+			temp = YR1/2;
 			break;
 		case 4:
-			temp = dYR2 + dYR1/2;
+			temp = YR2 + YR1/2;
 			break;
 		case 5:
-			temp = dYR1/2;
+			temp = YR1/2;
 			break;
 		default:
 			temp = 0;
 			break;
 		}
-		return (temp - (dProbTopBuffer + (2 * dBorder))) * mScaleFactor;
+		return (temp - (PROBABILITY_TOP_BUFFER + (2 * BORDER_WIDTH))) * mScaleFactor;
 	}
 }
