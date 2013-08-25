@@ -327,6 +327,15 @@ public class MapFragment extends Fragment {
 	private class ShuffleMapAsyncTask extends ShuffleAsyncTask {
 		@Override
 		protected void mapChanges() {
+			// Refresh New World maps
+			if (mMapSize.title.equals("new_world")) {
+				mMapSize = MapSize.NEW_WORLD;
+				mMapSize.mapProvider.refresh(getActivity());
+			}
+			if (mMapSize.title.equals("new_world_exp")) {
+				mMapSize = MapSize.NEW_WORLD_EXP;
+				mMapSize.mapProvider.refresh(getActivity());
+			}
 			mProbabilityList = MapLogic.getProbabilities(getCatanMap(), mMapType);
 			mUnknownProbabilitiesList = MapLogic.getUnknownProbabilities(getCatanMap());
 			mResourceList = MapLogic.getResources(getCatanMap(), mMapType, mProbabilityList);

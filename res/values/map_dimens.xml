@@ -1,8 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-  <dimen name="font_size">12sp</dimen>
-  <dimen name="reason_font_size">13sp</dimen>
+  <dimen name="font_size">15sp</dimen>
+  <dimen name="reason_font_size">12sp</dimen>
+  <dimen name="reason_font_buffer_multiplier">2dp</dimen>
   <dimen name="view_buffer">10dp</dimen>
-  <dimen name="placement_reason_box_width">300dp</dimen>
+  <dimen name="placement_reason_box_width">250dp</dimen>
   <dimen name="placement_reason_box_line_height">15dp</dimen>
 </resources>

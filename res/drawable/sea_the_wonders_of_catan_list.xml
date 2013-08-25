@@ -1,0 +1,6 @@
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:id="@+id/sea_the_wonders_of_catan_list"
+        android:drawable="@drawable/sea_the_wonders_of_catan" />
+    <item android:id="@+id/orange_list"
+        android:drawable="@drawable/orange" />
+ </layer-list>

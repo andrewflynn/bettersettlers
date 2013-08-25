@@ -1,0 +1,7 @@
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+     <item android:state_pressed="true"
+           android:drawable="@drawable/sea_cloth_for_catan_bw_list" /> <!-- pressed -->
+     <item android:state_focused="true"
+           android:drawable="@drawable/sea_cloth_for_catan_bw_list" /> <!-- focused -->
+     <item android:drawable="@drawable/sea_cloth_for_catan_bw" /> <!-- default -->
+ </selector>

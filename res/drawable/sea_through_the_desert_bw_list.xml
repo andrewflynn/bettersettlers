@@ -1,0 +1,6 @@
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:id="@+id/sea_through_the_desert_bw_list"
+        android:drawable="@drawable/sea_through_the_desert_bw" />
+    <item android:id="@+id/orange_list"
+        android:drawable="@drawable/orange" />
+ </layer-list>
