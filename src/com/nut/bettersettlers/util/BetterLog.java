@@ -15,10 +15,10 @@ public final class BetterLog {
 		v(t, String.format(fmt, args));
 	}
 	public static void v(String msg) {
-		if (Consts.TEST) Log.v(TAG, msg);
+		if (Consts.TEST_SHOW_LOGCAT) Log.v(TAG, msg);
 	}
 	public static void v(String msg, Throwable t) {
-		if (Consts.TEST) Log.v(TAG, msg, t);
+		if (Consts.TEST_SHOW_LOGCAT) Log.v(TAG, msg, t);
 	}
 	
 	/* DEBUG */
@@ -29,10 +29,10 @@ public final class BetterLog {
 		d(t, String.format(fmt, args));
 	}
 	public static void d(String msg) {
-		if (Consts.TEST) Log.d(TAG, msg);
+		if (Consts.TEST_SHOW_LOGCAT) Log.d(TAG, msg);
 	}
 	public static void d(String msg, Throwable t) {
-		if (Consts.TEST) Log.d(TAG, msg, t);
+		if (Consts.TEST_SHOW_LOGCAT) Log.d(TAG, msg, t);
 	}
 	
 	/* INFO */
@@ -43,10 +43,10 @@ public final class BetterLog {
 		i(t, String.format(fmt, args));
 	}
 	public static void i(String msg) {
-		if (Consts.TEST) Log.i(TAG, msg);
+		if (Consts.TEST_SHOW_LOGCAT) Log.i(TAG, msg);
 	}
 	public static void i(String msg, Throwable t) {
-		if (Consts.TEST) Log.i(TAG, msg, t);
+		if (Consts.TEST_SHOW_LOGCAT) Log.i(TAG, msg, t);
 	}
 	
 	/* WARNING */
@@ -57,10 +57,10 @@ public final class BetterLog {
 		w(t, String.format(fmt, args));
 	}
 	public static void w(String msg) {
-		if (Consts.TEST) Log.w(TAG, msg);
+		if (Consts.TEST_SHOW_LOGCAT) Log.w(TAG, msg);
 	}
 	public static void w(String msg, Throwable t) {
-		if (Consts.TEST) Log.w(TAG, msg, t);
+		if (Consts.TEST_SHOW_LOGCAT) Log.w(TAG, msg, t);
 	}
 	
 	/* ERROR */
@@ -71,9 +71,9 @@ public final class BetterLog {
 		e(t, String.format(fmt, args));
 	}
 	public static void e(String msg) {
-		if (Consts.TEST) Log.e(TAG, msg);
+		if (Consts.TEST_SHOW_LOGCAT) Log.e(TAG, msg);
 	}
 	public static void e(String msg, Throwable t) {
-		if (Consts.TEST) Log.e(TAG, msg, t);
+		if (Consts.TEST_SHOW_LOGCAT) Log.e(TAG, msg, t);
 	}
 }
