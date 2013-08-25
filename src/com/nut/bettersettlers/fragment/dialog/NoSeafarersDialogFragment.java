@@ -18,7 +18,7 @@ public class NoSeafarersDialogFragment extends DialogFragment {
 	private static final Spanned MESSAGE = Html.fromHtml("Sorry, it appears as though your Android device does not " +
 			"support Google Play In-App Billing so we cannot offer Seafarers of Catan.<br/>" +
 			"Please check that Google Play is installed properly and restart Better Settlers. " +
-			"If Seafarers still does not appear, please <a href='mailto:emailus@bettersettlers.com'>let us know</a> and we can help you troubleshoot");
+			"If Seafarers still does not appear, please <a href='mailto:emailus@bettersettlers.com'>let us know</a> and we can help you troubleshoot.");
 	
 	public static NoSeafarersDialogFragment newInstance() {
 		return new NoSeafarersDialogFragment();

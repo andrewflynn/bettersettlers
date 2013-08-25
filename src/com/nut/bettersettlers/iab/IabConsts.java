@@ -1,38 +1,30 @@
-/*
- * Copyright (C) 2010 The Android Open Source Project
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 package com.nut.bettersettlers.iab;
 
 /**
  * This class holds global constants that are used throughout the application
  * to support in-app billing.
  */
-public class IabConsts {
+public final class IabConsts {
+	private IabConsts() {}
+	
+	public static final String BIND_ACTION = "com.android.vending.billing.InAppBillingService.BIND";
+	public static final int API_VERSION = 3;
+	
 	public static final String BUY_ALL = "seafarers.all";
 	public static final String FAKE_PRODUCT_ID = "android.test.purchased";
 	
+	// Bundle keys
+	public static final String GET_SKU_DETAILS_ITEM_LIST = "ITEM_ID_LIST";
+	
     // Billing response codes
-    public static final long BILLING_RESPONSE_RESULT_OK = 0;
-    public static final long BILLING_RESPONSE_RESULT_USER_CANCELED = 1;
-    public static final long BILLING_RESPONSE_RESULT_BILLING_UNAVAILABLE = 3;
-    public static final long BILLING_RESPONSE_RESULT_ITEM_UNAVAILABLE = 4;
-    public static final long BILLING_RESPONSE_RESULT_DEVELOPER_ERROR = 5;
-    public static final long BILLING_RESPONSE_RESULT_ERROR = 6;
-    public static final long BILLING_RESPONSE_RESULT_ITEM_ALREADY_OWNED = 7;
-    public static final long BILLING_RESPONSE_RESULT_ITEM_NOT_OWNED = 8;
+    public static final int BILLING_RESPONSE_RESULT_OK = 0;
+    public static final int BILLING_RESPONSE_RESULT_USER_CANCELED = 1;
+    public static final int BILLING_RESPONSE_RESULT_BILLING_UNAVAILABLE = 3;
+    public static final int BILLING_RESPONSE_RESULT_ITEM_UNAVAILABLE = 4;
+    public static final int BILLING_RESPONSE_RESULT_DEVELOPER_ERROR = 5;
+    public static final int BILLING_RESPONSE_RESULT_ERROR = 6;
+    public static final int BILLING_RESPONSE_RESULT_ITEM_ALREADY_OWNED = 7;
+    public static final int BILLING_RESPONSE_RESULT_ITEM_NOT_OWNED = 8;
 
     // Keys for the responses from InAppBillingService
     public static final String RESPONSE_CODE = "RESPONSE_CODE";

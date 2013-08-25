@@ -7,7 +7,7 @@ import com.nut.bettersettlers.data.MapSizePair;
 
 public enum MapContainer {
 	HEADING_FOR_NEW_SHORES("Heading for New Shores", "seafarers.heading_for_new_shores",
-			MapSizePair.HEADING_FOR_NEW_SHORES);
+			MapSizePair.HEADING_FOR_NEW_SHORES),;
 	
 	private static final Map<String, MapContainer> ID_MAP = new HashMap<String, MapContainer>();
 	static {
@@ -18,14 +18,14 @@ public enum MapContainer {
 	public static MapContainer getMapById(String id) {
 		return ID_MAP.get(id);
 	}
-	
+
+	public final String title;
 	public final String id;
-	public final String name;
 	public final MapSizePair sizePair;
 	
-	private MapContainer(String id, String name, MapSizePair sizePair) {
+	private MapContainer(String title, String id, MapSizePair sizePair) {
+		this.title = title;
 		this.id = id;
-		this.name = name;
 		this.sizePair = sizePair;
 	}
 }

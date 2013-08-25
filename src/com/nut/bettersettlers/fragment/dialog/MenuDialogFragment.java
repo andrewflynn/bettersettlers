@@ -1,8 +1,5 @@
 package com.nut.bettersettlers.fragment.dialog;
 
-import android.app.Activity;
-import android.app.AlertDialog;
-import android.app.Dialog;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -20,7 +17,7 @@ import com.nut.bettersettlers.activity.MainActivity;
 import com.nut.bettersettlers.data.CatanMap;
 import com.nut.bettersettlers.data.MapType;
 import com.nut.bettersettlers.fragment.MapFragment;
-import com.nut.bettersettlers.util.Consts;
+import com.nut.bettersettlers.util.Analytics;
 
 public class MenuDialogFragment extends DialogFragment {
 	private static final String SHARED_PREFS_NAME = "Graph";
@@ -31,22 +28,27 @@ public class MenuDialogFragment extends DialogFragment {
 	private ImageView randomButton;
 	
 	public static MenuDialogFragment newInstance() {
-		return new MenuDialogFragment();
+		MenuDialogFragment f = new MenuDialogFragment();
+		f.setStyle(STYLE_NO_TITLE, 0);
+		return f;
 	}
 	
 	@Override
-	public Dialog onCreateDialog(Bundle savedInstanceState) {
-		Context mContext = getActivity().getApplicationContext();
-		LayoutInflater inflater =
-			(LayoutInflater) mContext.getSystemService(Activity.LAYOUT_INFLATER_SERVICE);
-		View layout =
-			inflater.inflate(R.layout.menu, (ViewGroup) getActivity().findViewById(R.id.menu_root));
+	public void onActivityCreated (Bundle savedInstanceState) {
+		super.onActivityCreated(savedInstanceState);
 		
-		betterSettlersButton = (ImageView) layout.findViewById(R.id.better_settlers_overlay);
+		((MainActivity) getActivity()).trackView(Analytics.VIEW_MORE_MENU);
+	}
+	
+	@Override
+	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+		View view = inflater.inflate(R.layout.menu, container, false);
+		
+		betterSettlersButton = (ImageView) view.findViewById(R.id.better_settlers_overlay);
 		betterSettlersButton.setOnClickListener(ROTATE);
-		traditionalButton = (ImageView) layout.findViewById(R.id.traditional_overlay);
+		traditionalButton = (ImageView) view.findViewById(R.id.traditional_overlay);
 		traditionalButton.setOnClickListener(ROTATE);
-		randomButton = (ImageView) layout.findViewById(R.id.random_overlay);
+		randomButton = (ImageView) view.findViewById(R.id.random_overlay);
 		randomButton.setOnClickListener(ROTATE);
 
 		MapFragment mapFragment = ((MainActivity) getActivity()).getMapFragment();
@@ -68,7 +70,7 @@ public class MenuDialogFragment extends DialogFragment {
 			break;
 		}
 
-		ImageView rollTrackerButton = (ImageView) layout.findViewById(R.id.roll_tracker_item);
+		ImageView rollTrackerButton = (ImageView) view.findViewById(R.id.roll_tracker_item);
 		rollTrackerButton.setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View v) {
@@ -76,7 +78,8 @@ public class MenuDialogFragment extends DialogFragment {
 				mainActivity.getSupportFragmentManager().popBackStack();
 				mainActivity.getSupportFragmentManager().popBackStack();
 				mainActivity.showGraphFragment();
-				((MainActivity) getActivity()).getAnalytics().trackPageView(Consts.ANALYTICS_USE_ROLL_TRACKER);
+				((MainActivity) getActivity()).trackEvent(Analytics.CATEGORY_MENU_MENU,
+						Analytics.ACTION_BUTTON, Analytics.USE_ROLL_TRACKER);
 
 				SharedPreferences prefs = getActivity().getSharedPreferences(SHARED_PREFS_NAME, Context.MODE_PRIVATE);
 				boolean shownWhatsNew = prefs.getBoolean(SHARED_PREFS_SHOWN_HELP, false);
@@ -89,7 +92,7 @@ public class MenuDialogFragment extends DialogFragment {
 			}
 		});
 		
-		ImageView shuffleProbsButton = (ImageView) layout.findViewById(R.id.shuffle_probs_item);
+		ImageView shuffleProbsButton = (ImageView) view.findViewById(R.id.shuffle_probs_item);
 		shuffleProbsButton.setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View v) {
@@ -97,10 +100,11 @@ public class MenuDialogFragment extends DialogFragment {
 				mainActivity.getSupportFragmentManager().popBackStack();
 				mainActivity.getSupportFragmentManager().popBackStack();
 				mainActivity.getMapFragment().asyncProbsShuffle();
-				((MainActivity) getActivity()).getAnalytics().trackPageView(Consts.ANALYTICS_SHUFFLE_PROBABILITIES);
+				((MainActivity) getActivity()).trackEvent(Analytics.CATEGORY_MENU_MENU,
+						Analytics.ACTION_BUTTON, Analytics.SHUFFLE_PROBABILITIES);
 			}
 		});
-		ImageView shuffleHarborsButton = (ImageView) layout.findViewById(R.id.shuffle_harbors_item);
+		ImageView shuffleHarborsButton = (ImageView) view.findViewById(R.id.shuffle_harbors_item);
 		shuffleHarborsButton.setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View v) {
@@ -108,15 +112,14 @@ public class MenuDialogFragment extends DialogFragment {
 				mainActivity.getSupportFragmentManager().popBackStack();
 				mainActivity.getSupportFragmentManager().popBackStack();
 				mainActivity.getMapFragment().asyncHarborsShuffle();
-				((MainActivity) getActivity()).getAnalytics().trackPageView(Consts.ANALYTICS_SHUFFLE_HARBORS);
+				((MainActivity) getActivity()).trackEvent(Analytics.CATEGORY_MENU_MENU,
+						Analytics.ACTION_BUTTON, Analytics.SHUFFLE_HARBORS);
 			}
 		});
-
-		AlertDialog ret = new AlertDialog.Builder(getActivity())
-			.create();
-		ret.setView(layout, 0, 0, 0, 5); // Remove top padding
-		ret.getWindow().getAttributes().windowAnimations = R.style.SlideDialogAnimation;
-		return ret;
+		
+		getDialog().getWindow().getAttributes().windowAnimations = R.style.SlideDialogAnimation;
+		
+		return view;
 	}
 	
 	private final OnClickListener ROTATE = new OnClickListener() {
@@ -141,23 +144,23 @@ public class MenuDialogFragment extends DialogFragment {
 						|| size.name.equals("large")
 						|| size.name.equals("xlarge")) {
 					inButton = traditionalButton;
-					mapFragment.traditionalChoice();
+					mapFragment.typeChoice(MapType.TRADITIONAL);
 				} else {
 					inButton = randomButton;
-					mapFragment.randomChoice();
+					mapFragment.typeChoice(MapType.RANDOM);
 				}
 				break;
 			case MapType.TRADITIONAL:
 				outButton = traditionalButton;
 				
 				inButton = randomButton;
-				mapFragment.randomChoice();
+				mapFragment.typeChoice(MapType.RANDOM);
 				break;
 			case MapType.RANDOM:
 				outButton = randomButton;
 				
 				inButton = betterSettlersButton;
-				mapFragment.betterSettlersChoice();
+				mapFragment.typeChoice(MapType.FAIR);
 				break;
 			}
 			

@@ -3,7 +3,6 @@
     android:id="@+id/seafarers_root"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
-    android:gravity="center_horizontal"
     android:padding="16dip" >
 
     <FrameLayout
@@ -26,13 +25,13 @@
         android:id="@+id/seafarers_scroll"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_above="@id/buy_all_container"
-        android:layout_alignRight="@id/buy_all_container" >
+        android:layout_above="@id/buy_all_container" >
 
         <LinearLayout
             android:id="@+id/seafarers_container"
             android:layout_width="@dimen/menu_list_width"
             android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
             android:orientation="vertical" >
 
             <TextView
@@ -40,11 +39,10 @@
                 android:layout_width="@dimen/menu_item_width"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="8dip"
-                android:fontFamily="sans-serif-light"
+                android:layout_gravity="center_horizontal"
                 android:gravity="center"
                 android:text="@string/seafarers_intro"
-                android:textSize="@dimen/seafarers_buy_text"
-                android:textStyle="bold" />
+                android:textSize="@dimen/seafarers_buy_text_size" />
 
             <ImageView
                 android:id="@+id/heading_for_new_shores_item"

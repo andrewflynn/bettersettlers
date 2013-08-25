@@ -1,30 +1,26 @@
 package com.nut.bettersettlers.util;
 
-public class Consts {
-	public static final String SHARED_PREFS_SEAFARERS_KEY = "seafarers";
+public final class Consts {
+	private Consts() {}
 
-	public static final boolean TEST = true;
+	///////////////////////////////////////////
+	// All of these should be false for release
+	public static final boolean TEST_SHOW_LOGCAT = false;
+	public static final boolean TEST_STATIC_IAB = true;
+	public static final boolean TEST_CONSUME_ALL_PURCHASES = true;
+	public static final boolean TEST_FAST_ANALYTICS = false;
+	
 	public static final boolean DEBUG_MAP = false;
 	public static final boolean DEBUG_MAP_WITH_RED = false;
-	
-	public static final String ANALYTICS_KEY = TEST ? "UA-24622139-1" : "UA-22984277-1";
-	public static final int ANALYTICS_INTERVAL = 10;
-	public static final String ANALYTICS_SHUFFLE = "/shuffle";
-	public static final String ANALYTICS_SHUFFLE_MAP = ANALYTICS_SHUFFLE + "/map";
-	public static final String ANALYTICS_SHUFFLE_PROBABILITIES = ANALYTICS_SHUFFLE + "/probabilities";
-	public static final String ANALYTICS_SHUFFLE_HARBORS = ANALYTICS_SHUFFLE + "/harbors";
-	public static final String ANALYTICS_USE_PLACEMENTS = "/placements";
-	public static final String ANALYTICS_USE_ROLL_TRACKER = "/rollTracker";
-	public static final String ANALYTICS_VIEW_SETTLERS = "/settlers";
-	public static final String ANALYTICS_VIEW_SEAFARERS = "/seafarers";
-	public static final String ANALYTICS_VIEW_MORE = "/more";
-	public static final String ANALYTICS_CHANGE_MAP_SIZE_FORMAT = "/size/%s";
-	public static final String ANALYTICS_CHANGE_MAP_TYPE_FORMAT = "/type/%s";
-	public static final String ANALYTICS_SEAFARERS_PURCHASE_FORMAT = "/seafarersPurchaseView/%s";
+    //
+	///////////////////////////////////////////
 	
 	public static final String LAUNCH_MAP_ACTION = "com.nut.bettersettlers.action.LAUNCH_MAP";
-	
-	public static final int IAB_API_VERSION = 3;
+	public static final String PLAY_STORE_URL = "https://play.google.com/store/apps/details?id=com.nut.bettersettlers";
+
+	public static final String SHARED_PREFS_NAME = "Preferences";
+	public static final String SHARED_PREFS_KEY_WHATS_NEW_HELP = "ShownWhatsNewVersion21";
+	public static final String SHARED_PREFS_KEY_FOG_ISLAND_HELP = "TheFogIsland";
 	
 	/**
 	 * Mapping between the numbers that are shown (rolled on the dice) and the probability of each

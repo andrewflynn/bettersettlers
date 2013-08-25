@@ -5,7 +5,6 @@ import android.app.Dialog;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnClickListener;
 import android.content.Intent;
-import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
@@ -15,6 +14,9 @@ import android.text.method.LinkMovementMethod;
 import android.widget.TextView;
 
 import com.nut.bettersettlers.R;
+import com.nut.bettersettlers.activity.MainActivity;
+import com.nut.bettersettlers.util.Analytics;
+import com.nut.bettersettlers.util.Consts;
 
 public class AboutDialogFragment extends DialogFragment {
 	private static final Spanned MESSAGE = Html.fromHtml("The Better Settlers Board Generator is for use with the offline board game Settlers of Catan. "
@@ -25,7 +27,7 @@ public class AboutDialogFragment extends DialogFragment {
 			+ "The algorithm for the generator is designed to create fair play. The result is more riveting and engaging play.<br/><br/>"
 			+ "You'll have a better game of Settlers.<br/><br/>"
 			+ "<a href='mailto:emailus@bettersettlers.com'>Send us feedback</a> on how we can improve Better Settlers!<br/><br/>"
-			+ "Copyright 2011 Better Settlers. All Rights Reserved.<br/><br/>"
+			+ "Copyright 2013 Better Settlers. All Rights Reserved.<br/><br/>"
 			+ "This app is in no way affiliated with Mayfair Games or Klaus Teuber, of whom Settlers of Catan is a registered trademark.<br/><br/>"
 			+ "This app uses Google Analytics, which uses anonymous tracking data in order to provide you with a better user experience. "
 			+ "More info can be found by reading the <a href='http://www.google.com/analytics/tos.html'>Google Analytics Terms of Service</a>.");
@@ -33,11 +35,18 @@ public class AboutDialogFragment extends DialogFragment {
 	public static AboutDialogFragment newInstance() {
 		return new AboutDialogFragment();
 	}
+	
+	@Override
+	public void onActivityCreated (Bundle savedInstanceState) {
+		super.onActivityCreated(savedInstanceState);
+		
+		((MainActivity) getActivity()).trackView(Analytics.VIEW_INFO);
+	}
 			
 	@Override
 	public Dialog onCreateDialog(Bundle savedInstanceState) {
-		TextView textView = new TextView(getActivity(), null, android.R.attr.textAppearanceSmallInverse);
-		textView.setTextColor(Color.WHITE);
+		TextView textView = new TextView(getActivity(), null, android.R.attr.textAppearanceSmall);
+		textView.setTextSize(getResources().getDimension(R.dimen.about_text_size));
 		textView.setPadding(10, 10, 10, 10);
 		textView.setText(MESSAGE);
 		textView.setMovementMethod(LinkMovementMethod.getInstance());
@@ -48,8 +57,9 @@ public class AboutDialogFragment extends DialogFragment {
 			.setView(textView)
 			.setPositiveButton("Rate us", new OnClickListener() {
 				public void onClick(DialogInterface dialog, int id) {
-					getActivity().startActivity(new Intent(Intent.ACTION_VIEW,
-							Uri.parse("http://market.android.com/details?id=com.nut.bettersettlers")));
+					getActivity().startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(Consts.PLAY_STORE_URL)));
+					((MainActivity) getActivity()).trackEvent(Analytics.CATEGORY_ABOUT_MENU,
+							Analytics.ACTION_BUTTON, Analytics.RATE_US);
 				}
 			})
 			.setNegativeButton("Dismiss", new OnClickListener() {

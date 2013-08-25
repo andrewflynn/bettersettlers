@@ -19,7 +19,6 @@ import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.Typeface;
 import android.graphics.drawable.ShapeDrawable;
-import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.AttributeSet;
@@ -218,6 +217,7 @@ public class MapView extends View {
             super(superState);
         }
         
+		@SuppressWarnings("unchecked")
 		private SavedState(Parcel in) {
             super(in);
             ready = in.readByte() == 1;
@@ -263,7 +263,8 @@ public class MapView extends View {
             out.writeSerializable(orderedPlacements);
         }
 
-        public static final Parcelable.Creator<SavedState> CREATOR
+        @SuppressWarnings("unused")
+		public static final Parcelable.Creator<SavedState> CREATOR
                 = new Parcelable.Creator<SavedState>() {
             public SavedState createFromParcel(Parcel in) {
                 return new SavedState(in);

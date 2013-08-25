@@ -15,11 +15,10 @@ import com.nut.bettersettlers.activity.MainActivity;
 import com.nut.bettersettlers.data.MapSize;
 import com.nut.bettersettlers.data.MapSizePair;
 import com.nut.bettersettlers.fragment.MapFragment;
+import com.nut.bettersettlers.util.Analytics;
+import com.nut.bettersettlers.util.Consts;
 
 public class ExpansionDialogFragment extends DialogFragment {
-	private static final String SHARED_PREFS_NAME = "Seafarers";
-	private static final String SHARED_PREFS_SHOWN_HELP = "TheFogIsland";
-	
 	private static final String SIZE_KEY = "SIZE";
 	
 	private MapSizePair mMapSizePair;
@@ -36,6 +35,13 @@ public class ExpansionDialogFragment extends DialogFragment {
 	}
 	
 	@Override
+	public void onActivityCreated (Bundle savedInstanceState) {
+		super.onActivityCreated(savedInstanceState);
+		
+		((MainActivity) getActivity()).trackView(Analytics.VIEW_EXPANSIONS_MENU);
+	}
+	
+	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 		View view = inflater.inflate(R.layout.expansion, container, false);
 		
@@ -45,6 +51,8 @@ public class ExpansionDialogFragment extends DialogFragment {
 		smallButton.setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View v) {
+				((MainActivity) getActivity()).trackEvent(Analytics.CATEGORY_EXPANSION_MENU,
+						Analytics.ACTION_BUTTON, Analytics.EXPANSION_SMALL);
 				choice(mMapSizePair.reg);
 			}
 		});
@@ -53,6 +61,8 @@ public class ExpansionDialogFragment extends DialogFragment {
 		largeButton.setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View v) {
+				((MainActivity) getActivity()).trackEvent(Analytics.CATEGORY_EXPANSION_MENU,
+						Analytics.ACTION_BUTTON, Analytics.EXPANSION_LARGE);
 				choice(mMapSizePair.exp);
 			}
 		});

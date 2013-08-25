@@ -1,8 +1,5 @@
 package com.nut.bettersettlers.fragment.dialog;
 
-import android.app.Activity;
-import android.app.AlertDialog;
-import android.app.Dialog;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -17,25 +14,30 @@ import android.widget.ImageView;
 import com.nut.bettersettlers.R;
 import com.nut.bettersettlers.activity.MainActivity;
 import com.nut.bettersettlers.fragment.MapFragment;
-import com.nut.bettersettlers.util.Consts;
+import com.nut.bettersettlers.util.Analytics;
 
 public class MapsDialogFragment extends DialogFragment {
 	private static final String SHARED_PREFS_NAME = "Maps";
 	private static final String SHARED_PREFS_SHOWN_HELP = "NoSeafarers";
 	
 	public static MapsDialogFragment newInstance() {
-		return new MapsDialogFragment();
+		MapsDialogFragment f = new MapsDialogFragment();
+		f.setStyle(STYLE_NO_TITLE, 0);
+		return f;
 	}
 	
 	@Override
-	public Dialog onCreateDialog(Bundle savedInstanceState) {
-		Context mContext = getActivity().getApplicationContext();
-		LayoutInflater inflater =
-			(LayoutInflater) mContext.getSystemService(Activity.LAYOUT_INFLATER_SERVICE);
-		View layout =
-			inflater.inflate(R.layout.maps, (ViewGroup) getActivity().findViewById(R.id.maps_root));
+	public void onActivityCreated (Bundle savedInstanceState) {
+		super.onActivityCreated(savedInstanceState);
+		
+		((MainActivity) getActivity()).trackView(Analytics.VIEW_MAPS_MENU);
+	}
+	
+	@Override
+	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+		View view = inflater.inflate(R.layout.maps, container, false);
 
-		ImageView settlersButton = (ImageView) layout.findViewById(R.id.settlers_item);
+		ImageView settlersButton = (ImageView) view.findViewById(R.id.settlers_item);
 		settlersButton.setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View v) {
@@ -43,14 +45,15 @@ public class MapsDialogFragment extends DialogFragment {
 			    ft.addToBackStack(null);
 			    
 				SettlersDialogFragment.newInstance().show(ft, "SettlersDialogFragment");
-				((MainActivity) getActivity()).getAnalytics().trackPageView(Consts.ANALYTICS_VIEW_SETTLERS);
+				((MainActivity) getActivity()).trackEvent(Analytics.CATEGORY_MAPS_MENU,
+						Analytics.ACTION_BUTTON, Analytics.SEE_SETTLERS);
 			}
 		});
 		
-		maybeShowSeafarers(layout.findViewById(R.id.seafarers_item),
+		maybeShowSeafarers(view.findViewById(R.id.seafarers_item),
 				(MapFragment) getActivity().getSupportFragmentManager().findFragmentById(R.id.map_fragment));
 		
-		ImageView moreButton = (ImageView) layout.findViewById(R.id.more_item);
+		ImageView moreButton = (ImageView) view.findViewById(R.id.more_item);
 		moreButton.setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View v) {
@@ -58,20 +61,18 @@ public class MapsDialogFragment extends DialogFragment {
 			    ft.addToBackStack(null);
 			    
 				MenuDialogFragment.newInstance().show(ft, "MenuDialogFragment");
-				((MainActivity) getActivity()).getAnalytics().trackPageView(Consts.ANALYTICS_VIEW_MORE);
+				((MainActivity) getActivity()).trackEvent(Analytics.CATEGORY_MAPS_MENU,
+						Analytics.ACTION_BUTTON, Analytics.SEE_MORE);
 			}
 		});
 
-		AlertDialog ret = new AlertDialog.Builder(getActivity())
-			.create();
-		ret.setView(layout, 0, 0, 0, 5); // Remove top padding
-		ret.getWindow().getAttributes().windowAnimations = R.style.FadeDialogAnimation;
-		return ret;
+		getDialog().getWindow().getAttributes().windowAnimations = R.style.FadeDialogAnimation;
+		
+		return view;
 	}
 	
-	@SuppressWarnings("unused")
 	private void maybeShowSeafarers(View seafarersButton, MapFragment mapFragment) {
-		if (Consts.TEST || mapFragment.getShowSeafarers()) {
+		if (mapFragment.getShowSeafarers()) {
 			seafarersButton.setVisibility(View.VISIBLE);
 			seafarersButton.setOnClickListener(new OnClickListener() {
 				@Override
@@ -80,7 +81,8 @@ public class MapsDialogFragment extends DialogFragment {
 				    ft.addToBackStack(null);
 				    
 					SeafarersDialogFragment.newInstance().show(ft, "SeafarersDialogFragment");
-					((MainActivity) getActivity()).getAnalytics().trackPageView(Consts.ANALYTICS_VIEW_SETTLERS);
+					((MainActivity) getActivity()).trackEvent(Analytics.CATEGORY_MAPS_MENU,
+							Analytics.ACTION_BUTTON, Analytics.SEE_SEAFARERS);
 				}
 			});
 		} else {

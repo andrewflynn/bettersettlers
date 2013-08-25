@@ -30,18 +30,18 @@ public enum MapSize implements Parcelable {
 			PRODUCT_ID_MAP.put(size.productId, size);
 		}
 	}
-	public static MapSize getMapSizeByProductId(String name) {
-		return PRODUCT_ID_MAP.get(name);
+	public static MapSize getMapSizeByProductId(String id) {
+		return PRODUCT_ID_MAP.get(id);
 	}
 	
 	public final CatanMapProvider mapProvider;
-	public final String name;
+	public final String title;
 	public final int titleDrawableId;
 	public final String productId;
 	
-	private MapSize(CatanMapProvider mapProvider, String name, int titleDrawableId, String productId) {
+	private MapSize(CatanMapProvider mapProvider, String title, int titleDrawableId, String productId) {
 		this.mapProvider = mapProvider;
-		this.name = name;
+		this.title = title;
 		this.titleDrawableId = titleDrawableId;
 		this.productId = productId;
 	}
@@ -68,6 +68,6 @@ public enum MapSize implements Parcelable {
 	
 	@Override
 	public String toString() {
-		return name;
+		return title;
 	}
 }

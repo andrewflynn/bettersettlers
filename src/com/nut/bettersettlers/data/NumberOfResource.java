@@ -7,4 +7,21 @@ public final class NumberOfResource {
 	public static final int HIGH = 2;
 	public static final int WATER = 3;
 	public static final int GOLD = 4;
+	
+	public static String getString(int numberOfResource) {
+		switch (numberOfResource) {
+		case DESERT:
+			return "DESERT";
+		case LOW:
+			return "LOW";
+		case HIGH:
+			return "HIGH";
+		case WATER:
+			return "WATER";
+		case GOLD:
+			return "GOLD";
+		default:
+			return "UNKNOWN";
+		}
+	}
 }
