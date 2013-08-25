@@ -64,7 +64,7 @@ public class MainActivity extends FragmentActivity {
 	private MapFragment mMapFragment;
 	private GraphFragment mGraphFragment;
 
-	private ImageView mTitle;
+	private View mTitle;
 	private int mTitleId;
 	private ImageView mInfoButton;
 	
@@ -353,7 +353,7 @@ public class MainActivity extends FragmentActivity {
 		mMapFragment = (MapFragment) getSupportFragmentManager().findFragmentById(R.id.map_fragment);
 		mGraphFragment = (GraphFragment) getSupportFragmentManager().findFragmentById(R.id.graph_fragment);
 
-		mTitle = (ImageView) findViewById(R.id.title_text);
+		mTitle = findViewById(R.id.title_text);
 		if (savedInstanceState != null && savedInstanceState.getInt(STATE_TITLE_ID) != 0) {
 			setTitleButtonText(savedInstanceState.getInt(STATE_TITLE_ID));
 		} else {

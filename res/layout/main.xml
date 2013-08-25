@@ -18,7 +18,7 @@
         android:layout_height="match_parent" />
 
     <!-- TITLE -->
-    <ImageView
+    <View
         android:id="@+id/title_text"
         android:layout_width="fill_parent"
         android:layout_height="@dimen/main_button"
@@ -26,7 +26,6 @@
         android:layout_marginLeft="16dp"
         android:layout_marginRight="16dp"
         android:layout_marginTop="16dp"
-        android:layout_gravity="center_horizontal"
         android:background="@drawable/title_settlers" />
 
     <ImageView
@@ -37,6 +36,6 @@
         android:layout_alignParentTop="true"
         android:layout_marginRight="16dp"
         android:layout_marginTop="16dp"
-        android:background="@drawable/title_info_button" />
+        android:src="@drawable/title_info_button" />
 
 </RelativeLayout>
