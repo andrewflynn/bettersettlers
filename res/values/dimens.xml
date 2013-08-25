@@ -13,6 +13,6 @@
     <dimen name="buy_all_width">128dip</dimen>
     <dimen name="buy_all_height">55dip</dimen>
     
-    <dimen name="about_text_size">8sp</dimen>
+    <dimen name="about_text_size">5sp</dimen>
     <dimen name="seafarers_buy_text_size">16sp</dimen>
 </resources>
