@@ -1,0 +1,19 @@
+/build
+/src/main/java/com/nut/bettersettlers/util/PrivateConsts.java
+
+# MAPS
+/src/main/res/raw/*.json
+/src/main/java/com/nut/bettersettlers/data/maps/ClothForCatan.java
+/src/main/java/com/nut/bettersettlers/data/maps/ClothForCatanExp.java
+/src/main/java/com/nut/bettersettlers/data/maps/TheFogIsland.java
+/src/main/java/com/nut/bettersettlers/data/maps/TheFogIslandExp.java
+/src/main/java/com/nut/bettersettlers/data/maps/TheForgottenTribe.java
+/src/main/java/com/nut/bettersettlers/data/maps/TheForgottenTribeExp.java
+/src/main/java/com/nut/bettersettlers/data/maps/TheFourIslands.java
+/src/main/java/com/nut/bettersettlers/data/maps/TheFourIslandsExp.java
+/src/main/java/com/nut/bettersettlers/data/maps/ThePirateIslands.java
+/src/main/java/com/nut/bettersettlers/data/maps/ThePirateIslandsExp.java
+/src/main/java/com/nut/bettersettlers/data/maps/TheWondersOfCatan.java
+/src/main/java/com/nut/bettersettlers/data/maps/TheWondersOfCatanExp.java
+/src/main/java/com/nut/bettersettlers/data/maps/ThroughTheDesert.java
+/src/main/java/com/nut/bettersettlers/data/maps/ThroughTheDesertExp.java
