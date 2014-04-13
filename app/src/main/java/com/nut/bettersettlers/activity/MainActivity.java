@@ -392,7 +392,9 @@ public class MainActivity extends FragmentActivity {
 		mOwnedMaps.add(MapContainer.HEADING_FOR_NEW_SHORES.id);
 
 		// IAB
-		bindService(new Intent(IabConsts.BIND_ACTION), mServiceConn, Context.BIND_AUTO_CREATE);
+        Intent serviceIntent = new Intent(IabConsts.BIND_ACTION);
+        serviceIntent.setPackage(IabConsts.VENDING_PACKAGE);
+		bindService(serviceIntent, mServiceConn, Context.BIND_AUTO_CREATE);
 	}
 	
 	@Override

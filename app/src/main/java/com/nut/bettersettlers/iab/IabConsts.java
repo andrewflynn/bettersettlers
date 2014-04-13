@@ -8,6 +8,7 @@ public final class IabConsts {
 	private IabConsts() {}
 	
 	public static final String BIND_ACTION = "com.android.vending.billing.InAppBillingService.BIND";
+    public static final String VENDING_PACKAGE = "com.android.vending";
 	public static final int API_VERSION = 3;
 	
 	public static final String BUY_ALL = "seafarers.all";

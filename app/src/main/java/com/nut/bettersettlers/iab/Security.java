@@ -52,21 +52,14 @@ public class Security {
      * @param signature the signature for the data, signed with the private key
      */
     public static boolean verifyPurchase(String signedData, String signature) {
-        if (signedData == null) {
-            BetterLog.e("data is null");
+        if (TextUtils.isEmpty(signedData) || TextUtils.isEmpty(PrivateConsts.X) ||
+                TextUtils.isEmpty(signature)) {
+            BetterLog.e("Purchase verification failed: missing data.");
             return false;
         }
 
-        boolean verified = false;
-        if (!TextUtils.isEmpty(signature)) {
-            PublicKey key = Security.generatePublicKey(PrivateConsts.X);
-            verified = verify(key, signedData, signature);
-            if (!verified) {
-            	BetterLog.w("signature does not match data.");
-                return false;
-            }
-        }
-        return true;
+        PublicKey key = Security.generatePublicKey(PrivateConsts.X);
+        return Security.verify(key, signedData, signature);
     }
 
     /**
