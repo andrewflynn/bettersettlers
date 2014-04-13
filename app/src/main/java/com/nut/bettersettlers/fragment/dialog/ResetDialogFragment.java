@@ -7,7 +7,6 @@ import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
 
 import com.nut.bettersettlers.R;
-import com.nut.bettersettlers.activity.MainActivity;
 import com.nut.bettersettlers.fragment.GraphFragment;
 import com.nut.bettersettlers.util.Analytics;
 
@@ -25,8 +24,8 @@ public class ResetDialogFragment extends DialogFragment {
 			.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
 				public void onClick(DialogInterface dialog, int id) {
 					((GraphFragment) getFragmentManager().findFragmentById(R.id.graph_fragment)).reset();
-					((MainActivity) getActivity()).trackEvent(Analytics.CATEGORY_ROLL_TRACKER,
-							Analytics.ACTION_LONG_PRESS_BUTTON, Analytics.DELETE);
+                    Analytics.track(getActivity(), Analytics.CATEGORY_ROLL_TRACKER,
+                            Analytics.ACTION_LONG_PRESS_BUTTON, Analytics.DELETE);
 				}
 			})
 			.setNegativeButton("No", new DialogInterface.OnClickListener() {

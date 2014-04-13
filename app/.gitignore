@@ -1,5 +1,6 @@
 /build
 /src/main/java/com/nut/bettersettlers/util/PrivateConsts.java
+/src/main/res/xml/global_tracker.xml
 
 # MAPS
 /src/main/res/raw/*.json

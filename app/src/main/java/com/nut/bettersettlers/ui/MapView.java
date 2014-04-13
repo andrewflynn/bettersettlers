@@ -137,7 +137,7 @@ public class MapView extends View {
 	private float mDiffY;
     private float mLastTouchX;
     private float mLastTouchY;
-    // The ‘active pointer’ is the one currently moving our object.
+    // The "active pointer" is the one currently moving our object.
     private int mActivePointerId = INVALID_POINTER_ID;
 	
 	public MapView(Context context) {

@@ -2,10 +2,10 @@ apply plugin: 'android'
 
 android {
     compileSdkVersion 19
-    buildToolsVersion "19.0.1"
+    buildToolsVersion "19.0.3"
 
     defaultConfig {
-        minSdkVersion 8
+        minSdkVersion 9
         targetSdkVersion 19
     }
 
@@ -34,5 +34,5 @@ android {
 
 dependencies {
     compile 'com.android.support:support-v4:+'
-    compile files('libs/libGoogleAnalyticsV2.jar')
+    compile 'com.google.android.gms:play-services:4.3.23'
 }

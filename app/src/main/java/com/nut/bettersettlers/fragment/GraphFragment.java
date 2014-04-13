@@ -1,7 +1,5 @@
 package com.nut.bettersettlers.fragment;
 
-import java.util.ArrayList;
-
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
@@ -12,10 +10,11 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 
 import com.nut.bettersettlers.R;
-import com.nut.bettersettlers.activity.MainActivity;
 import com.nut.bettersettlers.fragment.dialog.ResetDialogFragment;
 import com.nut.bettersettlers.ui.GraphView;
 import com.nut.bettersettlers.util.Analytics;
+
+import java.util.ArrayList;
 
 public class GraphFragment extends Fragment {
 	private static final String STATE_PROBS = "STATE_PROBS";
@@ -132,8 +131,8 @@ public class GraphFragment extends Fragment {
 			@Override
 			public void onClick(View v) {
 				undo();
-				((MainActivity) getActivity()).trackEvent(Analytics.CATEGORY_ROLL_TRACKER,
-						Analytics.ACTION_BUTTON, Analytics.DELETE);
+                Analytics.track(getActivity(), Analytics.CATEGORY_ROLL_TRACKER,
+                        Analytics.ACTION_BUTTON, Analytics.DELETE);
 			}
 		});
 		mDelButton.setOnLongClickListener(new OnLongClickListener() {
@@ -150,16 +149,16 @@ public class GraphFragment extends Fragment {
 			@Override
 			public void onClick(View v) {
 				incrementGraph(n, false);
-				((MainActivity) getActivity()).trackEvent(Analytics.CATEGORY_ROLL_TRACKER,
-						Analytics.ACTION_BUTTON, "" + n);
+                Analytics.track(getActivity(), Analytics.CATEGORY_ROLL_TRACKER,
+                        Analytics.ACTION_BUTTON, "" + n);
 			}
 		});
 		button.setOnLongClickListener(new OnLongClickListener() {
 			@Override
 			public boolean onLongClick(View v) {
 				incrementGraph(n, true);
-				((MainActivity) getActivity()).trackEvent(Analytics.CATEGORY_ROLL_TRACKER,
-						Analytics.ACTION_LONG_PRESS_BUTTON, "" + n);
+                Analytics.track(getActivity(), Analytics.CATEGORY_ROLL_TRACKER,
+                        Analytics.ACTION_LONG_PRESS_BUTTON, "" + n);
 				
 				return true;
 			}

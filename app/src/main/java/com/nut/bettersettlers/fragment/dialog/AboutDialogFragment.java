@@ -14,7 +14,6 @@ import android.text.method.LinkMovementMethod;
 import android.widget.TextView;
 
 import com.nut.bettersettlers.R;
-import com.nut.bettersettlers.activity.MainActivity;
 import com.nut.bettersettlers.util.Analytics;
 import com.nut.bettersettlers.util.Consts;
 
@@ -39,8 +38,8 @@ public class AboutDialogFragment extends DialogFragment {
 	@Override
 	public void onActivityCreated (Bundle savedInstanceState) {
 		super.onActivityCreated(savedInstanceState);
-		
-		((MainActivity) getActivity()).trackView(Analytics.VIEW_INFO);
+
+        Analytics.trackView(getActivity(), Analytics.VIEW_INFO);
 	}
 			
 	@Override
@@ -58,8 +57,8 @@ public class AboutDialogFragment extends DialogFragment {
 			.setPositiveButton("Rate us", new OnClickListener() {
 				public void onClick(DialogInterface dialog, int id) {
 					getActivity().startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(Consts.PLAY_STORE_URL)));
-					((MainActivity) getActivity()).trackEvent(Analytics.CATEGORY_ABOUT_MENU,
-							Analytics.ACTION_BUTTON, Analytics.RATE_US);
+                    Analytics.track(getActivity(), Analytics.CATEGORY_ABOUT_MENU,
+                            Analytics.ACTION_BUTTON, Analytics.RATE_US);
 				}
 			})
 			.setNegativeButton("Dismiss", new OnClickListener() {

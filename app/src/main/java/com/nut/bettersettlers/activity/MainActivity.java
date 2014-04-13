@@ -25,8 +25,6 @@ import android.view.View.OnClickListener;
 import android.widget.ImageView;
 
 import com.android.vending.billing.IInAppBillingService;
-import com.google.analytics.tracking.android.GAServiceManager;
-import com.google.analytics.tracking.android.GoogleAnalytics;
 import com.nut.bettersettlers.R;
 import com.nut.bettersettlers.data.MapSize;
 import com.nut.bettersettlers.fragment.GraphFragment;
@@ -366,7 +364,8 @@ public class MainActivity extends FragmentActivity {
 			@Override
 			public void onClick(View v) {
 				AboutDialogFragment.newInstance().show(getSupportFragmentManager(), "AboutDialog");
-				trackEvent(Analytics.CATEGORY_MAIN, Analytics.ACTION_BUTTON, Analytics.INFO);
+				Analytics.track(MainActivity.this, Analytics.CATEGORY_MAIN, Analytics.ACTION_BUTTON,
+                        Analytics.INFO);
 			}
 		});
 
@@ -398,17 +397,6 @@ public class MainActivity extends FragmentActivity {
 	}
 	
 	@Override
-	public void onStart() {
-		super.onStart();
-		
-		// Google Analytics
-	    if (Consts.TEST_FAST_ANALYTICS) {
-	    	GoogleAnalytics.getInstance(this).setDebug(true);
-	    	GAServiceManager.getInstance().setDispatchPeriod(5);
-	    }
-	}
-	
-	@Override
 	public void onResumeFragments() {
 		super.onResumeFragments();
 		
@@ -436,14 +424,6 @@ public class MainActivity extends FragmentActivity {
 			mService = null;
 		}
 	}
-    
-    public void trackEvent(String category, String action, String label) {
-    	GoogleAnalytics.getInstance(this).getTracker(PrivateConsts.ANALYTICS_ID).sendEvent(category, action, label, null);
-    }
-    
-    public void trackView(String view) {
-		GoogleAnalytics.getInstance(this).getTracker(PrivateConsts.ANALYTICS_ID).sendView(view);
-    }
     
     public void setTitleButtonText(final int resId) {
     	runOnUiThread(new Runnable() {
@@ -484,6 +464,6 @@ public class MainActivity extends FragmentActivity {
 		ft.commit();
 
 		
-		trackView(Analytics.VIEW_ROLL_TRACKER);
+		Analytics.trackView(this, Analytics.VIEW_ROLL_TRACKER);
     }
 }

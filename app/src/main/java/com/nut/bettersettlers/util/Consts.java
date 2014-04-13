@@ -8,7 +8,6 @@ public final class Consts {
 	public static final boolean TEST_SHOW_LOGCAT = false;
 	public static final boolean TEST_STATIC_IAB = false;
 	public static final boolean TEST_CONSUME_ALL_PURCHASES = false;
-	public static final boolean TEST_FAST_ANALYTICS = false;
 	
 	public static final boolean DEBUG_MAP = false;
 	public static final boolean DEBUG_MAP_WITH_RED = false;

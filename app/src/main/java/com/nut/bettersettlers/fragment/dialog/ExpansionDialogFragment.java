@@ -37,8 +37,8 @@ public class ExpansionDialogFragment extends DialogFragment {
 	@Override
 	public void onActivityCreated (Bundle savedInstanceState) {
 		super.onActivityCreated(savedInstanceState);
-		
-		((MainActivity) getActivity()).trackView(Analytics.VIEW_EXPANSIONS_MENU);
+
+        Analytics.trackView(getActivity(), Analytics.VIEW_EXPANSIONS_MENU);
 	}
 	
 	@Override
@@ -51,7 +51,7 @@ public class ExpansionDialogFragment extends DialogFragment {
 		smallButton.setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				((MainActivity) getActivity()).trackEvent(Analytics.CATEGORY_EXPANSION_MENU,
+                Analytics.track(getActivity(), Analytics.CATEGORY_EXPANSION_MENU,
 						Analytics.ACTION_BUTTON, Analytics.EXPANSION_SMALL);
 				choice(mMapSizePair.reg);
 			}
@@ -61,7 +61,7 @@ public class ExpansionDialogFragment extends DialogFragment {
 		largeButton.setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				((MainActivity) getActivity()).trackEvent(Analytics.CATEGORY_EXPANSION_MENU,
+                Analytics.track(getActivity(), Analytics.CATEGORY_EXPANSION_MENU,
 						Analytics.ACTION_BUTTON, Analytics.EXPANSION_LARGE);
 				choice(mMapSizePair.exp);
 			}

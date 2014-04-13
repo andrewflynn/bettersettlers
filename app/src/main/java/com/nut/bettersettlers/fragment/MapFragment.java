@@ -1,10 +1,5 @@
 package com.nut.bettersettlers.fragment;
 
-import static com.nut.bettersettlers.util.Consts.BOARD_RANGE_X;
-import static com.nut.bettersettlers.util.Consts.BOARD_RANGE_Y;
-
-import java.util.ArrayList;
-
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.graphics.Point;
@@ -39,6 +34,11 @@ import com.nut.bettersettlers.util.Analytics;
 import com.nut.bettersettlers.util.BetterLog;
 import com.nut.bettersettlers.util.Consts;
 import com.nut.bettersettlers.util.Util;
+
+import java.util.ArrayList;
+
+import static com.nut.bettersettlers.util.Consts.BOARD_RANGE_X;
+import static com.nut.bettersettlers.util.Consts.BOARD_RANGE_Y;
 
 public class MapFragment extends Fragment {
 	private static final String STATE_MAP_SIZE = "MAP_SIZE";
@@ -92,8 +92,8 @@ public class MapFragment extends Fragment {
 				FragmentTransaction ft = getActivity().getSupportFragmentManager().beginTransaction();
 			    ft.addToBackStack(null);
 		    	MapsDialogFragment.newInstance().show(ft, "MapsDialogFragment");
-				((MainActivity) getActivity()).trackEvent(Analytics.CATEGORY_MAIN,
-						Analytics.ACTION_BUTTON, Analytics.SETTINGS);
+                Analytics.track(getActivity(), Analytics.CATEGORY_MAIN, Analytics.ACTION_BUTTON,
+                        Analytics.SETTINGS);
 			}
 		});
 		
@@ -104,8 +104,8 @@ public class MapFragment extends Fragment {
 		    		hidePlacements(true);
 		    	} else {
 		    		showPlacements(true);
-					((MainActivity) getActivity()).trackEvent(Analytics.CATEGORY_MAIN,
-							Analytics.ACTION_BUTTON, Analytics.USE_PLACEMENTS);
+                    Analytics.track(getActivity(), Analytics.CATEGORY_MAIN, Analytics.ACTION_BUTTON,
+                            Analytics.USE_PLACEMENTS);
 		    	}
 			}
 		});
@@ -116,8 +116,8 @@ public class MapFragment extends Fragment {
 		mPlacementsLeftButton.setOnClickListener(new View.OnClickListener() {
 			@Override public void onClick(View v) {
 				prevPlacement();
-				((MainActivity) getActivity()).trackEvent(Analytics.CATEGORY_MAIN,
-						Analytics.ACTION_BUTTON, Analytics.PREV_PLACEMENTS);
+                Analytics.track(getActivity(), Analytics.CATEGORY_MAIN, Analytics.ACTION_BUTTON,
+                        Analytics.PREV_PLACEMENTS);
 			}
 		});
 		
@@ -125,8 +125,8 @@ public class MapFragment extends Fragment {
 		mPlacementsRightButton.setOnClickListener(new View.OnClickListener() {
 			@Override public void onClick(View v) {
 				nextPlacement();
-				((MainActivity) getActivity()).trackEvent(Analytics.CATEGORY_MAIN,
-						Analytics.ACTION_BUTTON, Analytics.NEXT_PLACEMENTS);
+                Analytics.track(getActivity(), Analytics.CATEGORY_MAIN, Analytics.ACTION_BUTTON,
+                        Analytics.NEXT_PLACEMENTS);
 			}
 		});
 		
@@ -135,8 +135,8 @@ public class MapFragment extends Fragment {
 			@Override
 			public void onClick(View v) {
 				asyncMapShuffle();
-				((MainActivity) getActivity()).trackEvent(Analytics.CATEGORY_MAIN,
-						Analytics.ACTION_BUTTON, Analytics.SHUFFLE_MAP);
+                Analytics.track(getActivity(), Analytics.CATEGORY_MAIN, Analytics.ACTION_BUTTON,
+                        Analytics.SHUFFLE_MAP);
 			}
 		});
 		mRefreshDownButton = (ImageView) view.findViewById(R.id.refresh_down_button);
@@ -451,8 +451,8 @@ public class MapFragment extends Fragment {
 	}
 	
 	private void recordView() {
-		((MainActivity) getActivity()).trackView(
-				String.format(Analytics.VIEW_MAP_FORMAT, mMapSize.title, MapType.getString(mMapType)));
+        Analytics.trackView(getActivity(), String.format(
+                Analytics.VIEW_MAP_FORMAT, mMapSize.title, MapType.getString(mMapType)));
 	}
 	
 	public void typeChoice(int type) {
@@ -481,8 +481,8 @@ public class MapFragment extends Fragment {
 	
 	public void togglePlacements(boolean on) {
 		if (on) {
-			((MainActivity) getActivity()).trackEvent(Analytics.CATEGORY_MAIN,
-					Analytics.ACTION_BUTTON, Analytics.USE_PLACEMENTS);
+            Analytics.track(getActivity(), Analytics.CATEGORY_MAIN, Analytics.ACTION_BUTTON,
+                    Analytics.USE_PLACEMENTS);
 			if (mPlacementBookmark < 0) {
 				mPlacementBookmark = 0;
 			}

@@ -1,7 +1,5 @@
 package com.nut.bettersettlers.fragment.dialog;
 
-import java.util.Set;
-
 import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.FragmentTransaction;
@@ -20,6 +18,8 @@ import com.nut.bettersettlers.iab.IabConsts;
 import com.nut.bettersettlers.iab.MapContainer;
 import com.nut.bettersettlers.util.Analytics;
 
+import java.util.Set;
+
 public class SeafarersDialogFragment extends DialogFragment {
 	private MainActivity mMainActivity;
 	private Set<String> mMaps;
@@ -33,8 +33,8 @@ public class SeafarersDialogFragment extends DialogFragment {
 	@Override
 	public void onActivityCreated (Bundle savedInstanceState) {
 		super.onActivityCreated(savedInstanceState);
-		
-		((MainActivity) getActivity()).trackView(Analytics.VIEW_SEAFARERS_MENU);
+
+        Analytics.trackView(getActivity(), Analytics.VIEW_SEAFARERS_MENU);
 	}
 	
 	private void setupButton(ImageView button, final MapContainer map) {
@@ -46,8 +46,8 @@ public class SeafarersDialogFragment extends DialogFragment {
 					FragmentTransaction ft = getActivity().getSupportFragmentManager().beginTransaction();
 				    ft.addToBackStack(null);
 
-					((MainActivity) getActivity()).trackEvent(Analytics.CATEGORY_SEAFARERS_MENU,
-							Analytics.ACTION_BUTTON, map.id);
+                    Analytics.track(getActivity(), Analytics.CATEGORY_SEAFARERS_MENU,
+                            Analytics.ACTION_BUTTON, map.id);
 				    ExpansionDialogFragment.newInstance(map.sizePair)
 				            .show(ft, "ExpansionDialogFragment");
 				}
@@ -60,8 +60,8 @@ public class SeafarersDialogFragment extends DialogFragment {
 					mMainActivity.purchaseItem(map);	
 					mMainActivity.getSupportFragmentManager().popBackStack();
 					mMainActivity.getSupportFragmentManager().popBackStack();
-					((MainActivity) getActivity()).trackEvent(Analytics.CATEGORY_SEAFARERS_MENU,
-							Analytics.ACTION_PURCHASE_OFFER, map.id);
+                    Analytics.track(getActivity(), Analytics.CATEGORY_SEAFARERS_MENU,
+                            Analytics.ACTION_PURCHASE_OFFER, map.id);
 				}
 			});
 		}
@@ -121,7 +121,7 @@ public class SeafarersDialogFragment extends DialogFragment {
 					mMainActivity.purchaseItem(IabConsts.BUY_ALL);
 					mMainActivity.getSupportFragmentManager().popBackStack();
 					mMainActivity.getSupportFragmentManager().popBackStack();
-					((MainActivity) getActivity()).trackEvent(Analytics.CATEGORY_SEAFARERS_MENU,
+                    Analytics.track(getActivity(), Analytics.CATEGORY_SEAFARERS_MENU,
 							Analytics.ACTION_PURCHASE_OFFER, IabConsts.BUY_ALL);
 				}
 			});

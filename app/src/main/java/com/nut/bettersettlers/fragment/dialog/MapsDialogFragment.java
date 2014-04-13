@@ -12,7 +12,6 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 
 import com.nut.bettersettlers.R;
-import com.nut.bettersettlers.activity.MainActivity;
 import com.nut.bettersettlers.fragment.MapFragment;
 import com.nut.bettersettlers.util.Analytics;
 
@@ -29,8 +28,8 @@ public class MapsDialogFragment extends DialogFragment {
 	@Override
 	public void onActivityCreated (Bundle savedInstanceState) {
 		super.onActivityCreated(savedInstanceState);
-		
-		((MainActivity) getActivity()).trackView(Analytics.VIEW_MAPS_MENU);
+
+        Analytics.trackView(getActivity(), Analytics.VIEW_MAPS_MENU);
 	}
 	
 	@Override
@@ -45,8 +44,8 @@ public class MapsDialogFragment extends DialogFragment {
 			    ft.addToBackStack(null);
 			    
 				SettlersDialogFragment.newInstance().show(ft, "SettlersDialogFragment");
-				((MainActivity) getActivity()).trackEvent(Analytics.CATEGORY_MAPS_MENU,
-						Analytics.ACTION_BUTTON, Analytics.SEE_SETTLERS);
+                Analytics.track(getActivity(), Analytics.CATEGORY_MAPS_MENU,
+                        Analytics.ACTION_BUTTON, Analytics.SEE_SETTLERS);
 			}
 		});
 		
@@ -61,8 +60,8 @@ public class MapsDialogFragment extends DialogFragment {
 			    ft.addToBackStack(null);
 			    
 				MenuDialogFragment.newInstance().show(ft, "MenuDialogFragment");
-				((MainActivity) getActivity()).trackEvent(Analytics.CATEGORY_MAPS_MENU,
-						Analytics.ACTION_BUTTON, Analytics.SEE_MORE);
+                Analytics.track(getActivity(), Analytics.CATEGORY_MAPS_MENU,
+                        Analytics.ACTION_BUTTON, Analytics.SEE_MORE);
 			}
 		});
 
@@ -81,8 +80,8 @@ public class MapsDialogFragment extends DialogFragment {
 				    ft.addToBackStack(null);
 				    
 					SeafarersDialogFragment.newInstance().show(ft, "SeafarersDialogFragment");
-					((MainActivity) getActivity()).trackEvent(Analytics.CATEGORY_MAPS_MENU,
-							Analytics.ACTION_BUTTON, Analytics.SEE_SEAFARERS);
+                    Analytics.track(getActivity(), Analytics.CATEGORY_MAPS_MENU,
+                            Analytics.ACTION_BUTTON, Analytics.SEE_SEAFARERS);
 				}
 			});
 		} else {

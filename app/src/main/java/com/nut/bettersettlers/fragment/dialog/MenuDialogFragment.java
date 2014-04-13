@@ -36,8 +36,8 @@ public class MenuDialogFragment extends DialogFragment {
 	@Override
 	public void onActivityCreated (Bundle savedInstanceState) {
 		super.onActivityCreated(savedInstanceState);
-		
-		((MainActivity) getActivity()).trackView(Analytics.VIEW_MORE_MENU);
+
+        Analytics.trackView(getActivity(), Analytics.VIEW_MORE_MENU);
 	}
 	
 	@Override
@@ -78,7 +78,7 @@ public class MenuDialogFragment extends DialogFragment {
 				mainActivity.getSupportFragmentManager().popBackStack();
 				mainActivity.getSupportFragmentManager().popBackStack();
 				mainActivity.showGraphFragment();
-				((MainActivity) getActivity()).trackEvent(Analytics.CATEGORY_MENU_MENU,
+                Analytics.track(getActivity(), Analytics.CATEGORY_MENU_MENU,
 						Analytics.ACTION_BUTTON, Analytics.USE_ROLL_TRACKER);
 
 				SharedPreferences prefs = getActivity().getSharedPreferences(SHARED_PREFS_NAME, Context.MODE_PRIVATE);
@@ -100,7 +100,7 @@ public class MenuDialogFragment extends DialogFragment {
 				mainActivity.getSupportFragmentManager().popBackStack();
 				mainActivity.getSupportFragmentManager().popBackStack();
 				mainActivity.getMapFragment().asyncProbsShuffle();
-				((MainActivity) getActivity()).trackEvent(Analytics.CATEGORY_MENU_MENU,
+                Analytics.track(getActivity(), Analytics.CATEGORY_MENU_MENU,
 						Analytics.ACTION_BUTTON, Analytics.SHUFFLE_PROBABILITIES);
 			}
 		});
@@ -112,7 +112,7 @@ public class MenuDialogFragment extends DialogFragment {
 				mainActivity.getSupportFragmentManager().popBackStack();
 				mainActivity.getSupportFragmentManager().popBackStack();
 				mainActivity.getMapFragment().asyncHarborsShuffle();
-				((MainActivity) getActivity()).trackEvent(Analytics.CATEGORY_MENU_MENU,
+                Analytics.track(getActivity(), Analytics.CATEGORY_MENU_MENU,
 						Analytics.ACTION_BUTTON, Analytics.SHUFFLE_HARBORS);
 			}
 		});
