@@ -62,8 +62,8 @@ public final class PlacementLogic {
 	 */	
 	public static Pair<ArrayList<Integer>, SparseArray<ArrayList<String>>> getBestPlacements(CatanMap currentMap,
 			ArrayList<Resource> resources, ArrayList<Integer> probs, ArrayList<Harbor> harbors) {
-		ArrayList<Integer> order = new ArrayList<Integer>();
-		SparseArray<ArrayList<String>> set = new SparseArray<ArrayList<String>>();
+		ArrayList<Integer> order = new ArrayList<>();
+		SparseArray<ArrayList<String>> set = new SparseArray<>();
 		SparseIntArray sums = new SparseIntArray();
 
 		// 5pts x # of resources
@@ -130,7 +130,7 @@ public final class PlacementLogic {
 		}
 
 		// Add reasons
-		SparseArray<ArrayList<String>> reasons = new SparseArray<ArrayList<String>>();
+		SparseArray<ArrayList<String>> reasons = new SparseArray<>();
 		for (int i = 0; i < sums.size(); i++) {
 			int key = sums.keyAt(i);
 			reasons.put(key, new ArrayList<String>());
@@ -145,17 +145,17 @@ public final class PlacementLogic {
 			if (varieties.get(key) != 0) { reasons.get(key).add(Trait.VARIETY); }
 		}
 
-		//BetterLog.i("   RICH    : " + highProbs);
-		//BetterLog.i("   RARE    : " + rareResources);
-		//BetterLog.i("   FACTORY : " + factories);
-		//BetterLog.i("   TRADER  : " + traders);
-		//BetterLog.i("   ROAD    : " + roads);
-		//BetterLog.i("   CITY    : " + cities);
-		//BetterLog.i("   DEV CARD: " + devCards);
-		//BetterLog.i("   NINJA   : " + ninjas);
-		//BetterLog.i("   VARIETY : " + varieties);
+		//BetterLog.v("   RICH    : " + highProbs);
+		//BetterLog.v("   RARE    : " + rareResources);
+		//BetterLog.v("   FACTORY : " + factories);
+		//BetterLog.v("   TRADER  : " + traders);
+		//BetterLog.v("   ROAD    : " + roads);
+		//BetterLog.v("   CITY    : " + cities);
+		//BetterLog.v("   DEV CARD: " + devCards);
+		//BetterLog.v("   NINJA   : " + ninjas);
+		//BetterLog.v("   VARIETY : " + varieties);
 
-		//BetterLog.i("Map: " + sums);
+		//BetterLog.v("Map: " + sums);
 		int sumSize = sums.size();
 		for (int i = 0; i < sumSize; i++) {
 			int index = removeMax(sums);
@@ -166,7 +166,7 @@ public final class PlacementLogic {
 			}
 		}
 
-		//BetterLog.i("List: " + set);
+		//BetterLog.v("List: " + set);
 
 		return Pair.create(order, set);
 	}
@@ -195,7 +195,7 @@ public final class PlacementLogic {
 				continue;
 			}
 
-			Set<Resource> seen = new HashSet<Resource>();
+			Set<Resource> seen = new HashSet<>();
 			boolean containsDuplicates = false;
 			int lowestProb = Integer.MAX_VALUE;
 			for (int trip : triplet) {
@@ -229,7 +229,7 @@ public final class PlacementLogic {
 
 	private static SparseIntArray getRoadBuilder(CatanMap currentMap, int n,
 			ArrayList<Integer> probs, ArrayList<Resource> resources) {
-		ArrayList<Resource> goal = new ArrayList<Resource>();
+		ArrayList<Resource> goal = new ArrayList<>();
 		goal.add(Resource.WOOD);
 		goal.add(Resource.CLAY);
 
@@ -238,7 +238,7 @@ public final class PlacementLogic {
 
 	private static SparseIntArray getCityBuilder(CatanMap currentMap, int n,
 			ArrayList<Integer> probs, ArrayList<Resource> resources) {
-		ArrayList<Resource> goal = new ArrayList<Resource>();
+		ArrayList<Resource> goal = new ArrayList<>();
 		goal.add(Resource.ROCK);
 		goal.add(Resource.WHEAT);
 
@@ -247,7 +247,7 @@ public final class PlacementLogic {
 
 	private static SparseIntArray getDevCardBuilder(CatanMap currentMap, int n,
 			ArrayList<Integer> probs, ArrayList<Resource> resources) {
-		ArrayList<Resource> goal = new ArrayList<Resource>();
+		ArrayList<Resource> goal = new ArrayList<>();
 		goal.add(Resource.ROCK);
 		goal.add(Resource.WHEAT);
 		goal.add(Resource.SHEEP);
@@ -279,7 +279,7 @@ public final class PlacementLogic {
 			int totalSum = 0;
 			int[] triplet = currentMap.landIntersections[i];
 
-			Map<Resource, Integer> resourceSums = new HashMap<Resource, Integer>();
+			Map<Resource, Integer> resourceSums = new HashMap<>();
 			for (Resource res : goal) {
 				resourceSums.put(res, 0);
 			}
@@ -497,7 +497,7 @@ public final class PlacementLogic {
 			ArrayList<Integer> probs, ArrayList<Resource> resources) {
 		SparseIntArray set = new SparseIntArray();
 
-		Map<Resource, Integer> sums = new HashMap<Resource, Integer>();
+		Map<Resource, Integer> sums = new HashMap<>();
 		for (int i = 0; i < probs.size(); i++) {
 			// Skip no prob resources
 			if (probs.get(i) < 0) {

@@ -87,7 +87,7 @@ public class MenuDialogFragment extends DialogFragment {
 					GraphHelpDialogFragment.newInstance().show(getFragmentManager(), "GraphHelpDialog");
 					SharedPreferences.Editor prefsEditor = prefs.edit();
 					prefsEditor.putBoolean(SHARED_PREFS_SHOWN_HELP, true);
-					prefsEditor.commit();
+					prefsEditor.apply();
 				}
 			}
 		});

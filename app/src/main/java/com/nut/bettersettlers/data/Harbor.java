@@ -73,11 +73,10 @@ public final class Harbor implements Parcelable {
 	
 	@Override
 	public String toString() {
-		return new StringBuilder("[Harbor:")
-			.append(" position: ").append(position)
-			.append(" resource: ").append(resource)
-			.append(" facing:   ").append(facing)
-			.append(" ]").append("\n")
-			.toString();
+		return "[Harbor:" +
+				" position: " + position +
+				" resource: " + resource +
+				" facing:   " + facing +
+				" ]"+ "\n";
 	}
 }

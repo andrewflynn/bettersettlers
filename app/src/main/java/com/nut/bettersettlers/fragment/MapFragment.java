@@ -54,24 +54,21 @@ public class MapFragment extends Fragment {
 	private static final String STATE_ORDERED_PLACEMENTS = "ORDERED_PLACEMENTS";
 	
 	private MapView mMapView;
-	
-	private ImageView mSettingsButton;
+
 	private ImageView mPlacementsButton;
-	private ImageView mPlacementsLeftButton;
-	private ImageView mPlacementsRightButton;
 	private LinearLayout mPlacementsContainer;
 	private ImageView mRefreshButton;
 	private ImageView mRefreshDownButton;
 
 	private MapSize mMapSize;
 	private int mMapType;
-	private ArrayList<Harbor> mHarborList = new ArrayList<Harbor>();
-	private ArrayList<Resource> mResourceList = new ArrayList<Resource>();
-	private ArrayList<Integer> mProbabilityList = new ArrayList<Integer>();
-	private ArrayList<Resource> mUnknownsList = new ArrayList<Resource>();
-	private ArrayList<Integer> mUnknownProbabilitiesList = new ArrayList<Integer>();
-	private ArrayList<Integer> mPlacementsList = new ArrayList<Integer>();
-	private SparseArray<ArrayList<String>> mOrderedPlacementsList = new SparseArray<ArrayList<String>>();
+	private ArrayList<Harbor> mHarborList = new ArrayList<>();
+	private ArrayList<Resource> mResourceList = new ArrayList<>();
+	private ArrayList<Integer> mProbabilityList = new ArrayList<>();
+	private ArrayList<Resource> mUnknownsList = new ArrayList<>();
+	private ArrayList<Integer> mUnknownProbabilitiesList = new ArrayList<>();
+	private ArrayList<Integer> mPlacementsList = new ArrayList<>();
+	private SparseArray<ArrayList<String>> mOrderedPlacementsList = new SparseArray<>();
 	private int mPlacementBookmark = -1;
 	private int mPlacementMax;
 	
@@ -86,8 +83,8 @@ public class MapFragment extends Fragment {
 		View view = inflater.inflate(R.layout.map, container, false);
 		mMapView = (MapView) view.findViewById(R.id.map_view);
 		
-		mSettingsButton = (ImageView) view.findViewById(R.id.settings_button);
-		mSettingsButton.setOnClickListener(new View.OnClickListener() {
+		ImageView settingsButton = (ImageView) view.findViewById(R.id.settings_button);
+		settingsButton.setOnClickListener(new View.OnClickListener() {
 			@Override public void onClick(View v) {
 				FragmentTransaction ft = getActivity().getSupportFragmentManager().beginTransaction();
 			    ft.addToBackStack(null);
@@ -112,8 +109,8 @@ public class MapFragment extends Fragment {
 		
 		mPlacementsContainer = (LinearLayout) view.findViewById(R.id.placements_container);
 		
-		mPlacementsLeftButton = (ImageView) view.findViewById(R.id.placements_left_button);
-		mPlacementsLeftButton.setOnClickListener(new View.OnClickListener() {
+		ImageView placementsLeftButton = (ImageView) view.findViewById(R.id.placements_left_button);
+		placementsLeftButton.setOnClickListener(new View.OnClickListener() {
 			@Override public void onClick(View v) {
 				prevPlacement();
                 Analytics.track(getActivity(), Analytics.CATEGORY_MAIN, Analytics.ACTION_BUTTON,
@@ -121,8 +118,8 @@ public class MapFragment extends Fragment {
 			}
 		});
 		
-		mPlacementsRightButton = (ImageView) view.findViewById(R.id.placements_right_button);
-		mPlacementsRightButton.setOnClickListener(new View.OnClickListener() {
+		ImageView placementsRightButton = (ImageView) view.findViewById(R.id.placements_right_button);
+		placementsRightButton.setOnClickListener(new View.OnClickListener() {
 			@Override public void onClick(View v) {
 				nextPlacement();
                 Analytics.track(getActivity(), Analytics.CATEGORY_MAIN, Analytics.ACTION_BUTTON,
@@ -172,7 +169,7 @@ public class MapFragment extends Fragment {
 	@Override
 	public void onActivityCreated(Bundle savedInstanceState) {
 		super.onActivityCreated(savedInstanceState);
-		BetterLog.i("MapFragment.onActivityCreated() " + savedInstanceState);
+		BetterLog.d("MapFragment.onActivityCreated() " + savedInstanceState);
 		
 		// If savedInstanceState == null, this is the first time the activity is created (not a rotation)
 		if (savedInstanceState == null) {
@@ -183,7 +180,7 @@ public class MapFragment extends Fragment {
 				WelcomeDialogFragment.newInstance().show(getFragmentManager(), "WelcomeDialog");
 				SharedPreferences.Editor prefsEditor = prefs.edit();
 				prefsEditor.putBoolean(Consts.SHARED_PREFS_KEY_WHATS_NEW_HELP, true);
-				prefsEditor.commit();
+				prefsEditor.apply();
 			}
 			
 			mMapSize = MapSize.STANDARD;
@@ -417,8 +414,8 @@ public class MapFragment extends Fragment {
 		mMapView.setPlacements(mOrderedPlacementsList);
 		
 		mPlacementMax = mOrderedPlacementsList.size() - 1;
-		//BetterLog.i("mOrderedPlacementList: " + mOrderedPlacementList);
-		//BetterLog.i("mPlacementList: " + mPlacementList);
+		//BetterLog.v("mOrderedPlacementList: " + mOrderedPlacementList);
+		//BetterLog.v("mPlacementList: " + mPlacementList);
 	}
 	
 	public boolean showingPlacements() {

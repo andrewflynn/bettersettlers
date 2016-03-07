@@ -153,10 +153,10 @@ public class MapView extends View {
 	}
 
 	private void init(Context context) {
-		BetterLog.i("INIT");
+		BetterLog.d("INIT");
 		initDimens(context);
 		
-		BetterLog.i("mReady=false");
+		BetterLog.d("mReady=false");
 		mReady = false;
 
 		mPiecesX = new int[BOARD_RANGE_X + 1][BOARD_RANGE_Y + 1];
@@ -176,10 +176,10 @@ public class MapView extends View {
 		
 		mProbs = new int[BOARD_RANGE_X + 1][BOARD_RANGE_Y + 1];
 		mUProbs = new int[BOARD_RANGE_X + 1][BOARD_RANGE_Y + 1];
-		mHarbors = new ArrayList<Harbor>();
+		mHarbors = new ArrayList<>();
 		mPlacementBookmark = -1; // No placements initially
-		mPlacements = new SparseArray<ArrayList<String>>();
-		mOrderedPlacements = new ArrayList<Integer>();
+		mPlacements = new SparseArray<>();
+		mOrderedPlacements = new ArrayList<>();
 
 		mScaleDetector = new ScaleGestureDetector(context, new ScaleListener());
 		mTapDetector = new GestureDetector(context, new TapListener());
@@ -242,7 +242,7 @@ public class MapView extends View {
             uProbs = (int[][]) in.readSerializable();
             uVisibility = (boolean[][]) in.readSerializable();
             if (harbors == null) {
-            	harbors = new ArrayList<Harbor>();
+            	harbors = new ArrayList<>();
             }
             in.readTypedList(harbors, Harbor.CREATOR);
             placementBookmark = in.readInt();
@@ -289,7 +289,7 @@ public class MapView extends View {
 	
 	@Override
 	protected Parcelable onSaveInstanceState () {
-		BetterLog.i("MapView.onSaveInstanceState");
+		BetterLog.d("MapView.onSaveInstanceState");
 		Parcelable savedState = super.onSaveInstanceState();
 		
 		SavedState ss = new SavedState(savedState);
@@ -318,7 +318,7 @@ public class MapView extends View {
 	
 	@Override
 	protected void onRestoreInstanceState (Parcelable state) {
-		BetterLog.i("MapView.onRestoreInstanceState");
+		BetterLog.d("MapView.onRestoreInstanceState");
 		if (!(state instanceof SavedState)) {
 			super.onRestoreInstanceState(state);
 			return;
@@ -349,17 +349,17 @@ public class MapView extends View {
 	}
 	
 	public void setReady() {
-		BetterLog.i("ready=true");
+		BetterLog.d("ready=true");
 		mReady = true;
 	}
 
 	public void setMapSize(MapSize currentMap) {
-		BetterLog.i("setMapSize: " + currentMap);
+		BetterLog.d("setMapSize: " + currentMap);
 		mMapSize = currentMap;
 	}
 
 	public void setLandAndWaterResources(Resource[][] land, Harbor[][] water, Resource[][] unknowns) {
-		BetterLog.i("setLAWR");
+		BetterLog.d("setLAWR");
 		mMaxX = 0;
 		mMaxY = 0;
 		
@@ -409,7 +409,7 @@ public class MapView extends View {
 				}
 			}
 		}
-		//BetterLog.i(String.format("Max (%s,%s)", mMaxX, mMaxY));
+		//BetterLog.v(String.format("Max (%s,%s)", mMaxX, mMaxY));
 		// Force the re-draw after finding the max X/Y
 		invalidate();
 	}
@@ -463,7 +463,7 @@ public class MapView extends View {
 					
 					if (dist(x, y, mDrawRect.exactCenterX(),
 							mDrawRect.exactCenterY()) <= HEX_R * mScaleFactor) {
-						return new Pair<Integer, Integer>(i, j);
+						return new Pair<>(i, j);
 					}
 				}
 			}
@@ -479,7 +479,7 @@ public class MapView extends View {
 					
 					if (dist(x, y, mDrawRect.exactCenterX(),
 							mDrawRect.exactCenterY()) <= HEX_R * mScaleFactor) {
-						return new Pair<Integer, Integer>(i, j);
+						return new Pair<>(i, j);
 					}
 				}
 			}
@@ -510,9 +510,9 @@ public class MapView extends View {
 			mTextScaleFactor = Math.max(0.1f, Math.min(mTextScaleFactor, 10.0f));
 			*/
 
-			//BetterLog.i("MiddleX: " + dMiddleX);
-			//BetterLog.i("MiddleY: " + dMiddleY);
-			//BetterLog.i("Factor: " + mScaleFactor);
+			//BetterLog.v("MiddleX: " + dMiddleX);
+			//BetterLog.v("MiddleY: " + dMiddleY);
+			//BetterLog.v("Factor: " + mScaleFactor);
 			//invalidate();
 			return true;
 		}
@@ -677,19 +677,19 @@ public class MapView extends View {
 			float baseHeight = ((YR1 + YR2 + BORDER_WIDTH) * mMaxY) + (2 * dViewBuffer);
 			float newScaleByHeight = getHeight() / baseHeight;
 			
-			//BetterLog.i("getWidth        : " + getWidth());
-			//BetterLog.i("baseWidth       : " + baseWidth);
-			//BetterLog.i("newScaleByWidth : " + newScaleByWidth);
+			//BetterLog.v("getWidth        : " + getWidth());
+			//BetterLog.v("baseWidth       : " + baseWidth);
+			//BetterLog.v("newScaleByWidth : " + newScaleByWidth);
 
-			//BetterLog.i("getHeight       : " + getHeight());
-			//BetterLog.i("baseHeight      : " + baseHeight);
-			//BetterLog.i("newScaleByHeight: " + newScaleByHeight);
+			//BetterLog.v("getHeight       : " + getHeight());
+			//BetterLog.v("baseHeight      : " + baseHeight);
+			//BetterLog.v("newScaleByHeight: " + newScaleByHeight);
 			if (newScaleByWidth < newScaleByHeight) {
 				mScaleFactor = newScaleByWidth;
 			} else {
 				mScaleFactor = newScaleByHeight;
 			}
-			//BetterLog.i("MapView.onSizeChanged() new scale: " + mScaleFactor);
+			//BetterLog.v("MapView.onSizeChanged() new scale: " + mScaleFactor);
 		}
 		
 		//canvas.save();
@@ -712,7 +712,7 @@ public class MapView extends View {
 		}
 		
 		if (!mReady) {
-			BetterLog.i("tried to draw before ready. not drawing");
+			BetterLog.w("tried to draw before ready. not drawing");
 			return;
 		}
 		
@@ -979,7 +979,7 @@ public class MapView extends View {
 			canvas.drawLine(x, y, x - XR * mScaleFactor, y + (YR1 / 2) * mScaleFactor, paint);
 			break;
 		default:
-			BetterLog.i("WARNING: Cannot draw this line: "  +  dir);
+			BetterLog.w("WARNING: Cannot draw this line: "  +  dir);
 			break;
 		}
 	}

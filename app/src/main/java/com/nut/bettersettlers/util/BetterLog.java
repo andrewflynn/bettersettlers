@@ -15,10 +15,10 @@ public final class BetterLog {
 		v(t, String.format(fmt, args));
 	}
 	public static void v(String msg) {
-		if (Consts.TEST_SHOW_LOGCAT) Log.v(TAG, msg);
+		if (Log.isLoggable(TAG, Log.VERBOSE)) Log.v(TAG, msg);
 	}
-	public static void v(String msg, Throwable t) {
-		if (Consts.TEST_SHOW_LOGCAT) Log.v(TAG, msg, t);
+	public static void v(Throwable t, String msg) {
+		if (Log.isLoggable(TAG, Log.VERBOSE)) Log.v(TAG, msg, t);
 	}
 	
 	/* DEBUG */
@@ -29,10 +29,10 @@ public final class BetterLog {
 		d(t, String.format(fmt, args));
 	}
 	public static void d(String msg) {
-		if (Consts.TEST_SHOW_LOGCAT) Log.d(TAG, msg);
+		if (Log.isLoggable(TAG, Log.DEBUG)) Log.d(TAG, msg);
 	}
-	public static void d(String msg, Throwable t) {
-		if (Consts.TEST_SHOW_LOGCAT) Log.d(TAG, msg, t);
+	public static void d(Throwable t, String msg) {
+		if (Log.isLoggable(TAG, Log.DEBUG)) Log.d(TAG, msg, t);
 	}
 	
 	/* INFO */
@@ -43,10 +43,10 @@ public final class BetterLog {
 		i(t, String.format(fmt, args));
 	}
 	public static void i(String msg) {
-		if (Consts.TEST_SHOW_LOGCAT) Log.i(TAG, msg);
+		Log.i(TAG, msg);
 	}
-	public static void i(String msg, Throwable t) {
-		if (Consts.TEST_SHOW_LOGCAT) Log.i(TAG, msg, t);
+	public static void i(Throwable t, String msg) {
+		Log.i(TAG, msg, t);
 	}
 	
 	/* WARNING */
@@ -57,10 +57,10 @@ public final class BetterLog {
 		w(t, String.format(fmt, args));
 	}
 	public static void w(String msg) {
-		if (Consts.TEST_SHOW_LOGCAT) Log.w(TAG, msg);
+		Log.w(TAG, msg);
 	}
-	public static void w(String msg, Throwable t) {
-		if (Consts.TEST_SHOW_LOGCAT) Log.w(TAG, msg, t);
+	public static void w(Throwable t, String msg) {
+		Log.w(TAG, msg, t);
 	}
 	
 	/* ERROR */
@@ -71,9 +71,9 @@ public final class BetterLog {
 		e(t, String.format(fmt, args));
 	}
 	public static void e(String msg) {
-		if (Consts.TEST_SHOW_LOGCAT) Log.e(TAG, msg);
+		Log.e(TAG, msg);
 	}
-	public static void e(String msg, Throwable t) {
-		if (Consts.TEST_SHOW_LOGCAT) Log.e(TAG, msg, t);
+	public static void e(Throwable t, String msg) {
+		Log.e(TAG, msg, t);
 	}
 }

@@ -98,9 +98,9 @@ public class GraphView extends View {
 	}
 
 	private void initDimens(Context context) {
-		dPadding = (float) context.getResources().getDimension(R.dimen.graph_padding);
-		dBarBufferWidth = (float) context.getResources().getDimension(R.dimen.graph_bar_buffer);
-		dBaseBuffer = (float) context.getResources().getDimension(R.dimen.graph_base_buffer);
+		dPadding = context.getResources().getDimension(R.dimen.graph_padding);
+		dBarBufferWidth = context.getResources().getDimension(R.dimen.graph_bar_buffer);
+		dBaseBuffer = context.getResources().getDimension(R.dimen.graph_base_buffer);
 		dTextSize = (int) context.getResources().getDimension(R.dimen.graph_font_size);
 	}
 	

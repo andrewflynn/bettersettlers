@@ -94,7 +94,7 @@ public class ExpansionDialogFragment extends DialogFragment {
 			FogIslandHelpDialogFragment.newInstance().show(getFragmentManager(), "TheFogIslandHelpDialog");
 			SharedPreferences.Editor prefsEditor = prefs.edit();
 			prefsEditor.putBoolean(Consts.SHARED_PREFS_KEY_FOG_ISLAND_HELP, true);
-			prefsEditor.commit();
+			prefsEditor.apply();
 		}
 	}
 }

@@ -24,7 +24,7 @@ public final class Util {
 	}
 	
 	public static SparseArray<ArrayList<String>> bundleToSparseArrayArrayList(Bundle bundle) {
-		SparseArray<ArrayList<String>> array = new SparseArray<ArrayList<String>>(bundle.size());
+		SparseArray<ArrayList<String>> array = new SparseArray<>(bundle.size());
 		for (String key : bundle.keySet()) {
 			array.put(Integer.parseInt(key), bundle.getStringArrayList(key));
 		}

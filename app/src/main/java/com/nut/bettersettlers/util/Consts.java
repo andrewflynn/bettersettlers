@@ -5,7 +5,6 @@ public final class Consts {
 
 	///////////////////////////////////////////
 	// All of these should be false for release
-	public static final boolean TEST_SHOW_LOGCAT = false;
 	public static final boolean TEST_STATIC_IAB = false;
 	public static final boolean TEST_CONSUME_ALL_PURCHASES = false;
 	

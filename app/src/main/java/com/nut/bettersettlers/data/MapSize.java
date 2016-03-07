@@ -71,7 +71,7 @@ public enum MapSize implements Parcelable {
 			R.drawable.title_the_wonders_of_catan, null),
 	NEW_WORLD_EXP(new NewWorldExp(), "new_world_exp", R.drawable.title_new_world, null);
 
-	private static final Map<String, MapSize> PRODUCT_ID_MAP = new HashMap<String, MapSize>();
+	private static final Map<String, MapSize> PRODUCT_ID_MAP = new HashMap<>();
 	static {
 		for (MapSize size : MapSize.values()) {
 			PRODUCT_ID_MAP.put(size.productId, size);
@@ -86,7 +86,7 @@ public enum MapSize implements Parcelable {
 	public final int titleDrawableId;
 	public final String productId;
 	
-	private MapSize(CatanMapProvider mapProvider, String title, int titleDrawableId, String productId) {
+	MapSize(CatanMapProvider mapProvider, String title, int titleDrawableId, String productId) {
 		this.mapProvider = mapProvider;
 		this.title = title;
 		this.titleDrawableId = titleDrawableId;

@@ -16,7 +16,7 @@ public enum Resource implements Parcelable {
 	WATER(0xFF00aeef, NumberOfResource.WATER, "water"),
 	GOLD(0xFFAF7817, NumberOfResource.GOLD, "gold");
 
-	private static final Map<String, Resource> JSON_KEY_MAP = new HashMap<String, Resource>();
+	private static final Map<String, Resource> JSON_KEY_MAP = new HashMap<>();
 	static {
 		for (Resource resource : Resource.values()) {
 			JSON_KEY_MAP.put(resource.jsonKey, resource);
@@ -30,7 +30,7 @@ public enum Resource implements Parcelable {
 	public final int numOfResource;
 	public final String jsonKey;
 	
-	private Resource(int color, int numOfResource, String jsonKey) {
+	Resource(int color, int numOfResource, String jsonKey) {
 		this.color = color;
 		this.numOfResource = numOfResource;
 		this.jsonKey = jsonKey;

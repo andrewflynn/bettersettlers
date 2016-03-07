@@ -43,13 +43,13 @@ public enum MapSizePair implements Parcelable {
 	public final int buttonResId;
 	public final int bwButtonResId;
 
-	private MapSizePair(MapSize reg, MapSize exp) {
+	MapSizePair(MapSize reg, MapSize exp) {
 		this(reg, exp, 0, 0);
 	}
-	private MapSizePair(MapSize reg, MapSize exp, int buttonResId) {
+	MapSizePair(MapSize reg, MapSize exp, int buttonResId) {
 		this(reg, exp, buttonResId, 0);
 	}
-	private MapSizePair(MapSize reg, MapSize exp, int buttonResId, int bwButtonResId) {
+	MapSizePair(MapSize reg, MapSize exp, int buttonResId, int bwButtonResId) {
 		this.reg = reg;
 		this.exp = exp;
 		this.buttonResId = buttonResId;

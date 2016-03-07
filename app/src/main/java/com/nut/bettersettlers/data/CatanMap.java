@@ -221,34 +221,33 @@ public final class CatanMap {
 	
 	@Override
 	public String toString() {
-		return new StringBuilder("[Settlers Map: (").append(name).append(")").append("\n")
-			.append("  Low Resource Number: ").append(lowResourceNumber).append("\n")
-			.append("  High Resource Number: ").append(highResourceNumber).append("\n")
-			.append("  Land Grid: ").append(Arrays.toString(landGrid)).append("\n")
-			.append("  Land Grid Whitelist: ").append(Arrays.toString(landGridWhitelists)).append("\n")
-			.append("  Land Grid Probabilities: ").append(Arrays.toString(landGridProbabilities)).append("\n")
-			.append("  Land Grid Resources: ").append(Arrays.toString(landGridResources)).append("\n")
-			.append("  Land Resource Whitelist: ").append(landResourceWhitelists).append("\n")
-			.append("  Land Probability Whitelist: ").append(landProbabilityWhitelists).append("\n")
-			.append("  Land Grid Order: ").append(Arrays.toString(landGridOrder)).append("\n")
-			.append("  Water Grid: ").append(Arrays.toString(waterGrid)).append("\n")
-			.append("  Harbor Lines: ").append(Arrays.deepToString(harborLines)).append("\n")
-			.append("  Land Neighbors: ").append(Arrays.deepToString(landNeighbors)).append("\n")
-			.append("  Water Neighbors: ").append(Arrays.deepToString(waterNeighbors)).append("\n")
-			.append("  Water Water Neighbors: ").append(Arrays.deepToString(waterWaterNeighbors)).append("\n")
-			.append("  Land Intersections: ").append(Arrays.deepToString(landIntersections)).append("\n")
-			.append("  Land Intersections Size: ").append(landIntersections.length).append("\n")
-			.append("  Land Intersection Indexes: ").append(Arrays.deepToString(landIntersectionIndexes)).append("\n")
-			.append("  Placement Indexes: ").append(Arrays.deepToString(placementIndexes)).append("\n")
-			.append("  Placement Indexes Size: ").append(placementIndexes.length).append("\n")
-			.append("  Available Resources: ").append(Arrays.toString(availableResources)).append("\n")
-			.append("  Available Probabilities: ").append(Arrays.toString(availableProbabilities)).append("\n")
-			.append("  Available Ordered Probabilities: ").append(Arrays.toString(availableOrderedProbabilities)).append("\n")
-			.append("  Available Harbors: ").append(Arrays.toString(availableHarbors)).append("\n")
-			.append("  Ordered Harbors: ").append(Arrays.toString(orderedHarbors)).append("\n")
-			.append("  Placement Blacklists: ").append(deepToString(placementBlacklists)).append("\n")
-			.append("]")
-			.toString();
+		return "[Settlers Map: (" + name + ")" + "\n" +
+				"  Low Resource Number: " + lowResourceNumber + "\n" +
+				"  High Resource Number: " + highResourceNumber + "\n" +
+				"  Land Grid: " + Arrays.toString(landGrid) + "\n" +
+				"  Land Grid Whitelist: " + Arrays.toString(landGridWhitelists) + "\n" +
+				"  Land Grid Probabilities: " + Arrays.toString(landGridProbabilities) + "\n" +
+				"  Land Grid Resources: " + Arrays.toString(landGridResources) + "\n" +
+				"  Land Resource Whitelist: " + landResourceWhitelists + "\n" +
+				"  Land Probability Whitelist: " + landProbabilityWhitelists + "\n" +
+				"  Land Grid Order: " + Arrays.toString(landGridOrder) + "\n" +
+				"  Water Grid: " + Arrays.toString(waterGrid) + "\n" +
+				"  Harbor Lines: " + Arrays.deepToString(harborLines) + "\n" +
+				"  Land Neighbors: " + Arrays.deepToString(landNeighbors) + "\n" +
+				"  Water Neighbors: " + Arrays.deepToString(waterNeighbors) + "\n" +
+				"  Water Water Neighbors: " + Arrays.deepToString(waterWaterNeighbors) + "\n" +
+				"  Land Intersections: " + Arrays.deepToString(landIntersections) + "\n" +
+				"  Land Intersections Size: " + landIntersections.length + "\n" +
+				"  Land Intersection Indexes: " + Arrays.deepToString(landIntersectionIndexes) + "\n" +
+				"  Placement Indexes: " + Arrays.deepToString(placementIndexes) + "\n" +
+				"  Placement Indexes Size: " + placementIndexes.length + "\n" +
+				"  Available Resources: " + Arrays.toString(availableResources) + "\n" +
+				"  Available Probabilities: " + Arrays.toString(availableProbabilities) + "\n" +
+				"  Available Ordered Probabilities: " + Arrays.toString(availableOrderedProbabilities) + "\n" +
+				"  Available Harbors: " + Arrays.toString(availableHarbors) + "\n" +
+				"  Ordered Harbors: " + Arrays.toString(orderedHarbors) + "\n" +
+				"  Placement Blacklists: " + deepToString(placementBlacklists) + "\n" +
+				"]";
 	}
 	
 	public static Builder newBuilder() {

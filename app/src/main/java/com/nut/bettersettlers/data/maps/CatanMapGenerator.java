@@ -6,6 +6,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -57,8 +58,7 @@ public final class CatanMapGenerator {
 	private CatanMapGenerator() {}
 	
 	public static CatanMap generateFromJson(InputStream is) {
-		CatanMap catanMap = generateFromJson(is, null);
-		return catanMap;
+		return generateFromJson(is, null);
 	}
 	
 	public static CatanMap generateFromJson(InputStream is, ArrayList<Integer> theftOrder) {
@@ -91,11 +91,11 @@ public final class CatanMapGenerator {
 		
 		JSONObject json = new JSONObject(str.toString());
 		
-		//BetterLog.i("Name " + json.getString(NAME));
-		//BetterLog.i("land.length " + json.getJSONArray(LAND).length());
-		//BetterLog.i("resources.length " + json.getJSONArray(RESOURCES).length());
-		//BetterLog.i("probs.length " + json.getJSONArray(PROBABILITIES).length());
-		//BetterLog.i("");
+		//BetterLog.v("Name " + json.getString(NAME));
+		//BetterLog.v("land.length " + json.getJSONArray(LAND).length());
+		//BetterLog.v("resources.length " + json.getJSONArray(RESOURCES).length());
+		//BetterLog.v("probs.length " + json.getJSONArray(PROBABILITIES).length());
+		//BetterLog.v("");
 		
 		CatanMap.Builder mapBuilder = CatanMap.newBuilder();
 		
@@ -189,7 +189,7 @@ public final class CatanMapGenerator {
 	// IMPORTANT: Must be run after the intersections have been set up
 	// TODO(flynn): Make intersections a function argument
 	private static void setLandIntersectionIndexesAfterIntersectionsHelper(CatanMap.Builder mapBuilder) {
-		List<List<Integer>> indexList = new ArrayList<List<Integer>>();
+		List<List<Integer>> indexList = new ArrayList<>();
 		for (int i = 0; i < mapBuilder.getLandGrid().length; i++) {
 			indexList.add(i, new ArrayList<Integer>());
 		}
@@ -213,13 +213,13 @@ public final class CatanMapGenerator {
 	}
 	
 	private static void setLandNeighborsAndIntersectionsAndPlacementIndexesHelper(CatanMap.Builder mapBuilder) {
-		List<int[]> uberNeighborList = new ArrayList<int[]>();
+		List<int[]> uberNeighborList = new ArrayList<>();
 		int[][] lands = new int[mapBuilder.getLandGrid().length][];
-		List<int[]> uberIndexes = new ArrayList<int[]>();
+		List<int[]> uberIndexes = new ArrayList<>();
 		
 		for (int i = 0; i < mapBuilder.getLandGrid().length; i++) {
 			Point land = mapBuilder.getLandGrid()[i];
-			List<Integer> smallList = new ArrayList<Integer>();
+			List<Integer> smallList = new ArrayList<>();
 			for (int j = 0; j < mapBuilder.getLandGrid().length; j++) {
 				Point land2 = mapBuilder.getLandGrid()[j];
 				if (land.x - 1 == land2.x && land.y - 1 == land2.y
@@ -280,7 +280,7 @@ public final class CatanMapGenerator {
 			Point water = mapBuilder.getWaterGrid()[i];
 			List<Point> landList = Arrays.asList(mapBuilder.getLandGrid());
 			
-			List<Integer> smallList = new ArrayList<Integer>();
+			List<Integer> smallList = new ArrayList<>();
 			for (int j = 0; j < 6; j++) {
 				Point neighbor = getNeighbor(water, j);
 				if (landList.contains(neighbor)) {
@@ -292,7 +292,7 @@ public final class CatanMapGenerator {
 				tuple[j] = smallList.get(j);
 			}
 			
-			List<int[]> tuples = new ArrayList<int[]>();
+			List<int[]> tuples = new ArrayList<>();
 			if (tuple.length > 2) {
 				// Split 3+ arrays into small two-somes
 				for (int j = 0; j < tuple.length; j++) {
@@ -493,8 +493,8 @@ public final class CatanMapGenerator {
 				continue;
 			}
 
-			List<Integer> neighborList = new ArrayList<Integer>();
-			List<Integer> waterNeighborList = new ArrayList<Integer>();
+			List<Integer> neighborList = new ArrayList<>();
+			List<Integer> waterNeighborList = new ArrayList<>();
 			for (int j = 0; j < 6; j++) {
 				int k = (leftMost + j) % 6;
 				if (has.get(k)) {
@@ -513,7 +513,7 @@ public final class CatanMapGenerator {
 				waterNeighborLines[i][j] = waterNeighborList.get(j);
 			}
 
-			List<Integer> harborList = new ArrayList<Integer>();
+			List<Integer> harborList = new ArrayList<>();
 			if (has.get((leftMost + 5) % 6) || has.get((leftMost + 0) % 6)) {
 				harborList.add((leftMost + 0) % 6);
 			}
@@ -579,34 +579,34 @@ public final class CatanMapGenerator {
 		int[] probGrid = new int[land.length()];
 		Resource[] resGrid = new Resource[land.length()];
 		boolean[] harborGrid = new boolean[land.length()];
-		List<int[]> placementBlacklist = new ArrayList<int[]>();
+		List<int[]> placementBlacklist = new ArrayList<>();
 		
 		for (int i = 0; i < land.length(); i++) {
 			JSONObject landPiece = land.getJSONObject(i);
 			landGrid[i] = new Point(landPiece.getInt(X), landPiece.getInt(Y));
-			
+
 			if (landPiece.has(HARBOR)) {
 				harborGrid[i] = landPiece.getBoolean(HARBOR);
 			} else {
 				harborGrid[i] = true; // default to true
 			}
-			
+
 			if (landPiece.has(WHITELIST)) {
 				whitelistGrid[i] = landPiece.getString(WHITELIST);
 			}
-			
+
 			if (landPiece.has(PROBABILITY)) {
 				probGrid[i] = landPiece.getInt(PROBABILITY);
 			} else {
 				probGrid[i] = Integer.MAX_VALUE;
 			}
-			
+
 			if (landPiece.has(RESOURCE)) {
 				resGrid[i] = Resource.getResourceByJson(landPiece.getString(RESOURCE));
 			} else {
 				resGrid[i] = null;
 			}
-			
+
 			if (landPiece.has(PLACEMENT_BLACKLIST)) {
 				JSONArray nos = landPiece.getJSONArray(PLACEMENT_BLACKLIST);
 				for (int j = 0; j < nos.length(); j++) {
@@ -649,13 +649,13 @@ public final class CatanMapGenerator {
 			return;
 		}
 		
-		Map<String, List<Resource>> resourceWhitelists = new HashMap<String, List<Resource>>();
-		Map<String, List<Integer>> probsWhitelists = new HashMap<String, List<Integer>>();
+		Map<String, List<Resource>> resourceWhitelists = new HashMap<>();
+		Map<String, List<Integer>> probsWhitelists = new HashMap<>();
 		for (int i = 0; i < array.length(); i++) {
 			JSONObject whitelist = array.getJSONObject(i);
 			
 			if (whitelist.getString(TYPE).equals("resource")) {
-				List<Resource> resources = new ArrayList<Resource>();
+				List<Resource> resources = new ArrayList<>();
 
 				JSONArray resourcesJson = whitelist.getJSONArray(VALUE);
 				for (int j = 0; j < resourcesJson.length(); j++) {
@@ -664,7 +664,7 @@ public final class CatanMapGenerator {
 
 				resourceWhitelists.put(whitelist.getString(KEY), resources);
 			} else if (whitelist.getString(TYPE).equals("probability")) {
-				List<Integer> probs = new ArrayList<Integer>();
+				List<Integer> probs = new ArrayList<>();
 				
 				JSONArray probsJson = whitelist.getJSONArray(VALUE);
 				for (int j = 0; j < probsJson.length(); j++) {
@@ -697,14 +697,10 @@ public final class CatanMapGenerator {
 		
 		Point[] newWaterGrid = new Point[newWaterLength];
 		
-		List<Point> landList = new ArrayList<Point>();
-		for (int i = 0; i < landGrid.length; i++) {
-			landList.add(landGrid[i]);
-		}
-		List<Point> waterList = new ArrayList<Point>();
-		for (int i = 0; i < waterGrid.length; i++) {
-			waterList.add(waterGrid[i]);
-		}
+		List<Point> landList = new ArrayList<>();
+		Collections.addAll(landList, landGrid);
+		List<Point> waterList = new ArrayList<>();
+		Collections.addAll(waterList, waterGrid);
 		
 		if (theftOrder != null) {
 			// Use it
@@ -722,7 +718,7 @@ public final class CatanMapGenerator {
 			}
 		} else {
 			// Keep track of the order for same map restoration
-			theftOrder = new ArrayList<Integer>();
+			theftOrder = new ArrayList<>();
 
 			// Randomly choose either an existing water or steal one from land
 			boolean choice;
@@ -760,7 +756,7 @@ public final class CatanMapGenerator {
 	}
 	
 	private static void setResourcesFromJson(CatanMap.Builder mapBuilder, JSONArray resources) throws JSONException {
-		Map<String, Integer> counts = new HashMap<String, Integer>();
+		Map<String, Integer> counts = new HashMap<>();
 		
 		Resource[] resourceArray = new Resource[resources.length()];
 		for (int i = 0; i < resources.length(); i++) {

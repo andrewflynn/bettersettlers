@@ -3,6 +3,7 @@ package com.nut.bettersettlers.logic;
 import static com.nut.bettersettlers.util.Consts.PROBABILITY_MAPPING;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -63,7 +64,7 @@ public class MapLogic {
 			set[i] = avail.remove(0);
 		}
 		
-		ArrayList<Integer> setList = new ArrayList<Integer>();
+		ArrayList<Integer> setList = new ArrayList<>();
 		for (int i : set) {
 			setList.add(i);
 		}
@@ -72,12 +73,12 @@ public class MapLogic {
 	}
 	
 	private static ArrayList<Integer> getRandomProbabilities(CatanMap currentMap) {
-		ArrayList<Integer> set = new ArrayList<Integer>();
+		ArrayList<Integer> set = new ArrayList<>();
 		ArrayList<Integer> avail = initProbabilities(currentMap);
 		while (!avail.isEmpty()) {
 			// If we have an assigned prob, use it
 			if (currentMap.landGridProbabilities[set.size()] != Integer.MAX_VALUE) {
-				//BetterLog.i(" pulling special " + counter);
+				//BetterLog.v(" pulling special " + counter);
 				int nextProb = currentMap.landGridProbabilities[set.size()];
 				avail.remove((Integer) nextProb);
 				set.add(nextProb);
@@ -89,8 +90,8 @@ public class MapLogic {
 	}
 	
 	public static ArrayList<Integer> getUnknownProbabilities(CatanMap currentMap) {
-		ArrayList<Integer> set = new ArrayList<Integer>();
-		ArrayList<Integer> avail = new ArrayList<Integer>();
+		ArrayList<Integer> set = new ArrayList<>();
+		ArrayList<Integer> avail = new ArrayList<>();
 		for (int i : currentMap.availableUnknownProbabilities) {
 			avail.add(i);
 		}
@@ -102,13 +103,13 @@ public class MapLogic {
 	}
 	
 	private static ArrayList<Integer> getRandomProbabilities(CatanMap currentMap, ArrayList<Resource> resources) {
-		ArrayList<Integer> set = new ArrayList<Integer>();
+		ArrayList<Integer> set = new ArrayList<>();
 		ArrayList<Integer> avail = initProbabilitiesNoZeros(currentMap);
 		int counter = 0;
 		while (!avail.isEmpty()) {
 			// If we have an assigned prob, use it
 			if (currentMap.landGridProbabilities[counter] != Integer.MAX_VALUE) {
-				//BetterLog.i(" pulling special " + counter);
+				//BetterLog.v(" pulling special " + counter);
 				int nextProb = currentMap.landGridProbabilities[counter];
 				avail.remove((Integer) nextProb);
 				set.add(nextProb);
@@ -119,7 +120,7 @@ public class MapLogic {
 					set.add(avail.remove(RAND.nextInt(avail.size())));
 				}
 			}
-			//BetterLog.i("Check " + counter + ", set " + set.get(counter));
+			//BetterLog.v("Check " + counter + ", set " + set.get(counter));
 			counter++;
 		}
 		
@@ -133,9 +134,9 @@ public class MapLogic {
 	
 	private static ArrayList<Integer> getOrderedProbabilities(CatanMap currentMap) {
 		// Contains the probabilities already set
-		ArrayList<Integer> set = new ArrayList<Integer>();
+		ArrayList<Integer> set = new ArrayList<>();
 		// Contains the probabilities already consumed in this iteration
-		ArrayList<Integer> tried = new ArrayList<Integer>();
+		ArrayList<Integer> tried = new ArrayList<>();
 		// Contains the probabilities yet to be consumed
 		ArrayList<Integer> avail = initProbabilities(currentMap);
 		boolean placedRecently = false;
@@ -148,15 +149,15 @@ public class MapLogic {
 			}
 			// Game over: avail is empty and we still have un-set probabilities. Start over.
 			if (avail.isEmpty()) {
-				//BetterLog.i("Restart: " + set);
+				//BetterLog.v("Restart: " + set);
 				set.clear();
 				tried.clear();
 				avail = initProbabilities(currentMap);
 				placedRecently = false;
 			} else {
-				//BetterLog.i("  Set      : " + set);
-				//BetterLog.i("  Tried    : " + tried);
-				//BetterLog.i("  Avail    : " + avail);
+				//BetterLog.v("  Set      : " + set);
+				//BetterLog.v("  Tried    : " + tried);
+				//BetterLog.v("  Avail    : " + avail);
 				
 				String whitelistName = currentMap.landGridWhitelists[set.size()];
 				
@@ -185,7 +186,7 @@ public class MapLogic {
 					nextProb = avail.remove(RAND.nextInt(avail.size()));
 				}
 
-				//BetterLog.i("  Consuming: " + nextProb);
+				//BetterLog.v("  Consuming: " + nextProb);
 				boolean canPlaceHere = true;
 				
 				// If it's a desert (picking a 0), make sure the whitelist (if it has one) has desert
@@ -202,7 +203,7 @@ public class MapLogic {
 						continue; // Skip shoreline
 					}
 					
-					ArrayList<Integer> tempTriplets = new ArrayList<Integer>();
+					ArrayList<Integer> tempTriplets = new ArrayList<>();
 					tempTriplets.add(nextProb);
 					boolean goAhead = true;
 					for (int trip : triplet) {
@@ -248,7 +249,7 @@ public class MapLogic {
 			}
 		}
 
-		//BetterLog.i("Finished: " + set);
+		//BetterLog.v("Finished: " + set);
 		return set;
 	}
 	
@@ -256,9 +257,9 @@ public class MapLogic {
 		// Contains a mapping to which resources have what so far
 		Map<Resource, ArrayList<Integer>> resourceMap = initResourceMap(currentMap);
 		// Contains the resources already set
-		ArrayList<Integer> set = new ArrayList<Integer>();
+		ArrayList<Integer> set = new ArrayList<>();
 		// Contains the resources already consumed in this iteration
-		ArrayList<Integer> tried = new ArrayList<Integer>();
+		ArrayList<Integer> tried = new ArrayList<>();
 		// Contains the (non desert) resources yet to be consumed
 		ArrayList<Integer> avail = initProbabilitiesNoZeros(currentMap);
 		boolean placedRecently = false;
@@ -271,7 +272,7 @@ public class MapLogic {
 			}
 			// Game over: avail is empty and we still have un-set probabilities. Start over.
 			if (avail.isEmpty()) {
-				//BetterLog.i("Restart: " + set);
+				//BetterLog.v("Restart: " + set);
 				resourceMap = initResourceMap(currentMap);
 				set.clear();
 				tried.clear();
@@ -313,10 +314,10 @@ public class MapLogic {
 					nextProb = avail.remove(RAND.nextInt(avail.size()));
 				}
 				
-				//BetterLog.i("  Set: " + set);
-				//BetterLog.i("  Avail: " + avail);
-				//BetterLog.i("  Tried: " + tried);
-				//BetterLog.i("  Consuming: " + nextResource);
+				//BetterLog.v("  Set: " + set);
+				//BetterLog.v("  Avail: " + avail);
+				//BetterLog.v("  Tried: " + tried);
+				//BetterLog.v("  Consuming: " + nextResource);
 				boolean canPlaceHere = true;
 				
 				// If it's a desert (picking a 0), make sure the whitelist (if it has one) has desert
@@ -333,7 +334,7 @@ public class MapLogic {
 						continue; // Skip shoreline
 					}
 					
-					ArrayList<Integer> tempTriplets = new ArrayList<Integer>();
+					ArrayList<Integer> tempTriplets = new ArrayList<>();
 					tempTriplets.add(nextProb);
 					boolean goAhead = true;
 					for (int trip : triplet) {
@@ -379,7 +380,7 @@ public class MapLogic {
 
 				// If this is the last resource, check the probs of this resource
 				int numOfResource = nextResource.numOfResource;
-				ArrayList<Integer> tmpProbs = new ArrayList<Integer>();
+				ArrayList<Integer> tmpProbs = new ArrayList<>();
 				tmpProbs.addAll(resourceMap.get(nextResource));
 				tmpProbs.add(nextProb);
 				if (numOfResource == NumberOfResource.LOW
@@ -414,7 +415,7 @@ public class MapLogic {
 			set.add(0);
 		}
 
-		//BetterLog.i("Finished: " + set);
+		//BetterLog.v("Finished: " + set);
 		return set;
 	}
 	
@@ -433,11 +434,9 @@ public class MapLogic {
 	}
 	
 	public static ArrayList<Resource> getUnknowns(CatanMap currentMap, ArrayList<Integer> probs) {
-		ArrayList<Resource> set = new ArrayList<Resource>();
-		ArrayList<Resource> avail = new ArrayList<Resource>();
-		for (Resource resource : currentMap.availableUnknownResources) {
-			avail.add(resource);
-		}
+		ArrayList<Resource> set = new ArrayList<>();
+		ArrayList<Resource> avail = new ArrayList<>();
+		Collections.addAll(avail, currentMap.availableUnknownResources);
 		
 		while (!avail.isEmpty()) {
 			int nextProb = probs.get(set.size());
@@ -462,7 +461,7 @@ public class MapLogic {
 	}
 	
 	private static ArrayList<Resource> getRandomResources(CatanMap currentMap, ArrayList<Integer> probs) {
-		ArrayList<Resource> set = new ArrayList<Resource>();
+		ArrayList<Resource> set = new ArrayList<>();
 		ArrayList<Resource> avail = initAvailResourcesNoDesert(currentMap);
 		Map<String, List<Resource>> allowedWhitelists = getAllowedWhitelists(currentMap);
 		
@@ -504,9 +503,9 @@ public class MapLogic {
 		// Contains a mapping to which resources have what so far
 		Map<Resource, ArrayList<Integer>> resourceMap = initResourceMap(currentMap);
 		// Contains the resources already set
-		ArrayList<Resource> set = new ArrayList<Resource>();
+		ArrayList<Resource> set = new ArrayList<>();
 		// Contains the resources already consumed in this iteration
-		ArrayList<Resource> tried = new ArrayList<Resource>();
+		ArrayList<Resource> tried = new ArrayList<>();
 		// Contains the (non desert) resources yet to be consumed
 		ArrayList<Resource> avail = initAvailResourcesNoDesert(currentMap);
 		boolean placedRecently = false;
@@ -521,9 +520,9 @@ public class MapLogic {
 			}
 			// Game over: avail is empty and we still have un-set resources. Start over.
 			if (avail.isEmpty()) {
-				//BetterLog.i("Restart");
-				//BetterLog.i("  set (" + set.size() + "): " + set);
-				//BetterLog.i("  probs: " + probs);
+				//BetterLog.v("Restart");
+				//BetterLog.v("  set (" + set.size() + "): " + set);
+				//BetterLog.v("  probs: " + probs);
 				resourceMap = initResourceMap(currentMap);
 				set.clear();
 				tried.clear();
@@ -531,10 +530,10 @@ public class MapLogic {
 				placedRecently = false;
 				allowedWhitelists = getAllowedWhitelists(currentMap);
 			} else {
-				//BetterLog.i("Set: " + set);
-				//BetterLog.i("Avail: " + avail);
-				//BetterLog.i("Tried: " + tried);
-				//BetterLog.i("Probs: " + probs);
+				//BetterLog.v("Set: " + set);
+				//BetterLog.v("Avail: " + avail);
+				//BetterLog.v("Tried: " + tried);
+				//BetterLog.v("Probs: " + probs);
 				
 				int nextIndex = set.size();
 				int nextProb = probs.get(nextIndex);
@@ -567,7 +566,7 @@ public class MapLogic {
 					nextResource = avail.remove(RAND.nextInt(avail.size()));
 				}
 				
-				//BetterLog.i("Consuming: " + nextResource);
+				//BetterLog.v("Consuming: " + nextResource);
 				boolean canPlaceHere = true;
 				
 				// Check to see if there's a whitelist
@@ -590,7 +589,7 @@ public class MapLogic {
 				if (!currentMap.name.equals("the_pirate_islands")
 						&& !currentMap.name.equals("the_pirate_islands_exp")) {
 					for (int neighbor : currentMap.landNeighbors[nextIndex]) {
-						//BetterLog.i("    " + neighbor);
+						//BetterLog.v("    " + neighbor);
 						if (neighbor >= set.size()) {
 							// Do nothing, it is not yet occupied
 						} else {
@@ -619,7 +618,7 @@ public class MapLogic {
 
 				// If this is the last resource, check the probs of this resource
 				int numOfResource = nextResource.numOfResource;
-				ArrayList<Integer> tmpProbs = new ArrayList<Integer>();
+				ArrayList<Integer> tmpProbs = new ArrayList<>();
 				tmpProbs.addAll(resourceMap.get(nextResource));
 				tmpProbs.add(nextProb);
 				if (!tmpProbs.contains(-1)) {
@@ -660,7 +659,7 @@ public class MapLogic {
 			set.add(Resource.DESERT);
 		}
 
-		//BetterLog.i("Finished: " + set);
+		//BetterLog.v("Finished: " + set);
 		return set;
 	}
 	
@@ -684,7 +683,7 @@ public class MapLogic {
 	 */
 	private static ArrayList<Harbor> getTraditionalHarbors(CatanMap currentMap) {
 		ArrayList<Resource> toTake = initHarbors(currentMap);
-		ArrayList<Harbor> harbors = new ArrayList<Harbor>();
+		ArrayList<Harbor> harbors = new ArrayList<>();
 
 		int i = 0;
 		for (int dir : currentMap.orderedHarbors) {
@@ -701,7 +700,7 @@ public class MapLogic {
 	
 	private static ArrayList<Harbor> getRandomHarbors(CatanMap currentMap) {
 		ArrayList<Resource> toTake = initHarbors(currentMap);
-		ArrayList<Harbor> harbors = new ArrayList<Harbor>();
+		ArrayList<Harbor> harbors = new ArrayList<>();
 		
 		// First fill with water
 		for (int i = 0; i < currentMap.waterGrid.length; i++) {
@@ -749,7 +748,7 @@ public class MapLogic {
 
 		while (true) {
 			int pos = 0;
-			harbors = new ArrayList<Harbor>();
+			harbors = new ArrayList<>();
 			resources = initHarbors(currentMap);
 
 			// Quick coin-flip to see to start with open ocean or not
@@ -865,19 +864,17 @@ public class MapLogic {
 				Harbor harbor = harbors.get(i);
 				Resource harborResource = harbor.resource;
 
-				if (harborResource == Resource.DESERT || harborResource == Resource.WATER) {
-					continue;
-				} else {
+				if (harborResource != Resource.DESERT && harborResource != Resource.WATER) {
 					int[] neighbors = currentMap.waterNeighbors[i];
 					for (int neighbor : neighbors) {
 						Resource landResource = resourceList.get(neighbor);
 						int landNumber = numberList.get(neighbor);
 						if (harborResource == landResource && (landNumber >= 5 && landNumber <= 9)) {
-							//BetterLog.i("    Skipping " + harborResource + ", " + landNumber);
+							//BetterLog.v("    Skipping " + harborResource + ", " + landNumber);
 							goAhead = false;
 							break;
 						} else {
-							//BetterLog.i("NOT SKipping " + harborResource + ", " + landNumber);
+							//BetterLog.v("NOT SKipping " + harborResource + ", " + landNumber);
 						}
 					}
 				}
@@ -894,7 +891,7 @@ public class MapLogic {
 	 * Helper for getOrderdHarbors for New World
 	 */
 	private static boolean neighborConflict(CatanMap currentMap, ArrayList<Harbor> harbors, int position) {
-		Set<Integer> seenNeighbors = new HashSet<Integer>();
+		Set<Integer> seenNeighbors = new HashSet<>();
 		for (int i = 0; i < harbors.size(); i++) {
 			if (harbors.get(i).resource != Resource.WATER && currentMap.waterNeighbors[i] != null) {
 				seenNeighbors.add(harbors.get(i).position);
@@ -946,7 +943,7 @@ public class MapLogic {
 	 * Helper function for getOrderedResources
 	 */
 	private static Map<String, List<Resource>> getAllowedWhitelists(CatanMap currentMap) {
-		Map<String, List<Resource>> allowedWhitelists = new HashMap<String, List<Resource>>();
+		Map<String, List<Resource>> allowedWhitelists = new HashMap<>();
 		if (currentMap.landResourceWhitelists != null) {
 			for (Map.Entry<String, List<Resource>> entry : currentMap.landResourceWhitelists.entrySet()) {
 				allowedWhitelists.put(entry.getKey(), new ArrayList<Resource>());
@@ -962,7 +959,7 @@ public class MapLogic {
 	 * Helper function for getOrderedResources
 	 */
 	private static Map<Resource, ArrayList<Integer>> initResourceMap(CatanMap currentMap) {
-		Map<Resource, ArrayList<Integer>> resourceMap = new HashMap<Resource, ArrayList<Integer>>();
+		Map<Resource, ArrayList<Integer>> resourceMap = new HashMap<>();
 		for (Resource resource : currentMap.availableResources) {
 			resourceMap.put(resource, new ArrayList<Integer>());
 		}
@@ -973,7 +970,7 @@ public class MapLogic {
 	 * Helper function for getOrderedResources
 	 */
 	private static ArrayList<Resource> initAvailResourcesNoDesert(CatanMap currentMap) {
-		ArrayList<Resource> avail = new ArrayList<Resource>();
+		ArrayList<Resource> avail = new ArrayList<>();
 		for (Resource resource : currentMap.availableResources) {
 			if (resource != Resource.DESERT) {
 				avail.add(resource);
@@ -987,7 +984,7 @@ public class MapLogic {
 	 * Helper function for getOrderedProbabilities()
 	 */
 	private static ArrayList<Integer> initOrderedProbabilitiesNoZeros(CatanMap currentMap) {
-		ArrayList<Integer> numbers = new ArrayList<Integer>();
+		ArrayList<Integer> numbers = new ArrayList<>();
 		for (int i : currentMap.availableOrderedProbabilities) {
 			numbers.add(i);
 		}
@@ -999,7 +996,7 @@ public class MapLogic {
 	 * Helper function for getOrderedProbabilities()
 	 */
 	private static ArrayList<Integer> initProbabilities(CatanMap currentMap) {
-		ArrayList<Integer> numbers = new ArrayList<Integer>();
+		ArrayList<Integer> numbers = new ArrayList<>();
 		for (int i : currentMap.availableProbabilities) {
 			numbers.add(i);
 		}
@@ -1011,7 +1008,7 @@ public class MapLogic {
 	 * Helper function for getOrderedProbabilities()
 	 */
 	private static ArrayList<Integer> initProbabilitiesNoZeros(CatanMap currentMap) {
-		ArrayList<Integer> numbers = new ArrayList<Integer>();
+		ArrayList<Integer> numbers = new ArrayList<>();
 		for (int i : currentMap.availableProbabilities) {
 			if (i != 0) {
 				numbers.add(i);
@@ -1075,15 +1072,13 @@ public class MapLogic {
 	 * Helper function for getHarbors()
 	 */
 	private static ArrayList<Resource> initHarbors(CatanMap currentMap) {
-		ArrayList<Resource> harbors = new ArrayList<Resource>();
-		for (Resource resource : currentMap.availableHarbors) {
-			harbors.add(resource);
-		}
+		ArrayList<Resource> harbors = new ArrayList<>();
+		Collections.addAll(harbors, currentMap.availableHarbors);
 		return harbors;
 	}
 	
 	private static boolean isCustom(CatanMap currentMap) {
-		Set<String> nonCustomNames = new HashSet<String>();
+		Set<String> nonCustomNames = new HashSet<>();
 		nonCustomNames.add("standard");
 		nonCustomNames.add("large");
 		nonCustomNames.add("xlarge");

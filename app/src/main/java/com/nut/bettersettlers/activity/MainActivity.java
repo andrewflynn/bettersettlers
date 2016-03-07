@@ -39,7 +39,6 @@ import com.nut.bettersettlers.iab.SkuDetails;
 import com.nut.bettersettlers.util.Analytics;
 import com.nut.bettersettlers.util.BetterLog;
 import com.nut.bettersettlers.util.Consts;
-import com.nut.bettersettlers.util.PrivateConsts;
 
 public class MainActivity extends FragmentActivity {
 	private static final String STATE_SHOW_GRAPH = "STATE_SHOW_GRAPH";
@@ -50,7 +49,7 @@ public class MainActivity extends FragmentActivity {
 	
 	private static final Bundle GET_PRICES_BUNDLE;
 	static {
-		ArrayList<String> priceItems = new ArrayList<String>();
+		ArrayList<String> priceItems = new ArrayList<>();
 		priceItems.add(MapContainer.NEW_WORLD.id); // Any normal map should do
 		priceItems.add(IabConsts.BUY_ALL);
 		
@@ -65,9 +64,8 @@ public class MainActivity extends FragmentActivity {
 
 	private View mTitle;
 	private int mTitleId;
-	private ImageView mInfoButton;
 	
-	private Set<String> mOwnedMaps = new HashSet<String>();
+	private Set<String> mOwnedMaps = new HashSet<>();
 	
 	// Stupid onActivityResult is called before onStart()
 	// http://stackoverflow.com/q/10114324/452383
@@ -99,7 +97,7 @@ public class MainActivity extends FragmentActivity {
     				mMapFragment.setShowSeafarers(true);
                 }
             } catch (RemoteException e) {
-            	BetterLog.i("Exception while querying for IABv3 support.");
+            	BetterLog.w("Exception while querying for IABv3 support.");
             }
 		}
 	};
@@ -122,7 +120,7 @@ public class MainActivity extends FragmentActivity {
 	    	Bundle ownedItems = mService.getPurchases(IabConsts.API_VERSION, getPackageName(),
 	    			IabConsts.ITEM_TYPE_INAPP, null);
 	        
-	        int response = getResponseCodeFromBundle(ownedItems);;
+	        int response = getResponseCodeFromBundle(ownedItems);
 	        BetterLog.d("Owned items response: " + String.valueOf(response));
 	        if (response != IabConsts.BILLING_RESPONSE_RESULT_OK
 	                || !ownedItems.containsKey(IabConsts.RESPONSE_INAPP_ITEM_LIST)
@@ -183,7 +181,6 @@ public class MainActivity extends FragmentActivity {
 			mService.consumePurchase(IabConsts.API_VERSION, getPackageName(), purchase.token);
 		} catch (RemoteException e) {
 			BetterLog.e("Could not consume purchase");
-			return;
 		}
 	}
 	
@@ -268,7 +265,6 @@ public class MainActivity extends FragmentActivity {
 					new Intent(), 0, 0, 0);
 		} catch (SendIntentException e) {
 			BetterLog.e("Error sending intent", e);
-			return;
 		}
 	}
 
@@ -318,7 +314,7 @@ public class MainActivity extends FragmentActivity {
 	/** Called when the activity is going to disappear. */
 	@Override
 	public void onSaveInstanceState(Bundle outState) {
-		BetterLog.i("MainActivity.onSaveInstanceState");
+		BetterLog.d("MainActivity.onSaveInstanceState");
 		
 		if (mGraphFragment.isVisible()) {
 			outState.putBoolean(STATE_SHOW_GRAPH, true);
@@ -359,8 +355,8 @@ public class MainActivity extends FragmentActivity {
 			setTitleButtonText(MapSize.STANDARD.titleDrawableId);
 		}
 		
-		mInfoButton = (ImageView) findViewById(R.id.info_button);
-		mInfoButton.setOnClickListener(new OnClickListener() {
+		ImageView infoButton = (ImageView) findViewById(R.id.info_button);
+		infoButton.setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View v) {
 				AboutDialogFragment.newInstance().show(getSupportFragmentManager(), "AboutDialog");
@@ -409,7 +405,7 @@ public class MainActivity extends FragmentActivity {
 				FogIslandHelpDialogFragment.newInstance().show(getSupportFragmentManager(), "TheFogIslandHelpDialog");
 				SharedPreferences.Editor prefsEditor = prefs.edit();
 				prefsEditor.putBoolean(Consts.SHARED_PREFS_KEY_FOG_ISLAND_HELP, true);
-				prefsEditor.commit();
+				prefsEditor.apply();
 			}
 		}
 	}

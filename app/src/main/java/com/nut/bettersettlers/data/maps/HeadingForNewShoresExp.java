@@ -699,8 +699,8 @@ public class HeadingForNewShoresExp extends CatanMapProvider {
             .setAvailableUnknownProbabilities(new int[] {})
             .setUnknownGrid(new Point[] {});
 
-        Map<String, List<Resource>> landResourceWhitelists = new HashMap<String, List<Resource>>(1);
-        List<Resource> islands = new ArrayList<Resource>(10);
+        Map<String, List<Resource>> landResourceWhitelists = new HashMap<>(1);
+        List<Resource> islands = new ArrayList<>(10);
         islands.add(Resource.GOLD);
         islands.add(Resource.GOLD);
         islands.add(Resource.GOLD);
@@ -715,11 +715,11 @@ public class HeadingForNewShoresExp extends CatanMapProvider {
         builder.setLandResourceWhitelists(landResourceWhitelists);
 
 
-        Map<String, List<Integer>> landProbabilityWhitelists = new HashMap<String, List<Integer>>(0);
+        Map<String, List<Integer>> landProbabilityWhitelists = new HashMap<>(0);
         builder.setLandProbabilityWhitelists(landProbabilityWhitelists);
 
 
-        List<int[]> placementBlacklists = new ArrayList<int[]>(60);
+        List<int[]> placementBlacklists = new ArrayList<>(60);
         placementBlacklists.add(new int[] { 0, 0 });
         placementBlacklists.add(new int[] { 0, 1 });
         placementBlacklists.add(new int[] { 0, 2 });

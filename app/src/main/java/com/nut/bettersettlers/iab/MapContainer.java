@@ -25,7 +25,7 @@ public enum MapContainer {
 	NEW_WORLD("New World", "seafarers.new_world",
 			MapSizePair.NEW_WORLD);
 	
-	private static final Map<String, MapContainer> ID_MAP = new HashMap<String, MapContainer>();
+	private static final Map<String, MapContainer> ID_MAP = new HashMap<>();
 	static {
 		for (MapContainer map : MapContainer.values()) {
 			ID_MAP.put(map.id, map);
@@ -39,7 +39,7 @@ public enum MapContainer {
 	public final String id;
 	public final MapSizePair sizePair;
 	
-	private MapContainer(String title, String id, MapSizePair sizePair) {
+	MapContainer(String title, String id, MapSizePair sizePair) {
 		this.title = title;
 		this.id = id;
 		this.sizePair = sizePair;

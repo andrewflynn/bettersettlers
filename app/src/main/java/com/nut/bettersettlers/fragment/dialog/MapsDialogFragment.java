@@ -92,7 +92,7 @@ public class MapsDialogFragment extends DialogFragment {
 				NoSeafarersDialogFragment.newInstance().show(ft, "NoSeafarersDialogFragment");
 				SharedPreferences.Editor prefsEditor = prefs.edit();
 				prefsEditor.putBoolean(SHARED_PREFS_SHOWN_HELP, true);
-				prefsEditor.commit();
+				prefsEditor.apply();
 			}
 			
 			seafarersButton.setVisibility(View.GONE);

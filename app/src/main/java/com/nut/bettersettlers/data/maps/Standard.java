@@ -357,15 +357,15 @@ public class Standard extends CatanMapProvider {
             .setAvailableUnknownProbabilities(new int[] {})
             .setUnknownGrid(new Point[] {});
 
-        Map<String, List<Resource>> landResourceWhitelists = new HashMap<String, List<Resource>>(0);
+        Map<String, List<Resource>> landResourceWhitelists = new HashMap<>(0);
         builder.setLandResourceWhitelists(landResourceWhitelists);
 
 
-        Map<String, List<Integer>> landProbabilityWhitelists = new HashMap<String, List<Integer>>(0);
+        Map<String, List<Integer>> landProbabilityWhitelists = new HashMap<>(0);
         builder.setLandProbabilityWhitelists(landProbabilityWhitelists);
 
 
-        List<int[]> placementBlacklists = new ArrayList<int[]>(0);
+        List<int[]> placementBlacklists = new ArrayList<>(0);
         builder.setPlacementBlacklists(placementBlacklists);
 
         builder.setLandGridOrder(new int[] {

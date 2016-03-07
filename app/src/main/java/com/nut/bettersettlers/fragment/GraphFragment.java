@@ -39,7 +39,7 @@ public class GraphFragment extends Fragment {
 	private int[] mProbs;
 	private int[] mRobberProbs;
 	// Negative numbers will represent robber values in this stack
-	private ArrayList<Integer> mProbsList = new ArrayList<Integer>();
+	private ArrayList<Integer> mProbsList = new ArrayList<>();
 
 	///////////////////////////////
 	// Fragment method overrides //
